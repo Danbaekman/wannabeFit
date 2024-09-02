@@ -12,6 +12,12 @@ WannabeFit은 원하는 몸의 기준에 맞춰 운동하고 식단을 관리할
 - **백엔드**: Node.js, Express
 - **데이터베이스**: MongoDB
 
+## 개발 환경
+- **기기**: Pixel 7 Pro
+- **API 레벨**: 31
+- **Android 버전**: Android 12.0 ("S")
+- **아키텍처**: ARM 64
+
 ## 설치 및 실행
 1. 레포지토리를 클론합니다: `git clone https://github.com/your-org/wannabefit.git`
 2. 의존성을 설치합니다: `npm install`
