@@ -20,6 +20,10 @@ WannabeFit은 원하는 몸의 기준에 맞춰 운동하고 식단을 관리할
 - **Android 버전**: Android 12.0 ("S")
 - **아키텍처**: ARM 64
 
+## 개발 참여 인원(총 2명)
+- 프론트 엔드 : 이시헌
+- 백 엔드 : 송승민
+
 ## 설치 및 실행
 1. 레포지토리를 클론합니다: `git clone https://github.com/your-org/wannabefit.git`
 2. 의존성을 설치합니다: `npm install`
