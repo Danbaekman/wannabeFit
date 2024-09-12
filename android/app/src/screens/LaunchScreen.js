@@ -2,7 +2,8 @@ import React from 'react';
 import { View, Text, TouchableOpacity, Image } from 'react-native';
 import styles from '../styles/LaunchStyles';
 
-const LaunchScreen = () => {
+
+const LaunchScreen = ({navigation}) => {
   return (
     <View style={styles.container}>
       {/* 제목 부분 */}
@@ -60,7 +61,11 @@ const LaunchScreen = () => {
       </View>
 
       {/* 시작하기 버튼 */}
-      <TouchableOpacity style={styles.startButton}>
+      <TouchableOpacity style={styles.startButton}
+      title="로그인 창 이동"
+      onPress={() =>
+      navigation.navigate('login')
+  }>
         <Text style={styles.startButtonText}>시작하기</Text>
       </TouchableOpacity>
 
