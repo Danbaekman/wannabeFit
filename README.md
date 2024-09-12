@@ -1,3 +1,5 @@
+![Uploaded Image](https://github.com/user-attachments/assets/5523c5b6-2f01-43b3-afc8-b466a0c28f0c)
+
 # wannabeFit
 WannabeFit은 원하는 몸의 기준에 맞춰 운동하고 식단을 관리할 수 있는 모바일 앱입니다.
 약 7년간의 개발자의 웨이트 경력 및 지식을 바탕으로 운동방법 공유와 함께 맛있게 다이어트 할 수 있는 팁도 포함되어있습니다.
