@@ -65,8 +65,8 @@ const styles = StyleSheet.create({
       backgroundColor: '#FEE500',
       flexDirection: 'row',
       alignItems: 'center',
-      paddingVertical: 15,  // 더 크게 설정
-      paddingHorizontal: 80, // 더 크게 설정
+      paddingVertical: 10,  // 버튼 높이 설정
+      paddingHorizontal: 40, // 버튼 너비 설정
       borderRadius: 10,
       marginBottom: 15,
       justifyContent: 'center',
@@ -74,29 +74,38 @@ const styles = StyleSheet.create({
     kakaoSymbol: {
       width: 30,  // 심볼 크기
       height: 30,
-      marginRight: 10, 
+      marginRight: 10, // 심볼과 텍스트 간격 설정
     },
     kakaoButtonContent: {
       flexDirection: 'row',
       alignItems: 'center',
     },
     kakaoText: {
-      fontSize: 18,  // 글씨 크기도 키움
+      fontSize: 18,  // 글씨 크기
       fontWeight: 'bold',
       color: '#3A1D1D',
-      flex: 1,
       textAlign: 'center',
     },
     naverButton: {
       backgroundColor: '#03C75A',
-      paddingVertical: 15,
-      paddingHorizontal: 100,
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingVertical: 10,  // 버튼 높이 설정
+      paddingHorizontal: 40, // 버튼 너비 설정
       borderRadius: 10,
+      justifyContent: 'center',
+    },
+    naverSymbol: {
+      width: 30,  // 심볼 크기
+      height: 30,
+      marginRight: 10, // 심볼과 텍스트 간격 설정
     },
     naverText: {
       fontSize: 16,
       fontWeight: 'bold',
       color: '#fff',
+      textAlign: 'center',
     },
-  });
-  export default styles;
+});
+
+export default styles;

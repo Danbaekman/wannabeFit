@@ -77,9 +77,9 @@ android {
     buildToolsVersion rootProject.ext.buildToolsVersion
     compileSdk rootProject.ext.compileSdkVersion
 
-    namespace "com.healthcareapp"
+    namespace "com.wannabefit"
     defaultConfig {
-        applicationId "com.healthcareapp"
+        applicationId "com.wannabefit"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1

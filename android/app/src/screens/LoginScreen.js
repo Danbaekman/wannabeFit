@@ -1,6 +1,8 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, Image, StyleSheet } from 'react-native';
 import styles from '../styles/LoginStyles';
+import NaverLoginButton from '../components/NaverLoginButton/NaverLoginButton';  // 네이버 로그인 버튼 컴포넌트 임포트
+
 
 const LoginScreen = ({ navigation }) => {
   return (
@@ -39,11 +41,9 @@ const LoginScreen = ({ navigation }) => {
         </View>
             <Text style={styles.kakaoText}>kakao로 시작하기</Text>
       </TouchableOpacity>
-
+      
       {/* 네이버 로그인 버튼 */}
-      <TouchableOpacity style={styles.naverButton}>
-        <Text style={styles.naverText}>네이버로 시작하기</Text>
-      </TouchableOpacity>
+      <NaverLoginButton />
     </View>
   );
 };

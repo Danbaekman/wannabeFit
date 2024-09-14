@@ -1,4 +1,4 @@
-package com.healthcareapp
+package com.wannabefit
 
 import android.app.Application
 import com.facebook.react.PackageList

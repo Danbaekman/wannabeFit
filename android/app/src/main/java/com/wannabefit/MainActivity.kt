@@ -1,4 +1,4 @@
-package com.healthcareapp
+package com.wannabefit
 
 import com.facebook.react.ReactActivity
 import com.facebook.react.ReactActivityDelegate
