@@ -41,9 +41,9 @@ const LoginScreen = ({ navigation }) => {
         </View>
             <Text style={styles.kakaoText}>kakao로 시작하기</Text>
       </TouchableOpacity>
-      
+
       {/* 네이버 로그인 버튼 */}
-      <NaverLoginButton />
+      <NaverLoginButton navigation={navigation} />
     </View>
   );
 };

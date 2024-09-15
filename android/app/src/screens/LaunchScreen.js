@@ -64,7 +64,7 @@ const LaunchScreen = ({navigation}) => {
       <TouchableOpacity style={styles.startButton}
       title="로그인 창 이동"
       onPress={() =>
-      navigation.navigate('login')
+      navigation.navigate('Login')
   }>
         <Text style={styles.startButtonText}>시작하기</Text>
       </TouchableOpacity>

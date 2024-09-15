@@ -1,9 +1,10 @@
-// src/screens/Main.js
+// src/screens/MainScreen.js
 import React from 'react';
-import { View, Text, Button, StyleSheet, ScrollView, ProgressBarAndroid } from 'react-native';
+import { View, Text, Button, StyleSheet, ScrollView } from 'react-native';
+import { ProgressBar } from '@react-native-community/progress-bar-android'; // 경로 변경
 import styles from '../styles/MainStyles';  // 스타일 파일 경로가 올바른지 확인하세요
 
-const Main = () => {
+const MainScreen = () => {
   return (
     <ScrollView style={styles.container}>
       {/* NavBar */}
@@ -24,31 +25,30 @@ const Main = () => {
       </View>
 
       {/* 오늘의 섭취 영양성분 */}
-      
-        <Text style={styles.nutritionTitle}>오늘의 섭취 영양성분</Text>
-        <View style={styles.nutritionContainer}>
+      <Text style={styles.nutritionTitle}>오늘의 섭취 영양성분</Text>
+      <View style={styles.nutritionContainer}>
         {/* 섭취칼로리 */}
         <View style={styles.gaugeContainer}>
           <Text>칼로리: 1200 kcal</Text>
-          <ProgressBarAndroid styleAttr="Horizontal" indeterminate={false} progress={0.6} />
+          <ProgressBar styleAttr="Horizontal" indeterminate={false} progress={0.6} />
         </View>
 
         {/* 단백질 */}
         <View style={styles.gaugeContainer}>
           <Text>단백질: 80g</Text>
-          <ProgressBarAndroid styleAttr="Horizontal" indeterminate={false} progress={0.5} />
+          <ProgressBar styleAttr="Horizontal" indeterminate={false} progress={0.5} />
         </View>
 
         {/* 지방 */}
         <View style={styles.gaugeContainer}>
           <Text>지방: 40g</Text>
-          <ProgressBarAndroid styleAttr="Horizontal" indeterminate={false} progress={0.3} />
+          <ProgressBar styleAttr="Horizontal" indeterminate={false} progress={0.3} />
         </View>
 
         {/* 나트륨 */}
         <View style={styles.gaugeContainer}>
           <Text>나트륨: 1000mg</Text>
-          <ProgressBarAndroid styleAttr="Horizontal" indeterminate={false} progress={0.8} />
+          <ProgressBar styleAttr="Horizontal" indeterminate={false} progress={0.8} />
         </View>
       </View>
 
@@ -56,13 +56,8 @@ const Main = () => {
       <View style={styles.goalMessageContainer}>
         <Text>목표 섭취량에 미달하였습니다.</Text>
       </View>
-
-    {/* */}
-      <View style={styles.todayConatainer}>
-
-      </View>
     </ScrollView>
   );
 };
 
-export default Main;  // default export 사용
+export default MainScreen;  // default export 사용

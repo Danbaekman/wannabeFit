@@ -22,6 +22,15 @@ package="com.wannabefit">
             <action android:name="android.intent.action.MAIN" />
             <category android:name="android.intent.category.LAUNCHER" />
         </intent-filter>
+
+        <!-- Naver Login 커스텀 스킴 설정 -->
+        <intent-filter>
+            <action android:name="android.intent.action.VIEW" />
+            <category android:name="android.intent.category.DEFAULT" />
+            <category android:name="android.intent.category.BROWSABLE" />
+            <!-- 여기서 스킴을 네이버 개발자 센터에 설정한 Redirect URI의 스킴과 일치시킵니다 -->
+            <data android:scheme="com.wannabefit" android:host="naverlogin" />
+        </intent-filter>
       </activity>
     </application>
 </manifest>
