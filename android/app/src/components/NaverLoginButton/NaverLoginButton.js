@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { TouchableOpacity, Text, View, StyleSheet } from 'react-native';
 import NaverLogin from '@react-native-seoul/naver-login';
+import CONFIG from '../../config';
 
 const consumerKey = 'BWqwiKuQdZgMQExzACXH';
 const consumerSecret = 'OHTX96R9nQ';
@@ -17,14 +18,34 @@ const NaverLoginButton = ( { navigation } ) => {
   const [failure, setFailureResponse] = useState();
   const [getProfileRes, setGetProfileRes] = useState();
 
+   //서버로 accessToken전달
+   const sendAccessTokenToBack = async(accessToken) => {
+    try {
+      const response = await fetch(`${CONFIG.API_BASE_URL}/auth/login/naver`, {  // 백엔드 서버의 엔드포인트를 입력
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ accessToken: accessToken }),  // JSON으로 액세스 토큰을 전송
+      });
+
+      const result = await response.json();
+      console.log('백엔드 응답:', result);
+    } catch (error) {
+      console.error('토큰 전송 오류:', error);
+    }
+  }
+
   const login = async () => {
     try {
       const { failureResponse, successResponse } = await NaverLogin.login();
 
       if (successResponse) {
         setSuccessResponse(successResponse);
-        navigation.navigate('Main');
+        navigation.navigate('InbodyInput');
         console.log('로그인 성공:', successResponse);
+
+        sendAccessTokenToBack(successResponse.accessToken);
       } else if (failureResponse) {
         setFailureResponse(failureResponse);
         console.log('로그인 실패:', failureResponse);

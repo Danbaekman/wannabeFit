@@ -4,33 +4,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
-    backgroundColor: '#fff',
+    backgroundColor: '#ffffff',
   },
-  navbar: {
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  navbarTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
-  logoContainer: {
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  logoBox: {
-    width: 150,
-    height: 150,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#f0f0f0',
-    borderRadius: 75,
-    marginBottom: 20,
-  },
-  logoText: {
-    textAlign: 'center',
-    fontSize: 16,
-  },
+
   buttonContainer: {
     alignItems: 'flex-end',
     marginBottom: 20,
@@ -43,6 +19,7 @@ const styles = StyleSheet.create({
   },
   nutritionTitle: {
     fontSize: 20,
+    color: 'black',
     fontWeight: 'bold',
     marginBottom: 10,
   },
@@ -52,6 +29,19 @@ const styles = StyleSheet.create({
   goalMessageContainer: {
     alignItems: 'center',
     marginTop: 20,
+  },
+  dateButton: {
+    alignItems: 'center',
+    padding: 10,
+    backgroundColor: '#f0f0f0',
+    marginVertical: 10,
+    borderRadius: 5,
+    borderWidth: 1, // 테두리 추가
+    borderColor: '#008080', // 테두리 색상
+  },
+  dateButtonText: {
+    fontSize: 16,
+    color: '#008080',
   },
 });
 
