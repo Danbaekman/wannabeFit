@@ -42,7 +42,7 @@ const NaverLoginButton = ( { navigation } ) => {
 
       if (successResponse) {
         setSuccessResponse(successResponse);
-        navigation.navigate('InbodyInput');
+        navigation.navigate('InbodyInput', { accessToken: successResponse.accessToken });
         console.log('로그인 성공:', successResponse);
 
         sendAccessTokenToBack(successResponse.accessToken);
@@ -66,13 +66,11 @@ const NaverLoginButton = ( { navigation } ) => {
     }
   };
 
-  const getProfile = async () => {
+  const getProfile = async (accessToken) => {
     try {
-      if (success && success.accessToken) {
-        const profileResult = await NaverLogin.getProfile(success.accessToken);
-        setGetProfileRes(profileResult);
-        console.log('사용자 프로필:', profileResult);
-      }
+      const profileResult = await NaverLogin.getProfile(accessToken);
+      setGetProfileRes(profileResult);
+      console.log('사용자 프로필:', profileResult); // 여기서 프로필 정보 출력
     } catch (e) {
       console.error('프로필 가져오기 오류:', e);
       setGetProfileRes(undefined);
@@ -84,6 +82,10 @@ const NaverLoginButton = ( { navigation } ) => {
       <TouchableOpacity onPress={login} style={styles.button}>
         <Text style={styles.buttonText}>네이버로 로그인</Text>
       </TouchableOpacity>
+
+      {getProfileRes && (
+        <Text style={styles.successText}>프로필 정보: {JSON.stringify(getProfileRes)}</Text>
+      )}
 
       <TouchableOpacity onPress={logout} style={styles.button}>
         <Text style={styles.buttonText}>Logout</Text>

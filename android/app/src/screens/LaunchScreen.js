@@ -10,7 +10,7 @@ const LaunchScreen = ({navigation}) => {
       <Text style={styles.title}>이상적인 몸을 향해</Text>
       <Text style={styles.subtitle}>WannabeFit</Text>
       <Text style={styles.description}>
-        워너비 핏과 함께 동기부여를 얻고 멋진 몸을 가꾸어 보세요.
+        워너비 핏과 함께 멋진 몸을 가꾸어 보세요.
       </Text>
 
       {/* 기능 설명 섹션 */}

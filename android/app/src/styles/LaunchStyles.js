@@ -3,7 +3,7 @@ import { StyleSheet } from 'react-native';
 const styles = StyleSheet.create({
     container: {
       flex: 1,
-      paddingHorizontal: 30,
+      paddingHorizontal: 40,
       justifyContent: 'center',
       backgroundColor: '#ffffff', // 배경 색
       alignItems: 'center',
@@ -29,7 +29,7 @@ const styles = StyleSheet.create({
     description: {
       fontSize: 14,
       color: '#000',
-      textAlign: 'center',
+      textAlign: 'left',
       marginBottom: 60,
     },
     feature: {
