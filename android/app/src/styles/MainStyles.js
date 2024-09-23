@@ -3,45 +3,106 @@ import { StyleSheet } from 'react-native';
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
+    paddingHorizontal: 20,
     backgroundColor: '#ffffff',
   },
-
-  buttonContainer: {
-    alignItems: 'flex-end',
-    marginBottom: 20,
+  dateToggleContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  nutritionContainer: {
+  navButton: {
     padding: 10,
-    marginBottom: 20,
-    borderRadius: 10,
-    backgroundColor: '#f5f5f5',
+  },
+  navButtonText: {
+    fontSize: 24,
+    color: '#008080',
+  },
+  dateButtonFullWidth: {
+    alignItems: 'center',
+    backgroundColor: '#f0f0f0',
+    borderRadius: 5,
+    padding: 5,
+    borderWidth: 1,
+    borderColor: '#008080',
+  },
+  dateButtonText: {
+    fontSize: 16,
+    color: '#008080',
   },
   nutritionTitle: {
     fontSize: 20,
     color: 'black',
     fontWeight: 'bold',
     marginBottom: 10,
-  },
-  gaugeContainer: {
-    marginBottom: 10,
-  },
-  goalMessageContainer: {
-    alignItems: 'center',
     marginTop: 20,
   },
-  dateButton: {
-    alignItems: 'center',
-    padding: 10,
-    backgroundColor: '#f0f0f0',
-    marginVertical: 10,
-    borderRadius: 5,
-    borderWidth: 1, // 테두리 추가
-    borderColor: '#008080', // 테두리 색상
+  nutritionContainer: {
+    padding: 20,
+    marginBottom: 20,
+    borderRadius: 10,
+    backgroundColor: 'white',
+    borderWidth: 1.5,
+    borderColor: '#008080',
   },
-  dateButtonText: {
+  gaugeContainer: {
+    marginBottom: 20,
+  },
+  subTitle: {
+    color: 'black',
+    fontWeight: 'bold',
+    paddingBottom: 10,
+  },
+  nutrientRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  nutrientColumn: {
+    flexDirection: 'column',
+    alignItems: 'center',
+    width: '30%',
+  },
+  nutrientText: {
     fontSize: 16,
-    color: '#008080',
+    color: 'black',
+    paddingBottom: 5,
+  },
+  progressBar: {
+    width: '100%',
+  },
+  goalMessageContainer: {},
+  mealPlanRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 20,
+  },
+  mealBox: {
+    width: '30%',
+    alignItems: 'center',
+    padding: 20,
+    borderWidth: 1.5,
+    borderColor: '#008080',
+    borderRadius: 10,
+  },
+  mealText: {
+    fontSize: 16,
+    marginTop: 10,
+    color: 'black',
+  },
+  snackBox: {
+    width: '30%',
+    padding: 20,
+    borderWidth: 1.5,
+    borderColor: '#008080',
+    borderRadius: 10,
+    marginBottom: 20,
+  },
+  snackText: {
+    fontSize: 16,
+    textAlign: 'center',
+    color: 'black',
   },
 });
 

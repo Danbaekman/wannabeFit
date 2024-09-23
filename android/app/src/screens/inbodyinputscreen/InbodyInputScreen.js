@@ -1,15 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, Button, TouchableOpacity, Alert } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import styles from './InbodyInputScreenStyles';
 import CONFIG from '../../config';
 import Modal from 'react-native-modal'; // 모달 컴포넌트 임포트
+import AsyncStorage from '@react-native-async-storage/async-storage'; // JWT 토큰 저장용
 
-const InbodyInputScreen = ({ navigation, route }) => {
+const InbodyInputScreen = ({ navigation }) => {
   const [height, setHeight] = useState('');
   const [weight, setWeight] = useState('');
   const [gender, setGender] = useState('');
@@ -18,16 +18,30 @@ const InbodyInputScreen = ({ navigation, route }) => {
   const [exerciseFrequency, setExerciseFrequency] = useState('');
   const [goal, setGoal] = useState(''); // 운동 목표
   const [modalVisible, setModalVisible] = useState(false); // 모달창 제어
+  const [jwtToken, setJwtToken] = useState(''); // JWT 토큰 저장
 
-  // NaverLoginButton.js에서 전달 받은 accessToken사용
-  const { accessToken } = route.params;
+  // AsyncStorage에서 JWT 토큰을 불러오는 함수
+  useEffect(() => {
+    const getToken = async () => {
+      try {
+        const token = await AsyncStorage.getItem('jwtToken');
+        if (token) {
+          setJwtToken(token);
+        }
+      } catch (error) {
+        console.error('Failed to retrieve JWT token from storage:', error);
+      }
+    };
+
+    getToken();
+  }, []);
 
   // "다음" 버튼을 눌렀을 때 모달창 열기
   const handleNextButton = () => {
     setModalVisible(true);
   };
 
-  // 모달에서 운동 목표를 선택하고, 서버로 데이터를 전송
+  // 모달에서 운동 목표를 선택
   const selectGoal = (selectedGoal) => {
     setGoal(selectedGoal);
   };
@@ -36,31 +50,31 @@ const InbodyInputScreen = ({ navigation, route }) => {
     setModalVisible(false); // 완료 버튼을 눌렀을 때 모달 닫기
 
     const userInfo = {
+      gender: gender === '남자' ? 'M' : 'F',
       height: parseFloat(height),
       weight: parseFloat(weight),
-      gender: gender === '남자' ? 'M' : 'F',
       birthdate,
       targetWeight: parseFloat(targetWeight),
-      exerciseFrequency: parseInt(exerciseFrequency), //Picker 컴포넌트의 value 속성은 항상 문자열 형태로 값을 전달(따라서 int형으로 변환 필요)
+      exerciseFrequency: parseInt(exerciseFrequency),
       goal, // 선택한 운동 목표 추가
     };
 
     console.log('전송할 데이터:', userInfo);
-    console.log('전송할 액세스 토큰:', accessToken);
+    console.log('전송할 JWT 토큰:', jwtToken);
 
     try {
       const response = await fetch(`${CONFIG.API_BASE_URL}/user/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${accessToken}`,
+          'Authorization': `Bearer ${jwtToken}`, // JWT 토큰 전송
         },
         body: JSON.stringify(userInfo),
       });
 
       if (response.ok) {
         console.log('User info submitted successfully!');
-        navigation.navigate('Main');
+        navigation.navigate('FitnessGoal');
       } else {
         console.error('Failed to submit user info:', response.status);
         Alert.alert('오류', '사용자 정보를 제출하는 데 실패했습니다.');

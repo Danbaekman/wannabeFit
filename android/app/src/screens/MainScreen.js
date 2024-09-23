@@ -1,16 +1,26 @@
-// src/screens/MainScreen.js
-import { View, Text, Button, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
 import React, { useState } from 'react';
-import { ProgressBar } from '@react-native-community/progress-bar-android'; // 경로 변경
+import { ProgressBar } from '@react-native-community/progress-bar-android';
 import styles from '../styles/MainStyles';
 import Navbar from '../components/navbar/Navbar';
 import Footer from '../components/footer/Footer';
-import { Calendar } from 'react-native-calendars'; // 달력 컴포넌트 추가
+import { Calendar } from 'react-native-calendars';
 import dayjs from 'dayjs';
+import Ionicons from 'react-native-vector-icons/Ionicons'; // 아이콘 추가
 
-const MainScreen = () => {
-  const [isCalendarVisible, setCalendarVisible] = useState(false); // 달력의 펼침 상태 관리
-  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]); // 현재 날짜를 기본값으로 설정
+const MainScreen = ({ navigation }) => {
+  const [isCalendarVisible, setCalendarVisible] = useState(false);
+  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
+
+  const handlePrevDay = () => {
+    const prevDate = dayjs(selectedDate).subtract(1, 'day').format('YYYY-MM-DD');
+    setSelectedDate(prevDate);
+  };
+
+  const handleNextDay = () => {
+    const nextDate = dayjs(selectedDate).add(1, 'day').format('YYYY-MM-DD');
+    setSelectedDate(nextDate);
+  };
 
   const toggleCalendar = () => {
     setCalendarVisible(!isCalendarVisible);
@@ -20,64 +30,110 @@ const MainScreen = () => {
     <View style={{ flex: 1 }}>
       <Navbar />
 
-      <ScrollView style={styles.container}>
+      <ScrollView style={styles.container} contentContainerStyle={{ flexGrow: 1 }}>
         {/* 달력 토글 버튼 */}
-        <TouchableOpacity onPress={toggleCalendar} style={styles.dateButton}>
-          <Text style={styles.dateButtonText}>
-            {dayjs(selectedDate).format('M월 D일 (ddd)')}
-          </Text>
-        </TouchableOpacity>
+        <View style={styles.dateToggleContainer}>
+          <TouchableOpacity onPress={handlePrevDay} style={styles.navButton}>
+            <Text style={styles.navButtonText}>{'<'}</Text>
+          </TouchableOpacity>
 
-        {/* 달력 */}
-        {isCalendarVisible && (
-          <View style={styles.calendarContainer}>
-            <Calendar
-              current={selectedDate}
-              onDayPress={(day) => {
-                setSelectedDate(day.dateString);
-              }}
-              markedDates={{
-                [selectedDate]: { selected: true, selectedColor: '#008080' },
-              }}
-              theme={{
-                todayTextColor: '#008080',
-              }}
-            />
-          </View>
-        )}
+          <TouchableOpacity onPress={toggleCalendar} style={styles.dateButtonFullWidth}>
+            <Text style={styles.dateButtonText}>
+              {dayjs(selectedDate).format('M월 D일 (ddd)')}
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity onPress={handleNextDay} style={styles.navButton}>
+            <Text style={styles.navButtonText}>{'>'}</Text>
+          </TouchableOpacity>
+        </View>
 
         {/* 오늘의 섭취 영양성분 */}
         <Text style={styles.nutritionTitle}>오늘의 섭취 영양성분</Text>
         <View style={styles.nutritionContainer}>
-          {/* 섭취칼로리 */}
           <View style={styles.gaugeContainer}>
-            <Text>칼로리: 1200 kcal</Text>
-            <ProgressBar styleAttr="Horizontal" indeterminate={false} progress={0.6} />
+            <Text style={styles.subTitle}>총 칼로리</Text>
+            <ProgressBar styleAttr="Horizontal" indeterminate={false} progress={0.83} />
+            <Text style={styles.nutrientText}>1322/1600kcal</Text>
           </View>
 
-          {/* 단백질 */}
-          <View style={styles.gaugeContainer}>
-            <Text>단백질: 80g</Text>
-            <ProgressBar styleAttr="Horizontal" indeterminate={false} progress={0.5} />
-          </View>
+          <Text style={styles.subTitle}>탄/단/지 비율</Text>
+          <View style={styles.nutrientRow}>
+            <View style={styles.nutrientColumn}>
+              <Text style={styles.nutrientText}>탄수화물</Text>
+              <ProgressBar styleAttr="Horizontal" indeterminate={false} progress={0.09} style={[styles.progressBar, { width: '90%' }]} />
+              <Text style={styles.nutrientText}>20g/225g</Text>
+            </View>
 
-          {/* 지방 */}
-          <View style={styles.gaugeContainer}>
-            <Text>지방: 40g</Text>
-            <ProgressBar styleAttr="Horizontal" indeterminate={false} progress={0.3} />
-          </View>
+            <View style={styles.nutrientColumn}>
+              <Text style={styles.nutrientText}>단백질</Text>
+              <ProgressBar styleAttr="Horizontal" indeterminate={false} progress={0.25} style={[styles.progressBar, { width: '70%' }]} />
+              <Text style={styles.nutrientText}>40g/160g</Text>
+            </View>
 
-          {/* 나트륨 */}
-          <View style={styles.gaugeContainer}>
-            <Text>나트륨: 1000mg</Text>
-            <ProgressBar styleAttr="Horizontal" indeterminate={false} progress={0.8} />
+            <View style={styles.nutrientColumn}>
+              <Text style={styles.nutrientText}>지방</Text>
+              <ProgressBar styleAttr="Horizontal" indeterminate={false} progress={0.64} style={[styles.progressBar, { width: '50%' }]} />
+              <Text style={styles.nutrientText}>43g/67g</Text>
+            </View>
           </View>
         </View>
 
         {/* 목표 섭취량 메시지 */}
         <View style={styles.goalMessageContainer}>
-          <Text>목표 섭취량에 미달하였습니다.</Text>
+          <Text>
+            목표 섭취량에{' '}
+            <Text style={{ fontWeight: 'bold', color: 'black' }}>미달</Text>
+            하였습니다.
+          </Text>
         </View>
+
+        {/* 큰 제목 */}
+        <Text style={styles.nutritionTitle}>식단</Text>
+
+        {/* 식단 박스 */}
+        <View style={styles.mealPlanRow}>
+           {/* 아침 박스 */}
+           <TouchableOpacity 
+            style={styles.mealBox} 
+            onPress={() => navigation.navigate('MealSetting', { mealType: '아침' })}
+          >
+            <Ionicons name="cafe-outline" size={40} color="#FFA500" />
+            <Text style={styles.mealText}>아침</Text>
+          </TouchableOpacity>
+
+          {/* 점심 박스 */}
+          <TouchableOpacity 
+            style={styles.mealBox} 
+            onPress={() => navigation.navigate('MealSetting', { mealType: '점심' })}
+          >
+            <Ionicons name="fast-food-outline" size={40} color="#32CD32" />
+            <Text style={styles.mealText}>점심</Text>
+          </TouchableOpacity>
+
+          {/* 저녁 박스 */}
+          <TouchableOpacity 
+            style={styles.mealBox} 
+            onPress={() => navigation.navigate('MealSetting', { mealType: '저녁' })}
+          >
+            <Ionicons name="restaurant-outline" size={40} color="#4682B4" />
+            <Text style={styles.mealText}>저녁</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* 간식 박스 */}
+        <View style={styles.snackBox}>
+          <TouchableOpacity 
+            style={styles.mealBox} 
+            onPress={() => navigation.navigate('MealSetting', { mealType: '간식' })}
+          >
+            <Ionicons name="ice-cream-outline" size={40} color="#DAA520" />
+            <Text style={styles.snackText}>간식</Text>
+          </TouchableOpacity>
+        </View>
+
+
+        
       </ScrollView>
 
       <Footer />
@@ -85,4 +141,4 @@ const MainScreen = () => {
   );
 };
 
-export default MainScreen; // default export 사용
+export default MainScreen;

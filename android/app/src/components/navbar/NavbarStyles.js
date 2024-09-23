@@ -4,8 +4,10 @@ const styles = StyleSheet.create({
     navbar: {
         alignItems: 'center', 
         justifyContent: 'center',
-        height: 45,
-        backgroundColor: '#ffffff',  
+        height: 50,
+        backgroundColor: '#ffffff',
+        borderBottomWidth: 1.5, 
+        borderColor: '#008080' 
     },
     navbarTitle: {
         fontSize: 20,
