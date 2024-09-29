@@ -4,7 +4,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage'; // JWT 토
 import styles from './FitnessGoalScreenStyles';
 import CONFIG from '../../config';
 
-const FitnessGoalScreen = () => {
+const FitnessGoalScreen = ({ navigation }) => {
   const [bmr, setBMR] = useState(0);
   const [tdee, setTDEE] = useState(0);
   const [recommended_protein, setRecommendedProtein] = useState(0);
@@ -84,6 +84,11 @@ const FitnessGoalScreen = () => {
   const proteinPercentage = ((recommended_protein * 4) / totalCalories) * 100;
   const fatPercentage = ((recommended_fat * 9) / totalCalories) * 100;
 
+  // 완료 버튼을 눌렀을 때 Main 화면으로 이동
+  const handleComplete = () => {
+    navigation.navigate('Main'); // Main 화면으로 이동
+  };
+
   return (
     <View style={styles.container}>
       {/* 내 목표 */}
@@ -122,6 +127,9 @@ const FitnessGoalScreen = () => {
           <Text style={styles.macroKcal}>{Math.round(recommended_fat * 9)}kcal ({Math.round(fatPercentage)}%)</Text>
         </View>
       </View>
+
+      {/* 완료 버튼 */}
+      <Button title="완료" onPress={handleComplete} color="#008080" />
     </View>
   );
 };
