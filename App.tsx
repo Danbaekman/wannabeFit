@@ -7,6 +7,7 @@ import MainScreen from './android/app/src/screens/MainScreen';
 import InbodyInputScreen from './android/app/src/screens/inbodyinputscreen/InbodyInputScreen';
 import FitnessGoalScreen from './android/app/src/screens/fitnessgoalscreen/FitnessGoalScreen';
 import MealSettingScreen from './android/app/src/screens/mealsettingscreen/MealSettingScreen';
+import DirectRegisterScreen from './android/app/src/screens/directregisterscreen/DirectRegisterScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -14,13 +15,14 @@ const App = () => {
   return (
     <NavigationContainer>
       {/* <Stack.Navigator initialRouteName="Launch">*/}
-      <Stack.Navigator initialRouteName="Main"> 
+      <Stack.Navigator initialRouteName="Launch"> 
         <Stack.Screen name="Launch" component={LaunchScreen} />
         <Stack.Screen name="Login" component={LoginScreen} />
         <Stack.Screen name="InbodyInput" component={InbodyInputScreen} />
         <Stack.Screen name="FitnessGoal" component={FitnessGoalScreen} />
         <Stack.Screen name="Main" component={MainScreen} />
         <Stack.Screen name="MealSetting" component={MealSettingScreen} />
+        <Stack.Screen name="DirectRegister" component={DirectRegisterScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

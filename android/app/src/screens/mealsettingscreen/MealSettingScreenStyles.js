@@ -37,11 +37,14 @@ const styles = StyleSheet.create({
     },
     setRegisterContainer: {
       alignItems: 'center',
-      marginVertical: 20,
+      justifyContent: 'center',
+      flex: 1,
     },
     setTitle: {
-      fontSize: 18,
+      fontSize: 24,
       fontWeight: 'bold',
+      color: 'black',
+      paddingBottom: 20,
     },
     setDescription: {
       color: 'gray',
