@@ -8,6 +8,7 @@ import { Calendar } from 'react-native-calendars';
 import dayjs from 'dayjs';
 import Ionicons from 'react-native-vector-icons/Ionicons'; // 아이콘 추가
 
+
 const MainScreen = ({ navigation }) => {
   const [isCalendarVisible, setCalendarVisible] = useState(false);
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);

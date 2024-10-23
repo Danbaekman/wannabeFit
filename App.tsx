@@ -14,7 +14,7 @@ const App = () => {
   return (
     <NavigationContainer>
       {/* <Stack.Navigator initialRouteName="Launch">*/}
-      <Stack.Navigator initialRouteName="Launch"> 
+      <Stack.Navigator initialRouteName="MealSetting"> 
         <Stack.Screen name="Launch" component={LaunchScreen} />
         <Stack.Screen name="Login" component={LoginScreen} />
         <Stack.Screen name="InbodyInput" component={InbodyInputScreen} />

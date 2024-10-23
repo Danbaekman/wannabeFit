@@ -57,6 +57,33 @@ const styles = StyleSheet.create({
       color: 'white',
       fontSize: 16,
     },
+    modalContainer: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      backgroundColor: 'rgba(0, 0, 0, 0.5)', // 배경 투명도
+    },
+    modalContent: {
+      width: '80%',
+      backgroundColor: 'white',
+      padding: 20,
+      borderRadius: 10,
+      alignItems: 'center',
+    },
+    foodName: {
+      fontSize: 20,
+      fontWeight: 'bold',
+      marginBottom: 20,
+      color: 'black',
+    },
+    foodDetail: {
+      fontSize: 16,
+      marginBottom: 5, // 각 항목 간의 간격을 추가
+    },
+    closeButton: {
+      marginTop: 20,
+      backgroundColor: '#008080'
+    },
   });
 
   export default styles;
