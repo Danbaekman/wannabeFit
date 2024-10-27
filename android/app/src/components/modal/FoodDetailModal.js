@@ -1,39 +1,67 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, Modal, TouchableOpacity, TextInput, StyleSheet, Dimensions } from 'react-native';
-import { PanGestureHandler } from 'react-native-gesture-handler';
-import Animated, { useSharedValue, useAnimatedStyle, withSpring } from 'react-native-reanimated';
+import Animated, { useSharedValue, useAnimatedStyle, withSpring, runOnJS } from 'react-native-reanimated';
+import { PanResponder } from 'react-native';
 
 const screenHeight = Dimensions.get('window').height;
 const MODAL_HEIGHT = screenHeight * 0.85;  // 전체 화면의 85%만 차지
 
-const FoodDetailModal = ({ visible, onClose, food }) => {
+const FoodDetailModal = ({ visible, onClose, food, onAddFood }) => {  
   const translateY = useSharedValue(0);
   const [quantity, setQuantity] = useState(1);
   const [inputValue, setInputValue] = useState('g');
+
+  useEffect(() => {
+    if (visible) {
+      // 모달이 열릴 때 애니메이션 초기화
+      translateY.value = withSpring(0);
+      setQuantity(1); // 모달이 열릴 때 수량 초기화
+      setInputValue('g'); // 모달이 열릴 때 입력값 초기화
+    }
+  }, [visible]);
 
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ translateY: translateY.value }],
   }));
 
-  const handleGesture = (event) => {
-    const { translationY } = event.nativeEvent;
-    if (translationY > 0) {
-      translateY.value = translationY;
+  const panResponder = PanResponder.create({
+    onMoveShouldSetPanResponder: () => true,
+    onPanResponderMove: (_, gestureState) => {
+      if (gestureState.dy > 0) {
+        translateY.value = gestureState.dy;
+      }
+    },
+    onPanResponderRelease: (_, gestureState) => {
+      if (gestureState.dy > MODAL_HEIGHT / 4) {
+        translateY.value = withSpring(MODAL_HEIGHT, {}, () => {
+          runOnJS(onClose)(); // 드래그가 충분하면 모달 창 닫기
+        });
+      } else {
+        translateY.value = withSpring(0); // 드래그가 충분하지 않으면 원위치로 돌아가기
+      }
+    },
+  });
+
+  // food 객체가 없을 경우 모달 렌더링을 중단
+  if (!food) {
+    console.error('food 객체가 없습니다. 모달을 렌더링할 수 없습니다.');
+    return null;
+  }
+
+  const handleAddFood = () => {
+    if (onAddFood && food) {
+      const totalQuantity = quantity > 1 ? quantity : parseFloat(inputValue.replace('g', '')) / 100;
+      onAddFood(food, totalQuantity, inputValue); // 부모 컴포넌트로 음식 정보 전달
     }
   };
+  const enteredQuantity = parseFloat(inputValue.replace('g', '')) || 0;
+  const calculatedQuantity = enteredQuantity / 100; // 입력된 g을 기준으로 비율 계산
 
-  const handleGestureEnd = (event) => {
-    const { translationY } = event.nativeEvent;
-    if (translationY > MODAL_HEIGHT / 4) {
-      translateY.value = withSpring(MODAL_HEIGHT, {}, () => {
-        onClose();
-      });
-    } else {
-      translateY.value = withSpring(0);
-    }
-  };
-
-  if (!food) return null;
+  // 매크로 성분의 총합을 계산하여 비율로 환산
+  const totalMacros = food.carbohydrates + food.protein + food.fat;
+  const carbPercentage = ((food.carbohydrates / totalMacros) * 100).toFixed(2);
+  const proteinPercentage = ((food.protein / totalMacros) * 100).toFixed(2);
+  const fatPercentage = ((food.fat / totalMacros) * 100).toFixed(2);
 
   return (
     <Modal
@@ -43,106 +71,112 @@ const FoodDetailModal = ({ visible, onClose, food }) => {
       onRequestClose={onClose}
     >
       <View style={styles.modalContainer}>
-        <PanGestureHandler onGestureEvent={handleGesture} onEnded={handleGestureEnd}>
-          <Animated.View style={[styles.modalContent, animatedStyle]}>
-            {/* 상단에 '-' 모양 추가 */}
-            <View style={styles.dragHandleContainer}>
-              <View style={styles.dragHandle} />
-            </View>
+        <Animated.View
+          style={[styles.modalContent, animatedStyle]}
+          {...panResponder.panHandlers} // PanResponder is attached here for drag functionality
+        >
+          {/* 상단에 '-' 모양 추가 */}
+          <View style={styles.dragHandleContainer}>
+            <View style={styles.dragHandle} />
+          </View>
 
-            <Text style={styles.modalTitle}>콤비네이션 피자{food.name}</Text>
+          <Text style={styles.modalTitle}>{food.food_name}</Text>
 
-            {/* 기본량 및 직접 입력 */}
-            <View style={styles.inputContainer}>
-              <View style={styles.inputBox}>
-                <Text style={styles.boxTitle}>기본량 (100g 당)</Text>
-                <View style={styles.counter}>
-                  <TouchableOpacity onPress={() => setQuantity(prev => Math.max(prev - 1, 1))}>
-                    <Text style={styles.counterButton}>-</Text>
-                  </TouchableOpacity>
-                  <Text style={styles.counterValue}>{quantity}</Text>
-                  <TouchableOpacity onPress={() => setQuantity(prev => prev + 1)}>
-                    <Text style={styles.counterButton}>+</Text>
-                  </TouchableOpacity>
-                </View>
-              </View>
-
-              <View style={styles.inputBox}>
-                <Text style={styles.boxTitle}>직접 입력</Text>
-                <TextInput
-                  style={styles.input}
-                  value={inputValue}
-                  onChangeText={setInputValue}
-                  keyboardType="numeric"
-                />
+          {/* 기본량 및 직접 입력 */}
+          <View style={styles.inputContainer}>
+            <View style={styles.inputBox}>
+              <Text style={styles.boxTitle}>기본량 (100g 당)</Text>
+              <View style={styles.counter}>
+                <TouchableOpacity onPress={() => setQuantity(prev => Math.max(prev - 0.5, 0.5))}>
+                  <Text style={styles.counterButton}>-</Text>
+                </TouchableOpacity>
+                <Text style={styles.counterValue}>{quantity}</Text>
+                <TouchableOpacity onPress={() => setQuantity(prev => prev + 0.5)}>
+                  <Text style={styles.counterButton}>+</Text>
+                </TouchableOpacity>
               </View>
             </View>
 
-            {/* 매크로 분포도 */}
-            <View style={styles.macroDistribution}>
-              <View style={styles.macroItem}>
-                <View style={[styles.macroBox, { backgroundColor: 'green' }]} />
-                <Text style={styles.macroLabel}>탄수화물 59%</Text>
-              </View>
-              <View style={styles.macroItem}>
-                <View style={[styles.macroBox, { backgroundColor: 'blue' }]} />
-                <Text style={styles.macroLabel}>단백질 17%</Text>
-              </View>
-              <View style={styles.macroItem}>
-                <View style={[styles.macroBox, { backgroundColor: 'yellow' }]} />
-                <Text style={styles.macroLabel}>지방 22%</Text>
-              </View>
+            <View style={styles.inputBox}>
+              <Text style={styles.boxTitle}>직접 입력</Text>
+              <TextInput
+                style={styles.input}
+                value={inputValue}
+                onChangeText={(text) => {
+                  const numericText = text.replace(/[^0-9]/g, '');
+                  setInputValue(`${numericText}g`);
+                }}
+                keyboardType="numeric"
+              />
             </View>
+          </View>
 
-            {/* 매크로 퍼센트 바 */}
-            <View style={styles.progressBar}>
-              <View style={[styles.progressSegment, { backgroundColor: 'green', width: '59%' }]} />
-              <View style={[styles.progressSegment, { backgroundColor: 'blue', width: '17%' }]} />
-              <View style={[styles.progressSegment, { backgroundColor: 'yellow', width: '22%' }]} />
+          {/* 매크로 분포도 */}
+          <View style={styles.macroDistribution}>
+            <View style={styles.macroItem}>
+              <View style={[styles.macroBox, { backgroundColor: 'green' }]} />
+              <Text style={styles.macroLabel}>탄수화물 {carbPercentage}%</Text>
             </View>
+            <View style={styles.macroItem}>
+              <View style={[styles.macroBox, { backgroundColor: 'blue' }]} />
+              <Text style={styles.macroLabel}>단백질 {proteinPercentage}%</Text>
+            </View>
+            <View style={styles.macroItem}>
+              <View style={[styles.macroBox, { backgroundColor: 'yellow' }]} />
+              <Text style={styles.macroLabel}>지방 {fatPercentage}%</Text>
+            </View>
+          </View>
 
-            {/* 영양 정보 */}
-            <View style={styles.foodDetails}>
-              <Text style={styles.caloriesText}>총 칼로리: 108Kcal</Text>
-              <View style={styles.nutrientContainer}>
+          {/* 매크로 퍼센트 바 */}
+          <View style={styles.progressBar}>
+            <View style={[styles.progressSegment, { backgroundColor: 'green', width: `${carbPercentage}%` }]} />
+            <View style={[styles.progressSegment, { backgroundColor: 'blue', width: `${proteinPercentage}%` }]} />
+            <View style={[styles.progressSegment, { backgroundColor: 'yellow', width: `${fatPercentage}%` }]} />
+          </View>
+
+          {/* 영양 정보 */}
+          <View style={styles.foodDetails}>
+            <Text style={styles.caloriesText}>총 칼로리: {(food.calories * quantity).toFixed(2)} Kcal</Text>
+            <View style={styles.nutrientContainer}>
               <View style={styles.nutrientRowContainer}>
                 <View style={styles.nutrientColumn}>
                   <Text style={styles.nutrientLabel}>탄수화물</Text>
-                  <Text style={styles.nutrientValue}>18.14g</Text>
+                  <Text style={styles.nutrientValue}>{(food.carbohydrates * quantity).toFixed(2)}g</Text>
                 </View>
                 <View style={styles.nutrientColumn}>
                   <Text style={styles.nutrientLabel}>단백질</Text>
-                  <Text style={styles.nutrientValue}>5.34g</Text>
+                  <Text style={styles.nutrientValue}>{(food.protein * quantity).toFixed(2)}g</Text>
                 </View>
                 <View style={styles.nutrientColumn}>
                   <Text style={styles.nutrientLabel}>지방</Text>
-                  <Text style={styles.nutrientValue}>3.02g</Text>
+                  <Text style={styles.nutrientValue}>{(food.fat * quantity).toFixed(2)}g</Text>
                 </View>
               </View>
               <View style={styles.divider} />
               <View style={styles.nutrientRowContainer}>
                 <View style={styles.nutrientColumn}>
                   <Text style={styles.nutrientLabel}>당</Text>
-                  <Text style={styles.nutrientValue}>3.22g</Text>
+                  <Text style={styles.nutrientValue}>{(food.sugar * quantity).toFixed(2)}g</Text>
                 </View>
                 <View style={styles.nutrientColumn}>
                   <Text style={styles.nutrientLabel}>나트륨</Text>
-                  <Text style={styles.nutrientValue}>253.94mg</Text>
+                  <Text style={styles.nutrientValue}>{(food.natrium * quantity).toFixed(2)}mg</Text>
                 </View>
               </View>
             </View>
-            </View>
+          </View>
 
-            <TouchableOpacity style={styles.addButton}>
-              <Text style={styles.addButtonText}>식단에 추가</Text>
-            </TouchableOpacity>
-          </Animated.View>
-        </PanGestureHandler>
+          {/* 식단에 추가 버튼 */}
+          <TouchableOpacity style={styles.addButton} onPress={handleAddFood}>
+            <Text style={styles.addButtonText}>식단에 추가</Text>
+          </TouchableOpacity>
+        </Animated.View>
       </View>
     </Modal>
   );
 };
 
+// 기존 디자인 유지
 const styles = StyleSheet.create({
   modalContainer: {
     flex: 1,
@@ -153,40 +187,40 @@ const styles = StyleSheet.create({
   modalContent: {
     backgroundColor: 'white',
     width: '100%',
-    height: MODAL_HEIGHT,  // 모달 높이를 전체 화면의 75%로 설정
+    height: MODAL_HEIGHT,  // 모달 높이를 전체 화면의 85%로 설정
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
-    paddingHorizontal: 15, // 양 옆 padding을 줄여서 흰색 박스와 #008080 색 박스의 여백을 감소
+    paddingHorizontal: 15,
     paddingVertical: 15,
   },
   inputContainer: {
-    flexDirection: 'row', // 가로로 배치
-    justifyContent: 'space-between', // 두 상자 사이에 공간을 균등하게 분배
-    marginBottom: 20, // 아래 여백
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 20,
+    marginTop: 20,
   },
   inputBox: {
-    width: '45%', // 상자의 너비를 45%로 설정하여 두 개 상자를 나란히 배치
-    padding: 10,
+    width: '45%',
     borderRadius: 8,
     borderWidth: 1,
     borderColor: '#00796B',
-    backgroundColor: '#00796B', // 배경색
+    backgroundColor: '#00796B',
   },
   boxTitle: {
-    textAlign: 'center', // 제목 텍스트를 가운데 정렬
-    color: 'white', // 텍스트 색상
-    marginBottom: 10, // 제목과 상자 내용 간의 여백
+    textAlign: 'center',
+    color: 'white',
+    marginBottom: 10,
     fontWeight: 'bold',
   },
   counter: {
-    flexDirection: 'row', // 가로로 배치
-    justifyContent: 'space-between', // 좌우로 공간 균등 분배
-    alignItems: 'center', // 세로 가운데 정렬
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     borderWidth: 1,
     borderRadius: 8,
     paddingHorizontal: 10,
     height: 40,
-    backgroundColor: 'white', // 카운터의 배경색
+    backgroundColor: 'white',
   },
   counterButton: {
     fontSize: 20,
@@ -199,19 +233,20 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 8,
     padding: 5,
-    textAlign: 'center', // 입력 텍스트 가운데 정렬
+    textAlign: 'center',
     backgroundColor: 'white',
     fontSize: 18,
     height: 40,
   },
   dragHandleContainer: {
     alignItems: 'center',
-    marginBottom: 10,
+    justifyContent: 'center',
+    paddingVertical: 10,
   },
   dragHandle: {
-    width: 40,
-    height: 5,
-    borderRadius: 2.5,
+    width: 60,
+    height: 6,
+    borderRadius: 3,
     backgroundColor: '#ccc',
   },
   modalTitle: {
@@ -252,7 +287,6 @@ const styles = StyleSheet.create({
     height: '100%',
   },
   foodDetails: {
-    width: '100%',
     marginBottom: 20,
   },
   caloriesText: {
@@ -272,9 +306,9 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   divider: {
-    height: 1,          // 구분선의 높이를 설정 (1px 두께)
-    backgroundColor: '#ccc',  // 구분선 색상을 회색으로 설정
-    marginVertical: 10,  // 위, 아래 여백 설정 (위아래로 10px 여백)
+    height: 1,
+    backgroundColor: '#ccc',
+    marginVertical: 10,
   },
   nutrientColumn: {
     alignItems: 'center',
@@ -296,13 +330,13 @@ const styles = StyleSheet.create({
     marginTop: 20,
     position: 'absolute',
     bottom: 20,
-    alignSelf: 'center', 
+    alignSelf: 'center',
   },
   addButtonText: {
     color: 'white',
     fontSize: 18,
     fontWeight: 'bold',
-    textAlign: 'center', 
+    textAlign: 'center',
   },
 });
 

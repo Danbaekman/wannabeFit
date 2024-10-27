@@ -1,8 +1,20 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { TouchableOpacity, Text, View, StyleSheet, Alert } from 'react-native';
 import NaverLogin from '@react-native-seoul/naver-login';
 import CONFIG from '../../config';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+
+// 네이버 애플리케이션 키 정보
+const consumerKey = 'BWqwiKuQdZgMQExzACXH';
+const consumerSecret = 'OHTX96R9nQ';
+const appName = 'WannabeFit';
+
+// 네이버 SDK 초기화
+NaverLogin.initialize({
+  appName,
+  consumerKey,
+  consumerSecret,
+});
 
 // JWT 토큰을 저장하는 함수
 const storeToken = async (token) => {
@@ -14,60 +26,74 @@ const storeToken = async (token) => {
   }
 };
 
-// JWT 토큰을 가져오는 함수
-const getToken = async () => {
+// JWT 토큰을 삭제하는 함수 (로그아웃 시 사용)
+const removeToken = async () => {
   try {
-    const token = await AsyncStorage.getItem('jwtToken');
-    if (token !== null) {
-      console.log('저장된 토큰:', token);
-      return token;
-    }
+    await AsyncStorage.removeItem('jwtToken');
+    console.log('토큰 삭제 완료');
   } catch (error) {
-    console.error('토큰 가져오기 오류:', error);
+    console.error('토큰 삭제 오류:', error);
   }
-  return null;
 };
 
-const consumerKey = 'BWqwiKuQdZgMQExzACXH';
-const consumerSecret = 'OHTX96R9nQ';
-const appName = 'WannabeFit';
+// 서버로 accessToken 전달
+const sendAccessTokenToBack = async (accessToken) => {
+  try {
+    const response = await fetch(`${CONFIG.API_BASE_URL}/auth/login/naver`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ accessToken }),
+    });
 
-NaverLogin.initialize({
-  appName,
-  consumerKey,
-  consumerSecret,
-});
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`서버 오류: ${response.status} - ${errorText}`);
+    }
 
+    const result = await response.json();
+    console.log('백엔드 응답:', result);
+    return { jwtToken: result.jwtToken, statusCode: response.status };
+  } catch (error) {
+    console.error('토큰 전송 오류:', error);
+    Alert.alert('서버 연결 실패', 'JWT 토큰을 받아오는 도중 오류가 발생했습니다.');
+    return null;
+  }
+};
+
+// 로그인 버튼 컴포넌트
 const NaverLoginButton = ({ navigation }) => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [failureResponse, setFailureResponse] = useState(null);
 
-  // 서버로 accessToken 전달
-  const sendAccessTokenToBack = async (accessToken) => {
-    try {
-      const response = await fetch(`${CONFIG.API_BASE_URL}/auth/login/naver`, {  // 백엔드 서버의 엔드포인트를 입력
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ accessToken }),  // JSON으로 액세스 토큰을 전송
-      });
+  // 앱 시작 시 자동로그인을 위한 토큰 확인
+  useEffect(() => {
+    const checkLoginStatus = async () => {
+      const token = await getToken();
+      if (token) {
+        // 토큰이 있다면, 로그인 화면으로 이동한 후 자동으로 네비게이션 처리
+        navigation.navigate('Login');
+      }
+    };
+    checkLoginStatus();
+  }, []);
 
-      const result = await response.json();
-      if (response.ok) {
-        console.log('백엔드 응답:', result);
-        return result.jwtToken; // 서버로부터 받은 JWT 토큰 반환
-      } else {
-        console.error('Failed to get JWT from backend:', result);
-        return null;
+  // JWT 토큰을 가져오는 함수
+  const getToken = async () => {
+    try {
+      const token = await AsyncStorage.getItem('jwtToken');
+      if (token !== null) {
+        console.log('저장된 토큰:', token);
+        return token;
       }
     } catch (error) {
-      console.error('토큰 전송 오류:', error);
-      Alert.alert('서버 연결 실패', 'JWT 토큰을 받아오는 도중 오류가 발생했습니다.');
-      return null;
+      console.error('토큰 가져오기 오류:', error);
     }
+    return null;
   };
 
+  // 로그인을 위한 함수
   const login = async () => {
     try {
       const { failureResponse, successResponse } = await NaverLogin.login();
@@ -76,21 +102,22 @@ const NaverLoginButton = ({ navigation }) => {
         setIsLoggedIn(true);
         console.log('로그인 성공:', successResponse);
 
-        // 네이버 accessToken을 서버로 보내고 JWT 토큰을 받음
-        const jwtToken = await sendAccessTokenToBack(successResponse.accessToken);
-
+        const { jwtToken, statusCode } = await sendAccessTokenToBack(successResponse.accessToken);
         if (jwtToken) {
-          // JWT 토큰을 AsyncStorage에 저장
           await storeToken(jwtToken);
 
-          // JWT 토큰을 다음 화면으로 전달
-          navigation.navigate('InbodyInput', { jwtToken });
+          // 상태 코드에 따라 화면 이동 처리
+          if (statusCode === 200) {
+            console.log('이미 등록된 사용자, Main 화면으로 이동');
+            navigation.navigate('Main'); // 이미 등록된 사용자
+          } else if (statusCode === 201) {
+            navigation.navigate('InbodyInput', { jwtToken }); // 등록되지 않은 사용자
+          }
         } else {
           console.error('Failed to get JWT token from server');
         }
       } else if (failureResponse) {
         setFailureResponse(failureResponse);
-        console.log('로그인 실패:', failureResponse);
         Alert.alert('로그인 실패', '네이버 로그인에 실패했습니다.');
       }
     } catch (error) {
@@ -99,26 +126,31 @@ const NaverLoginButton = ({ navigation }) => {
     }
   };
 
+  // 로그아웃을 위한 함수
   const logout = async () => {
     try {
       await NaverLogin.logout();
+      await removeToken();
       setIsLoggedIn(false);
-    } catch (e) {
-      console.error(e);
+      console.log('로그아웃 성공');
+      Alert.alert('로그아웃', '성공적으로 로그아웃되었습니다.');
+    } catch (error) {
+      console.error('로그아웃 오류:', error);
+      Alert.alert('로그아웃 오류', '로그아웃 도중 오류가 발생했습니다.');
     }
   };
 
   return (
     <View>
-      <TouchableOpacity onPress={login} style={styles.button}>
-        <Text style={styles.buttonText}>네이버로 로그인</Text>
-      </TouchableOpacity>
-
-      {isLoggedIn && (
+      {!isLoggedIn ? (
+        <TouchableOpacity onPress={login} style={styles.button}>
+          <Text style={styles.buttonText}>네이버로 로그인</Text>
+        </TouchableOpacity>
+      ) : (
         <>
           <Text style={styles.successText}>로그인 성공!</Text>
-          <TouchableOpacity onPress={logout} style={styles.button}>
-            <Text style={styles.buttonText}>Logout</Text>
+          <TouchableOpacity onPress={logout} style={styles.logoutButton}>
+            <Text style={styles.logoutButtonText}>로그아웃</Text>
           </TouchableOpacity>
         </>
       )}
@@ -140,6 +172,19 @@ const styles = StyleSheet.create({
     marginVertical: 10,
   },
   buttonText: {
+    color: '#ffffff',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  logoutButton: {
+    backgroundColor: '#FF0000',
+    padding: 15,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginVertical: 10,
+  },
+  logoutButtonText: {
     color: '#ffffff',
     fontSize: 16,
     fontWeight: 'bold',
