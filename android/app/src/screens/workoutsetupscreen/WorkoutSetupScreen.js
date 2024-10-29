@@ -1,67 +1,56 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
+// WorkoutSetupScreen.js
+import React, { useState, useEffect } from 'react';
+import { View, Text, TouchableOpacity, Image } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import Navbar from '../../components/navbar/Navbar';
+import styles from './WorkoutSetupScreenStyles';
+import Footer from '../../components/footer/Footer';
 
-const RoutineSetupScreen = ({ navigation }) => {
-  const [routine, setRoutine] = useState('');
+const WorkoutSetupScreen = ({ navigation }) => {
+  const [hasRoutine, setHasRoutine] = useState(false);
 
-  const saveRoutine = async () => {
+  useEffect(() => {
+    checkRoutine();
+  }, []);
+
+  const checkRoutine = async () => {
     try {
-      await AsyncStorage.setItem('workoutRoutine', routine);
-      navigation.goBack(); // 루틴 저장 후 이전 화면으로 돌아감
+      const routine = await AsyncStorage.getItem('workoutRoutine');
+      setHasRoutine(routine !== null);
     } catch (error) {
-      console.error('루틴 저장 중 오류 발생:', error);
+      console.error('루틴 상태를 불러오는 중 오류 발생:', error);
     }
+  };
+
+  const handleSetupRoutine = () => {
+    navigation.navigate('RoutineSetupScreen');
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>운동 루틴 설정</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="루틴 이름을 입력하세요"
-        value={routine}
-        onChangeText={setRoutine}
-      />
-      <TouchableOpacity style={styles.saveButton} onPress={saveRoutine}>
-        <Text style={styles.saveButtonText}>저장하기</Text>
-      </TouchableOpacity>
+      <Navbar />
+      <View style={styles.contentContainer}>
+        <Text style={styles.mytraining}>내 훈련</Text>
+
+        {!hasRoutine ? (
+          <View style={styles.routineCard}>
+            <Image
+              source={require('../../../assets/images/training.png')}
+              style={styles.icon}
+            />
+            <Text style={styles.title}>운동 루틴 설정하기</Text>
+            <Text style={styles.subtitle}>나만의 루틴을 설정해 보세요</Text>
+            <TouchableOpacity style={styles.startButton} onPress={handleSetupRoutine}>
+              <Text style={styles.startButtonText}>+ 시작하기</Text>
+            </TouchableOpacity>
+          </View>
+        ) : (
+          <Text>루틴이 설정되었습니다!</Text>
+        )}
+      </View>
+      <Footer />
     </View>
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 16,
-    backgroundColor: 'white',
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 20,
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 5,
-    padding: 10,
-    width: '100%',
-    marginBottom: 20,
-  },
-  saveButton: {
-    backgroundColor: '#008080',
-    paddingVertical: 12,
-    paddingHorizontal: 40,
-    borderRadius: 25,
-  },
-  saveButtonText: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-});
-
-export default RoutineSetupScreen;
+export default WorkoutSetupScreen;
