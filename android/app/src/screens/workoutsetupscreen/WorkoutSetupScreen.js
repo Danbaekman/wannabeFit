@@ -23,7 +23,7 @@ const WorkoutSetupScreen = ({ navigation }) => {
   };
 
   const handleSetupRoutine = () => {
-    navigation.navigate('RoutineSetupScreen');
+    navigation.navigate('RoutineSetup');
   };
 
   return (

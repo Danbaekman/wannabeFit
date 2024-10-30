@@ -9,6 +9,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 20,
+    width: '100%',
   },
   mytraining: {
     fontSize: 28,
@@ -16,8 +17,8 @@ const styles = StyleSheet.create({
     color: '#008080',
     alignSelf: 'center',
     width: '100%',
-    marginBottom: 20,
-    marginTop: 20,
+    marginBottom: 10,
+    marginTop: 30,
   },
   routineCard: {
     backgroundColor: 'white',
@@ -30,23 +31,25 @@ const styles = StyleSheet.create({
     shadowRadius: 2,
     elevation: 5,
     width: '100%',
-    minHeight: 540,
+    minHeight: 556,
   },
   icon: {
-    width: 200,
-    height: 200,
+    width: 240,
+    height: 240,
     marginBottom: 10, // 아이콘과 타이틀 간격 조정
   },
   title: {
-    fontSize: 30,
+    fontSize: 25,
     fontWeight: 'bold',
     color: '#333',
+    marginTop: 30,
     marginBottom: 5, // 타이틀과 서브타이틀 간격 줄이기
   },
   subtitle: {
-    fontSize: 16,
+    fontSize: 14,
     color: '#888',
-    marginBottom: 20, // 서브타이틀과 버튼 간격
+    marginTop: 5,
+    marginBottom: 10, // 서브타이틀과 버튼 간격
   },
   startButton: {
     backgroundColor: '#008080',
