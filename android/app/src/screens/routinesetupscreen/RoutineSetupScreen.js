@@ -14,7 +14,7 @@ const RoutineSetupScreen = ({ navigation }) => {
 
   const handleRoutineDetail = (routineName) => {
     // 각 버튼을 눌렀을 때의 상세 루틴 페이지로 이동하는 로직
-    navigation.navigate('RoutineDetailScreen', { routineName });
+    navigation.navigate('RoutineDetail', { routineName });
   };
 
   return (

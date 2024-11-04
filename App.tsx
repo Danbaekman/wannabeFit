@@ -11,6 +11,7 @@ import FitnessGoalScreen from './android/app/src/screens/fitnessgoalscreen/Fitne
 import MealSettingScreen from './android/app/src/screens/mealsettingscreen/MealSettingScreen';
 import WorkoutSetupScreen from './android/app/src/screens/workoutsetupscreen/WorkoutSetupScreen';
 import RoutineSetupScreen from './android/app/src/screens/routinesetupscreen/RoutineSetupScreen';
+import RoutineDetailScreen from './android/app/src/screens/routinedetailscreen/RoutineDetailScreen';
 
 
 
@@ -30,6 +31,7 @@ const App = () => {
           <Stack.Screen name="MealSetting" component={MealSettingScreen} />
           <Stack.Screen name="WorkoutSetup" component={WorkoutSetupScreen} />
           <Stack.Screen name="RoutineSetup" component={RoutineSetupScreen} />
+          <Stack.Screen name="RoutineDetail" component={RoutineDetailScreen} />
         </Stack.Navigator>
       </NavigationContainer>
     </GestureHandlerRootView>

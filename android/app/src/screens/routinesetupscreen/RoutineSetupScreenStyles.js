@@ -13,7 +13,7 @@ const styles = StyleSheet.create({
     flex:1,
   },
   mytraining: {
-    fontSize: 28,
+    fontSize: 24,
     fontWeight: 'bold',
     color: '#008080',
     marginBottom: 10,

@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, TextInput, FlatList, TouchableOpacity, Alert } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import { useFocusEffect } from '@react-navigation/native';
 import styles from './MealSettingScreenStyles';
 import Navbar from '../../components/navbar/Navbar';
 import FoodDetailModal from '../../components/modal/FoodDetailModal';
@@ -8,48 +9,55 @@ import CONFIG from '../../config';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const MealSettingScreen = ({ route = {}, navigation }) => {
-  const { mealType = '식단' } = route.params || {};  // mealType이 없을 경우 기본값 '식단'으로 설정
-  const [foodList, setFoodList] = useState([]); // 서버에서 받아올 음식 데이터를 저장할 상태
+  const { mealType = '식단' } = route.params || {};  
+  const [foodList, setFoodList] = useState([]);
   const [searchText, setSearchText] = useState('');
-  const [selectedFood, setSelectedFood] = useState(null); // 모달에 표시할 음식 정보
+  const [selectedFood, setSelectedFood] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
-  const [mealList, setMealList] = useState([]); // 서버에서 받아온 식단 목록을 저장할 상태
+  const [mealList, setMealList] = useState([]);
 
-  // 서버에서 식단 목록 불러오기
+  // Fetch meals for the current date and meal type
   const fetchMeals = async () => {
     try {
-      const token = await AsyncStorage.getItem('jwtToken'); // 저장된 JWT 토큰 가져오기
+      const token = await AsyncStorage.getItem('jwtToken');
       if (!token) {
         console.error('JWT 토큰이 없습니다. 로그인이 필요합니다.');
         return;
       }
 
-      const response = await fetch(`${CONFIG.API_BASE_URL}/meal/meals`, {
+      const date = new Date().toISOString().split("T")[0];
+      const response = await fetch(`${CONFIG.API_BASE_URL}/meal/meals?date=${date}&meal_type=${mealType}`, {
         method: 'GET',
         headers: {
-          'Authorization': `Bearer ${token}`, // 토큰을 헤더에 포함
+          'Authorization': `Bearer ${token}`,
         },
       });
 
       if (response.ok) {
         const data = await response.json();
-        setMealList(data); // 식단 목록 업데이트
+        setMealList(data);
       } else {
-        console.error('식단 목록을 불러오는 데 실패했습니다.', response.status);
         const errorText = await response.text();
-        console.error(errorText);
+        console.error('식단 목록을 불러오는 데 실패했습니다.', response.status, errorText);
       }
     } catch (error) {
       console.error('식단 목록을 불러오는 중 오류 발생:', error);
     }
   };
 
-  // 음식 검색 기능
+  // Fetch meals on screen focus
+  useFocusEffect(
+    useCallback(() => {
+      fetchMeals();
+    }, [])
+  );
+
+  // Handle food search
   const handleSearch = async (text) => {
     setSearchText(text);
     if (text.length > 0) {
       try {
-        const token = await AsyncStorage.getItem('jwtToken'); // 저장된 JWT 토큰 가져오기
+        const token = await AsyncStorage.getItem('jwtToken');
         if (!token) {
           console.error('JWT 토큰이 없습니다. 로그인이 필요합니다.');
           return;
@@ -58,35 +66,32 @@ const MealSettingScreen = ({ route = {}, navigation }) => {
         const response = await fetch(`${CONFIG.API_BASE_URL}/food/search?query=${text}`, {
           method: 'GET',
           headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`, // 토큰을 헤더에 포함
+            'Authorization': `Bearer ${token}`,
           },
         });
 
         if (response.ok) {
           const data = await response.json();
-          setFoodList(data); // 검색 결과 업데이트
+          setFoodList(data);
         } else {
           console.error('검색 결과를 불러오는 데 실패했습니다.', response.status);
-          const errorText = await response.text();
-          console.error(errorText);
         }
       } catch (error) {
         console.error('검색 중 오류 발생:', error);
       }
     } else {
-      setFoodList([]); // 검색어가 없을 경우 음식 목록을 비움
+      setFoodList([]);
     }
   };
 
-  // 음식 선택 시 모달을 열고 선택된 음식 정보 저장
+  // Handle food selection
   const handleFoodSelect = (food) => {
     setSelectedFood(food);
     setModalVisible(true);
   };
 
-  // 음식 추가 시 서버에 저장 요청
-  const handleAddFood = async (food) => {
+  // Handle adding food to meal
+  const handleAddFood = async (food, grams) => {
     try {
       const token = await AsyncStorage.getItem('jwtToken');
       if (!token) {
@@ -101,40 +106,74 @@ const MealSettingScreen = ({ route = {}, navigation }) => {
           'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify({
-          user_id: 'user_id', // 실제로는 사용자 ID를 넣어야 함
-          food_name: food.food_name,
-          protein: food.protein,
-          fat: food.fat,
-          calories: food.calories,
+          meal_type: mealType,
+          food_ids: [food._id],
+          grams: [grams],
+          created_at: new Date().toISOString(),
         }),
       });
 
       if (response.ok) {
-        const newMeal = await response.json();
-        setMealList(prevMeals => [...prevMeals, newMeal]); // 식단 목록에 새로 추가된 식단 추가
+        await fetchMeals(); // Refresh meal list
         setModalVisible(false);
+        setSearchText('');
+        setFoodList([]);
       } else {
-        console.error('음식 추가 실패:', response.status);
         const errorText = await response.text();
-        console.error(errorText);
+        console.error('음식 추가 실패:', response.status, errorText);
       }
     } catch (error) {
       console.error('음식 추가 중 오류 발생:', error);
     }
   };
 
-  // 초기 화면에서 식단 목록 불러오기
-  useEffect(() => {
-    fetchMeals();
-  }, []);
+  // Handle food removal from meal
+  const handleRemoveFood = async (mealId, foodId) => {
+    try {
+      const token = await AsyncStorage.getItem('jwtToken');
+      if (!token) {
+        Alert.alert('오류', '로그인이 필요합니다.');
+        return;
+      }
 
-  const renderItem = ({ item }) => (
-    <TouchableOpacity onPress={() => handleFoodSelect(item)} style={styles.itemContainer}>
-      <View style={styles.itemContent}>
-        <Text style={styles.foodName}>{item.food_name}</Text>
-        <Text style={styles.foodCalories}>{item.calories} Kcal</Text>
-      </View>
-    </TouchableOpacity>
+      const response = await fetch(`${CONFIG.API_BASE_URL}/meal/${mealId}/food/${foodId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (response.ok) {
+        await fetchMeals(); // Refresh meal list
+      } else {
+        const errorText = await response.text();
+        console.error('음식 제거 실패:', response.status, errorText);
+      }
+    } catch (error) {
+      console.error('음식 제거 중 오류 발생:', error);
+    }
+  };
+
+  const renderFoodItem = ({ item }) => (
+    <View style={styles.foodBox}>
+      <Text style={styles.foodName}>{item.food_name || "음식 이름 없음"}</Text>
+      <Text style={styles.foodCalories}>{item.calories || 0} Kcal</Text>
+    </View>
+  );
+  
+
+  const renderMealItem = ({ item }) => (
+    <View style={styles.mealContainer}>
+      <Text style={styles.mealType}>{item.meal_type} 식단</Text>
+      <Text style={styles.totalCalories}>총 칼로리: {item.total_calories} Kcal</Text>
+      {/* 각 음식 개별 박스 출력 */}
+      <FlatList
+        data={item.foods}
+        keyExtractor={(foodItem, index) => `${foodItem._id}-${index}`}  // `foods` 배열의 `_id` 사용
+        renderItem={renderFoodItem}
+        ListEmptyComponent={<Text>음식 목록이 없습니다.</Text>}
+      />
+    </View>
   );
 
   return (
@@ -155,30 +194,37 @@ const MealSettingScreen = ({ route = {}, navigation }) => {
           />
         </View>
 
-        <FlatList
-          data={foodList}
-          keyExtractor={item => item._id || item.food_name}
-          renderItem={renderItem}
-          ListEmptyComponent={<Text>음식 목록이 없습니다.</Text>}
-        />
+        {/* Food search results */}
+        {foodList.length > 0 && (
+         <FlatList
+         data={foodList}
+         keyExtractor={item => item._id}
+         renderItem={({ item }) => (
+           <TouchableOpacity onPress={() => handleFoodSelect(item)} style={styles.itemContainer}>
+             <View style={styles.itemContent}>
+               <Text style={styles.foodName}>{item.food_name}</Text>
+               <Text style={styles.foodCalories}>{item.calories} Kcal</Text>
+             </View>
+           </TouchableOpacity>
+         )}
+         ListEmptyComponent={<Text>음식 목록이 없습니다.</Text>}
+       />
+        )}
 
+        {/* Added meals list */}
         <FlatList
           data={mealList}
-          keyExtractor={item => item._id}
-          renderItem={({ item }) => (
-            <View style={styles.itemContainer}>
-              <Text>{item.food_name}</Text>
-              <Text>{item.calories} kcal</Text>
-            </View>
-          )}
+          keyExtractor={(item) => `${item._id}-${item.__v}`}
+          renderItem={renderMealItem}
+          ListEmptyComponent={<Text>식단 목록이 없습니다.</Text>}
         />
 
-        {/* 음식 상세 정보 모달 */}
+        {/* Food detail modal */}
         <FoodDetailModal
           visible={modalVisible}
           onClose={() => setModalVisible(false)}
           food={selectedFood}
-          onAddFood={handleAddFood}
+          onAddFood={(food, grams) => handleAddFood(food, grams)}
         />
       </View>
     </View>

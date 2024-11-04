@@ -1,10 +1,9 @@
 import { StyleSheet } from 'react-native';
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
-    backgroundColor: 'white'
+    backgroundColor: 'white',
   },
   header: {
     alignItems: 'center',
@@ -61,7 +60,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)', // 배경 투명도
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
   modalContent: {
     width: '80%',
@@ -73,12 +72,11 @@ const styles = StyleSheet.create({
   foodName: {
     fontSize: 20,
     fontWeight: 'bold',
-    marginBottom: 20,
     color: 'black',
   },
   foodDetail: {
     fontSize: 16,
-    marginBottom: 5, // 각 항목 간의 간격을 추가
+    marginBottom: 5,
   },
   closeButton: {
     marginTop: 20,
@@ -99,6 +97,20 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     width: '100%',
+  },
+  foodBox: {
+    flexDirection: 'row', // 검색 부분과 유사한 레이아웃
+    alignItems: 'center',
+    backgroundColor: '#f0f0f0', // 검색 부분과 동일한 배경색
+    borderRadius: 5,
+    paddingHorizontal: 10,
+    paddingVertical: 10,
+    marginVertical: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
+    elevation: 3,
   },
   foodCalories: {
     fontSize: 14,

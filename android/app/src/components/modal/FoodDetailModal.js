@@ -4,19 +4,18 @@ import Animated, { useSharedValue, useAnimatedStyle, withSpring, runOnJS } from 
 import { PanResponder } from 'react-native';
 
 const screenHeight = Dimensions.get('window').height;
-const MODAL_HEIGHT = screenHeight * 0.85;  // 전체 화면의 85%만 차지
+const MODAL_HEIGHT = screenHeight * 0.85;
 
-const FoodDetailModal = ({ visible, onClose, food, onAddFood }) => {  
+const FoodDetailModal = ({ visible, onClose, food = {}, onAddFood }) => {  
   const translateY = useSharedValue(0);
   const [quantity, setQuantity] = useState(1);
   const [inputValue, setInputValue] = useState('g');
 
   useEffect(() => {
     if (visible) {
-      // 모달이 열릴 때 애니메이션 초기화
       translateY.value = withSpring(0);
-      setQuantity(1); // 모달이 열릴 때 수량 초기화
-      setInputValue('g'); // 모달이 열릴 때 입력값 초기화
+      setQuantity(1);
+      setInputValue('g');
     }
   }, [visible]);
 
@@ -34,34 +33,25 @@ const FoodDetailModal = ({ visible, onClose, food, onAddFood }) => {
     onPanResponderRelease: (_, gestureState) => {
       if (gestureState.dy > MODAL_HEIGHT / 4) {
         translateY.value = withSpring(MODAL_HEIGHT, {}, () => {
-          runOnJS(onClose)(); // 드래그가 충분하면 모달 창 닫기
+          runOnJS(onClose)();
         });
       } else {
-        translateY.value = withSpring(0); // 드래그가 충분하지 않으면 원위치로 돌아가기
+        translateY.value = withSpring(0);
       }
     },
   });
 
-  // food 객체가 없을 경우 모달 렌더링을 중단
-  if (!food) {
-    console.error('food 객체가 없습니다. 모달을 렌더링할 수 없습니다.');
-    return null;
-  }
-
   const handleAddFood = () => {
     if (onAddFood && food) {
-      const totalQuantity = quantity > 1 ? quantity : parseFloat(inputValue.replace('g', '')) / 100;
-      onAddFood(food, totalQuantity, inputValue); // 부모 컴포넌트로 음식 정보 전달
+      const totalQuantity = quantity > 1 ? quantity : parseFloat(inputValue.replace('g', '')) || 0;
+      onAddFood(food, totalQuantity); // 총량을 서버에 전송
     }
   };
-  const enteredQuantity = parseFloat(inputValue.replace('g', '')) || 0;
-  const calculatedQuantity = enteredQuantity / 100; // 입력된 g을 기준으로 비율 계산
 
-  // 매크로 성분의 총합을 계산하여 비율로 환산
-  const totalMacros = food.carbohydrates + food.protein + food.fat;
-  const carbPercentage = ((food.carbohydrates / totalMacros) * 100).toFixed(2);
-  const proteinPercentage = ((food.protein / totalMacros) * 100).toFixed(2);
-  const fatPercentage = ((food.fat / totalMacros) * 100).toFixed(2);
+  const totalMacros = (food?.carbohydrates || 0) + (food?.protein || 0) + (food?.fat || 0);
+  const carbPercentage = totalMacros ? ((food?.carbohydrates || 0) / totalMacros * 100).toFixed(2) : 0;
+  const proteinPercentage = totalMacros ? ((food?.protein || 0) / totalMacros * 100).toFixed(2) : 0;
+  const fatPercentage = totalMacros ? ((food?.fat || 0) / totalMacros * 100).toFixed(2) : 0;
 
   return (
     <Modal
@@ -73,16 +63,14 @@ const FoodDetailModal = ({ visible, onClose, food, onAddFood }) => {
       <View style={styles.modalContainer}>
         <Animated.View
           style={[styles.modalContent, animatedStyle]}
-          {...panResponder.panHandlers} // PanResponder is attached here for drag functionality
+          {...panResponder.panHandlers}
         >
-          {/* 상단에 '-' 모양 추가 */}
           <View style={styles.dragHandleContainer}>
             <View style={styles.dragHandle} />
           </View>
 
-          <Text style={styles.modalTitle}>{food.food_name}</Text>
+          <Text style={styles.modalTitle}>{food?.food_name || '음식 정보'}</Text>
 
-          {/* 기본량 및 직접 입력 */}
           <View style={styles.inputContainer}>
             <View style={styles.inputBox}>
               <Text style={styles.boxTitle}>기본량 (100g 당)</Text>
@@ -111,7 +99,6 @@ const FoodDetailModal = ({ visible, onClose, food, onAddFood }) => {
             </View>
           </View>
 
-          {/* 매크로 분포도 */}
           <View style={styles.macroDistribution}>
             <View style={styles.macroItem}>
               <View style={[styles.macroBox, { backgroundColor: 'green' }]} />
@@ -127,46 +114,43 @@ const FoodDetailModal = ({ visible, onClose, food, onAddFood }) => {
             </View>
           </View>
 
-          {/* 매크로 퍼센트 바 */}
           <View style={styles.progressBar}>
             <View style={[styles.progressSegment, { backgroundColor: 'green', width: `${carbPercentage}%` }]} />
             <View style={[styles.progressSegment, { backgroundColor: 'blue', width: `${proteinPercentage}%` }]} />
             <View style={[styles.progressSegment, { backgroundColor: 'yellow', width: `${fatPercentage}%` }]} />
           </View>
 
-          {/* 영양 정보 */}
           <View style={styles.foodDetails}>
-            <Text style={styles.caloriesText}>총 칼로리: {(food.calories * quantity).toFixed(2)} Kcal</Text>
+            <Text style={styles.caloriesText}>총 칼로리: {(food?.calories * quantity || 0).toFixed(2)} Kcal</Text>
             <View style={styles.nutrientContainer}>
               <View style={styles.nutrientRowContainer}>
                 <View style={styles.nutrientColumn}>
                   <Text style={styles.nutrientLabel}>탄수화물</Text>
-                  <Text style={styles.nutrientValue}>{(food.carbohydrates * quantity).toFixed(2)}g</Text>
+                  <Text style={styles.nutrientValue}>{((food?.carbohydrates || 0) * quantity).toFixed(2)}g</Text>
                 </View>
                 <View style={styles.nutrientColumn}>
                   <Text style={styles.nutrientLabel}>단백질</Text>
-                  <Text style={styles.nutrientValue}>{(food.protein * quantity).toFixed(2)}g</Text>
+                  <Text style={styles.nutrientValue}>{((food?.protein || 0) * quantity).toFixed(2)}g</Text>
                 </View>
                 <View style={styles.nutrientColumn}>
                   <Text style={styles.nutrientLabel}>지방</Text>
-                  <Text style={styles.nutrientValue}>{(food.fat * quantity).toFixed(2)}g</Text>
+                  <Text style={styles.nutrientValue}>{((food?.fat || 0) * quantity).toFixed(2)}g</Text>
                 </View>
               </View>
               <View style={styles.divider} />
               <View style={styles.nutrientRowContainer}>
                 <View style={styles.nutrientColumn}>
                   <Text style={styles.nutrientLabel}>당</Text>
-                  <Text style={styles.nutrientValue}>{(food.sugar * quantity).toFixed(2)}g</Text>
+                  <Text style={styles.nutrientValue}>{((food?.sugar || 0) * quantity).toFixed(2)}g</Text>
                 </View>
                 <View style={styles.nutrientColumn}>
                   <Text style={styles.nutrientLabel}>나트륨</Text>
-                  <Text style={styles.nutrientValue}>{(food.natrium * quantity).toFixed(2)}mg</Text>
+                  <Text style={styles.nutrientValue}>{((food?.natrium || 0) * quantity).toFixed(2)}mg</Text>
                 </View>
               </View>
             </View>
           </View>
 
-          {/* 식단에 추가 버튼 */}
           <TouchableOpacity style={styles.addButton} onPress={handleAddFood}>
             <Text style={styles.addButtonText}>식단에 추가</Text>
           </TouchableOpacity>
@@ -176,7 +160,6 @@ const FoodDetailModal = ({ visible, onClose, food, onAddFood }) => {
   );
 };
 
-// 기존 디자인 유지
 const styles = StyleSheet.create({
   modalContainer: {
     flex: 1,
