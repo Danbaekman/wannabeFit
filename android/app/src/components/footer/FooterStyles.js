@@ -1,8 +1,7 @@
 import { StyleSheet } from 'react-native';
 
 const styles = StyleSheet.create({
-    footerContainer: {
-        position: 'absolute',  // 화면의 가장 아래에 고정
+    footerContainer: { // 화면의 가장 아래에 고정
         bottom: 0,             // 여백 없이 가장 아래에 배치
         left: 0,
         right: 0,

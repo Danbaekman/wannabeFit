@@ -7,6 +7,7 @@ import Footer from '../../components/footer/Footer';
 import styles from './RoutineSetupScreenStyles';
 
 const RoutineSetupScreen = ({ navigation }) => {
+    
   const handleSaveRoutine = () => {
     // 루틴 추가 로직을 구현하거나, 저장 완료 후 다른 화면으로 이동할 수 있습니다.
     navigation.goBack();
