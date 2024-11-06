@@ -10,7 +10,7 @@ const styles = StyleSheet.create({
   },
   headerRow: {
     flexDirection: 'row',
-    justifyContent: 'center', // 날짜를 가운데 정렬
+    justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 10,
   },
@@ -18,37 +18,36 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
     color: '#008080',
-    textAlign: 'center', // 가운데 정렬
+    textAlign: 'center',
   },
   completeButton: {
     position: 'absolute',
-    right: 20,
+    right: 2,
     backgroundColor: '#008080',
-    paddingHorizontal: 10,
+    paddingHorizontal: 20,
     paddingVertical: 5,
-    borderRadius: 5,
+    borderRadius: 15,
   },
   completeButtonText: {
     color: '#fff',
     fontWeight: 'bold',
   },
   mainBox: {
-    backgroundColor: '#ffffff', // 칸의 색을 흰색으로 설정
+    backgroundColor: '#ffffff',
     padding: 20,
     borderRadius: 8,
     marginBottom: 15,
   },
   mainBoxTitle: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: 'bold',
     color: 'black',
-    marginBottom: 2,
+    marginBottom: 10,
   },
   timeRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginVertical: 8,
     borderBottomWidth: 1,
     borderBottomColor: '#ccc',
   },
@@ -61,16 +60,15 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#333',
     textAlign: 'right',
-    flex: 1,
   },
   workoutContainer: {
-    backgroundColor: '#ffffff', // 칸의 색을 흰색으로 설정
+    backgroundColor: '#ffffff',
     padding: 20,
     marginBottom: 15,
     borderRadius: 8,
   },
   workoutTitle: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: 'bold',
     color: '#008080',
     marginBottom: 10,
@@ -97,26 +95,27 @@ const styles = StyleSheet.create({
   inputWithUnit: {
     flexDirection: 'row',
     alignItems: 'center',
-    flex: 0.5, // Adjust flex to fit both input and unit
+    flex: 0.5,
   },
   unitText: {
     fontSize: 14,
-    color: '#333',
+    color: '#7D7D7D',
     marginLeft: 4,
   },
   smallInput: {
     flex: 1,
     borderBottomWidth: 1,
     borderBottomColor: '#ccc',
-    padding: 5,
+    padding: 1,
     textAlign: 'center',
+    fontWeight: 'bold',
   },
   largeInput: {
     flex: 2,
     borderBottomWidth: 1,
     borderBottomColor: '#ccc',
     marginHorizontal: 5,
-    padding: 5,
+    padding: 1,
     textAlign: 'center',
   },
   memoInput: {
@@ -132,6 +131,15 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     textAlign: 'center',
     marginTop: 5,
+  },
+  timeInputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  colonText: {
+    fontSize: 16,
+    color: '#333',
+    marginHorizontal: 0, // 여백을 제거
   },
 });
 

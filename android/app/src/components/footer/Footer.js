@@ -1,8 +1,8 @@
+// Footer.js
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import Icon from 'react-native-vector-icons/Ionicons'; // Ionicons로 변경
+import { View, Text, TouchableOpacity } from 'react-native';
+import Icon from 'react-native-vector-icons/Ionicons';
 import styles from './FooterStyles';
-
 
 const Footer = ({ navigation }) => {
     return (
@@ -18,6 +18,11 @@ const Footer = ({ navigation }) => {
             <TouchableOpacity style={styles.iconContainer} onPress={() => navigation.navigate('Profile')}>
                 <Icon name="person-outline" size={24} color="#000" />
                 <Text style={styles.iconText}>프로필</Text>
+            </TouchableOpacity>
+            {/* 차트 아이콘 추가 */}
+            <TouchableOpacity style={styles.iconContainer} onPress={() => navigation.navigate('Chart')}>
+                <Icon name="stats-chart-outline" size={24} color="#000" />
+                <Text style={styles.iconText}>통계</Text>
             </TouchableOpacity>
         </View>
     );
