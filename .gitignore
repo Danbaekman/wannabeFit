@@ -1,0 +1,6 @@
+# .gitignore 파일
+.env
+# test 파일
+test.js
+
+node_modules/
