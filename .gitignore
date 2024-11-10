@@ -4,3 +4,6 @@
 test.js
 
 node_modules/
+
+scripts/wget_api.py
+scripts/test.js
