@@ -29,4 +29,8 @@ router.use('/profile', profileRouter);
 const inbodyRouter = require('./inbody');
 router.use('/inbody', inbodyRouter);
 
+// 헬스 라우터
+const workoutsRouter = require('./workouts');
+router.use('/workouts', workoutsRouter);
+
 module.exports = router;

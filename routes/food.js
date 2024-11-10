@@ -59,7 +59,6 @@ router.get('/search', authenticateToken, async (req, res) => {
   
   try {
     const foods = await Food.find({ food_name: { $regex: query, $options: 'i' } });
-    
     res.status(200).json(foods);
   } catch (error) {
     res.status(500).json({ error: error.message });

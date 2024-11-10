@@ -74,7 +74,7 @@ router.post('/login/naver', async (req, res) => {
 
       // JWT 발급
       const jwtToken = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
-      console.log('Generated JWT:', jwtToken);
+      console.log('Generated JWT:', jwtToken);x
 
       // 성공 메시지와 데이터 반환
       console.log('User registered and token saved:', user);

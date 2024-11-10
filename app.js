@@ -3,37 +3,29 @@ const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const routes = require('./routes/index');
-const env = require('dotenv');
+const env = require('dotenv')
 
 const app = express();
 
+// Middleware 설정
+app.use(cors()); // CORS 설정
+app.use(bodyParser.json()); // JSON 요청 처리
+app.use(bodyParser.urlencoded({ extended: true })); // URL 인코딩된 요청 처리
+
 env.config();
 
-// Middleware 설정
-app.use(cors());
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
-
 // MongoDB 연결
-const connectDB = async () => {
-  try {
-    await mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/wannabeFit');
-    console.log('MongoDB connected');
-  } catch (err) {
-    console.error('MongoDB connection error:', err);
-    process.exit(1); // 연결 실패 시 프로세스 종료
-  }
-};
-
-connectDB();
+mongoose.connect('mongodb://localhost:27017/wannabeFit')
+  .then(() => console.log('MongoDB connected'))
+  .catch(err => console.error('MongoDB connection error:', err));
 
 // 라우터 설정
-app.use('/api', routes);
+app.use('/api', routes); // '/api' 경로에 라우터 적용
 
 // 포트 설정
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5000; // 환경변수 PORT 또는 기본값 5000
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`Server running on port ${PORT}`);
 });
 
-module.exports = app;
+module.exports = app; // Express 애플리케이션을 모듈로 내보냅니다.
