@@ -6,8 +6,7 @@ import Navbar from '../components/navbar/Navbar';
 import Footer from '../components/footer/Footer';
 import { Calendar } from 'react-native-calendars';
 import dayjs from 'dayjs';
-import Ionicons from 'react-native-vector-icons/Ionicons'; // 아이콘 추가
-
+import Ionicons from 'react-native-vector-icons/Ionicons';
 
 const MainScreen = ({ navigation }) => {
   const [isCalendarVisible, setCalendarVisible] = useState(false);
@@ -92,49 +91,44 @@ const MainScreen = ({ navigation }) => {
         {/* 큰 제목 */}
         <Text style={styles.nutritionTitle}>식단</Text>
 
-        {/* 식단 박스 */}
-        <View style={styles.mealPlanRow}>
-           {/* 아침 박스 */}
-           <TouchableOpacity 
-            style={styles.mealBox} 
+        {/* 식단 박스 - 2행 2열 */}
+        <View style={styles.mealPlanGrid}>
+          {/* 아침 */}
+          <TouchableOpacity
+            style={styles.mealBox}
             onPress={() => navigation.navigate('MealSetting', { mealType: 'breakfast' })}
           >
             <Ionicons name="cafe-outline" size={40} color="#FFA500" />
             <Text style={styles.mealText}>아침</Text>
           </TouchableOpacity>
 
-          {/* 점심 박스 */}
-          <TouchableOpacity 
-            style={styles.mealBox} 
+          {/* 점심 */}
+          <TouchableOpacity
+            style={styles.mealBox}
             onPress={() => navigation.navigate('MealSetting', { mealType: 'lunch' })}
           >
             <Ionicons name="fast-food-outline" size={40} color="#32CD32" />
             <Text style={styles.mealText}>점심</Text>
           </TouchableOpacity>
 
-          {/* 저녁 박스 */}
-          <TouchableOpacity 
-            style={styles.mealBox} 
+          {/* 저녁 */}
+          <TouchableOpacity
+            style={styles.mealBox}
             onPress={() => navigation.navigate('MealSetting', { mealType: 'dinner' })}
           >
             <Ionicons name="restaurant-outline" size={40} color="#4682B4" />
             <Text style={styles.mealText}>저녁</Text>
           </TouchableOpacity>
-        </View>
 
-        {/* 간식 박스 */}
-        <View style={styles.snackBox}>
-          <TouchableOpacity 
-            style={styles.mealBox} 
+          {/* 간식 */}
+          <TouchableOpacity
+            style={styles.mealBox}
             onPress={() => navigation.navigate('MealSetting', { mealType: 'snack' })}
           >
             <Ionicons name="ice-cream-outline" size={40} color="#DAA520" />
-            <Text style={styles.snackText}>간식</Text>
+            <Text style={styles.mealText}>간식</Text>
           </TouchableOpacity>
         </View>
-
-
-        
       </ScrollView>
 
       <Footer />

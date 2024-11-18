@@ -1,4 +1,3 @@
-// WorkoutSetupScreen.js
 import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, Image } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -48,7 +47,8 @@ const WorkoutSetupScreen = ({ navigation }) => {
           <Text>루틴이 설정되었습니다!</Text>
         )}
       </View>
-      <Footer />
+      {/* Footer에 navigation 객체를 전달 */}
+      <Footer navigation={navigation} />
     </View>
   );
 };

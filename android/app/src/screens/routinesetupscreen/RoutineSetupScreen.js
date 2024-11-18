@@ -1,21 +1,100 @@
-// RoutineSetupScreen.js
-import React from 'react';
-import { View, Text, TouchableOpacity, TextInput } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, TouchableOpacity, TextInput, Alert } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import Icon from 'react-native-vector-icons/Ionicons';
 import Navbar from '../../components/navbar/Navbar';
 import Footer from '../../components/footer/Footer';
 import styles from './RoutineSetupScreenStyles';
+import CONFIG from '../../config';
 
 const RoutineSetupScreen = ({ navigation }) => {
-    
+  const [routines, setRoutines] = useState([]);
+  const [newRoutine, setNewRoutine] = useState('');
+  const [isAdding, setIsAdding] = useState(false);
+
+  useEffect(() => {
+    fetchRoutines();
+  }, []);
+
+  const fetchRoutines = async () => {
+    try {
+      const token = await AsyncStorage.getItem('jwtToken');
+      if (!token) {
+        Alert.alert('Error', '로그인이 필요합니다.');
+        navigation.navigate('Login');
+        return;
+      }
+
+      console.log('API 호출 시도');
+      const response = await fetch(`${CONFIG.API_BASE_URL}/exercise/muscles/grouped`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch workouts: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log('Muscle groups data:', JSON.stringify(data, null, 2));
+
+      // muscles 배열의 name과 isCustom 필드만 추출
+      const muscleGroups = data[0].muscles.map((muscle) => ({
+        name: muscle.name,
+        isCustom: muscle.isCustom,
+      }));
+
+      setRoutines(muscleGroups);
+    } catch (error) {
+      Alert.alert('Error', '운동 목록을 불러오지 못했습니다.');
+      console.error('Fetch workouts error:', error);
+    }
+  };
+
   const handleSaveRoutine = () => {
-    // 루틴 추가 로직을 구현하거나, 저장 완료 후 다른 화면으로 이동할 수 있습니다.
     navigation.goBack();
   };
 
   const handleRoutineDetail = (routineName) => {
-    // 각 버튼을 눌렀을 때의 상세 루틴 페이지로 이동하는 로직
     navigation.navigate('RoutineDetail', { routineName });
+  };
+
+  const handleAddRoutine = () => {
+    setIsAdding(true);
+  };
+
+  const handleAddComplete = async () => {
+    if (newRoutine.trim()) {
+      try {
+        const token = await AsyncStorage.getItem('jwtToken');
+        if (!token) {
+          Alert.alert('Error', '로그인이 필요합니다.');
+          navigation.navigate('Login');
+          return;
+        }
+
+        const response = await fetch(`${CONFIG.API_BASE_URL}/exercise/customMuscle`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ name: newRoutine }),
+        });
+
+        if (response.ok) {
+          fetchRoutines(); // 새로 추가 후 목록 업데이트
+          setNewRoutine('');
+          setIsAdding(false);
+        } else {
+          throw new Error('Failed to add custom muscle');
+        }
+      } catch (error) {
+        Alert.alert('Error', '새로운 근육 목록을 추가하지 못했습니다.');
+        console.error(error);
+      }
+    }
   };
 
   return (
@@ -24,22 +103,38 @@ const RoutineSetupScreen = ({ navigation }) => {
       <View style={styles.contentContainer}>
         <Text style={styles.mytraining}>내 훈련</Text>
 
-        {/* 운동 목록 버튼 */}
+        {/* 운동 목록 */}
         <View style={styles.buttonContainer}>
-          {['하체', '가슴', '등', '어깨', '팔'].map((routine) => (
+          {routines.map((routine, index) => (
             <TouchableOpacity
-              key={routine}
+              key={index}
               style={styles.routineButton}
-              onPress={() => handleRoutineDetail(routine)}
+              onPress={() => handleRoutineDetail(routine.name)}
             >
-              <Text style={styles.routineButtonText}>{routine}</Text>
+              <Text style={styles.routineButtonText}>{routine.name}</Text>
               <Icon name="chevron-forward-outline" size={20} color="#888" />
             </TouchableOpacity>
           ))}
+
+          {/* 새로운 운동 추가 */}
+          {isAdding && (
+            <View style={styles.newRoutineContainer}>
+              <TextInput
+                style={styles.newRoutineInput}
+                placeholder="훈련 이름 입력"
+                value={newRoutine}
+                onChangeText={setNewRoutine}
+                autoFocus
+              />
+              <TouchableOpacity onPress={handleAddComplete} style={styles.completeButton}>
+                <Text style={styles.completeButtonText}>완료</Text>
+              </TouchableOpacity>
+            </View>
+          )}
         </View>
 
-        {/* 훈련 추가 버튼 */}
-        <TouchableOpacity style={styles.addButton} onPress={handleSaveRoutine}>
+        {/* 추가 버튼 */}
+        <TouchableOpacity style={styles.addButton} onPress={handleAddRoutine}>
           <Text style={styles.addButtonText}>+ 훈련 추가</Text>
         </TouchableOpacity>
       </View>

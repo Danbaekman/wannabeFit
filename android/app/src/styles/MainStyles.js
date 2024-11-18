@@ -72,36 +72,34 @@ const styles = StyleSheet.create({
   progressBar: {
     width: '100%',
   },
-  goalMessageContainer: {},
-  mealPlanRow: {
+  goalMessageContainer: {
+    marginBottom: 20,
+    alignItems: 'center',
+  },
+  mealPlanGrid: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between', // 간격 유지
+    alignItems: 'center', // 세로 정렬
     marginBottom: 20,
   },
+  
   mealBox: {
-    width: '30%',
+    width: '45%', // 부모 컨테이너 너비의 45%로 설정
+    aspectRatio: 1, // 정사각형 비율 유지
     alignItems: 'center',
+    justifyContent: 'center', // 내용물 중앙 정렬
     padding: 20,
+    marginBottom: 20, // 아래 여백 추가
     borderWidth: 1.5,
     borderColor: '#008080',
     borderRadius: 10,
+    backgroundColor: 'white', // 필요시 추가
   },
+  
   mealText: {
     fontSize: 16,
     marginTop: 10,
-    color: 'black',
-  },
-  snackBox: {
-    width: '30%',
-    padding: 20,
-    borderWidth: 1.5,
-    borderColor: '#008080',
-    borderRadius: 10,
-    marginBottom: 20,
-  },
-  snackText: {
-    fontSize: 16,
-    textAlign: 'center',
     color: 'black',
   },
 });

@@ -3,15 +3,17 @@ import React from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import styles from './FooterStyles';
+import { useNavigation } from '@react-navigation/native';
 
-const Footer = ({ navigation }) => {
+const Footer = () => {
+    const navigation = useNavigation();
     return (
         <View style={styles.footerContainer}>
             <TouchableOpacity style={styles.iconContainer} onPress={() => navigation.navigate('Record')}>
                 <Icon name="clipboard-outline" size={24} color="#000" />
                 <Text style={styles.iconText}>기록</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.iconContainer} onPress={() => navigation.navigate('Training')}>
+            <TouchableOpacity style={styles.iconContainer} onPress={() => navigation.navigate('WorkoutSetup')}>
                 <Icon name="barbell-outline" size={24} color="#000" />
                 <Text style={styles.iconText}>내 훈련</Text>
             </TouchableOpacity>

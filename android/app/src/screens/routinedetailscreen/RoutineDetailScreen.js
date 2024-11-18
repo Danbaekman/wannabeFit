@@ -1,61 +1,91 @@
-import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, FlatList } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, TouchableOpacity, FlatList, Alert } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import Icon from 'react-native-vector-icons/Ionicons';
 import styles from './RoutineDetailScreenStyles';
 import Navbar from '../../components/navbar/Navbar';
+import CONFIG from '../../config';
 
 const RoutineDetailScreen = ({ route, navigation }) => {
-  const { routineName } = route.params;
-
-  // 선택된 운동 목록
+  const { routineName } = route.params; // routineName만 사용
   const [selectedWorkouts, setSelectedWorkouts] = useState([]);
+  const [workouts, setWorkouts] = useState([]);
 
-  // 하드코딩된 운동 목록 (추후 백엔드 연동 시 수정 예정)
-  const workouts = [
-    { id: '1', name: '풀업' },
-    { id: '2', name: '데드리프트' },
-    { id: '3', name: '랫풀 다운' },
-    { id: '4', name: '시티드 로우' },
-    { id: '5', name: '암풀 다운' },
-    { id: '6', name: '바벨 로우' },
-    { id: '7', name: '덤벨 로우' },
-  ];
+  useEffect(() => {
+    fetchWorkouts(); // 운동 데이터 가져오기
+  }, []);
 
-  // 선택한 운동 추가 및 제거 함수
+  // 운동 목록 가져오기 및 필터링
+  const fetchWorkouts = async () => {
+    console.log('API 호출 시도');
+    try {
+      const token = await AsyncStorage.getItem('jwtToken');
+      if (!token) {
+        Alert.alert('Error', '로그인이 필요합니다.');
+        navigation.navigate('Login');
+        return;
+      }
+
+      const response = await fetch(`${CONFIG.API_BASE_URL}/exercise/exercises`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch workouts: ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      // `routineName`으로 운동 필터링
+      const filteredWorkouts = data.filter((exercise) =>
+        exercise.muscles.some((muscle) => muscle.name === routineName)
+      );
+
+      // 중복 제거
+      const uniqueWorkouts = Array.from(new Set(filteredWorkouts.map((workout) => workout.name))).map(
+        (name) => filteredWorkouts.find((workout) => workout.name === name)
+      );
+
+      setWorkouts(uniqueWorkouts); // 필터링된 운동 목록 저장
+    } catch (error) {
+      Alert.alert('Error', '운동 목록을 불러오지 못했습니다.');
+      console.error('Fetch workouts error:', error);
+    }
+  };
+
+  // 운동 선택/해제 토글
   const toggleWorkoutSelection = (workout) => {
     setSelectedWorkouts((prevSelected) => {
-      const exists = prevSelected.find((w) => w.id === workout.id);
+      const exists = prevSelected.find((w) => w._id === workout._id);
       if (exists) {
-        // 이미 선택된 운동이면 제거
-        return prevSelected.filter((w) => w.id !== workout.id);
+        return prevSelected.filter((w) => w._id !== workout._id);
       } else {
-        // 선택되지 않은 운동이면 추가
-        return [...prevSelected, { id: workout.id, name: workout.name }];
+        return [...prevSelected, workout];
       }
     });
   };
 
-  // 다음 단계로 이동하는 함수
+  // 다음 단계로 이동
   const handleNextStep = () => {
     navigation.navigate('WorkoutEntry', { selectedWorkouts, routineName });
   };
 
-  // 운동 항목 렌더링 함수
+  // 운동 항목 렌더링
   const renderWorkoutItem = ({ item }) => (
     <TouchableOpacity
       style={[
         styles.workoutItem,
-        selectedWorkouts.some((w) => w.id === item.id) && styles.selectedWorkoutItem,
+        selectedWorkouts.some((w) => w._id === item._id) && styles.selectedWorkoutItem,
       ]}
       onPress={() => toggleWorkoutSelection(item)}
     >
       <Text style={styles.workoutName}>{item.name}</Text>
       <Icon
-        name={
-          selectedWorkouts.some((w) => w.id === item.id) ? "checkbox-outline" : "square-outline"
-        }
+        name={selectedWorkouts.some((w) => w._id === item._id) ? 'checkbox-outline' : 'square-outline'}
         size={24}
-        color={selectedWorkouts.some((w) => w.id === item.id) ? "#008080" : "#888"}
+        color={selectedWorkouts.some((w) => w._id === item._id) ? '#008080' : '#888'}
       />
     </TouchableOpacity>
   );
@@ -73,7 +103,7 @@ const RoutineDetailScreen = ({ route, navigation }) => {
 
         <FlatList
           data={workouts}
-          keyExtractor={(item) => item.id}
+          keyExtractor={(item) => item._id}
           renderItem={renderWorkoutItem}
           ListEmptyComponent={<Text>운동 목록이 없습니다.</Text>}
           contentContainerStyle={styles.workoutList}
