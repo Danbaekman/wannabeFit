@@ -4,12 +4,10 @@ import { ProgressBar } from '@react-native-community/progress-bar-android';
 import styles from '../styles/MainStyles';
 import Navbar from '../components/navbar/Navbar';
 import Footer from '../components/footer/Footer';
-import { Calendar } from 'react-native-calendars';
-import dayjs from 'dayjs';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import dayjs from 'dayjs';
 
 const MainScreen = ({ navigation }) => {
-  const [isCalendarVisible, setCalendarVisible] = useState(false);
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
 
   const handlePrevDay = () => {
@@ -22,113 +20,79 @@ const MainScreen = ({ navigation }) => {
     setSelectedDate(nextDate);
   };
 
-  const toggleCalendar = () => {
-    setCalendarVisible(!isCalendarVisible);
-  };
-
   return (
-    <View style={{ flex: 1 }}>
+    <View style={styles.mainContainer}>
       <Navbar />
 
-      <ScrollView style={styles.container} contentContainerStyle={{ flexGrow: 1 }}>
-        {/* 달력 토글 버튼 */}
-        <View style={styles.dateToggleContainer}>
-          <TouchableOpacity onPress={handlePrevDay} style={styles.navButton}>
-            <Text style={styles.navButtonText}>{'<'}</Text>
+      <ScrollView contentContainerStyle={styles.scrollContent}>
+        {/* 날짜 */}
+        <View style={styles.dateContainer}>
+          <TouchableOpacity onPress={handlePrevDay} style={styles.arrowButton}>
+            <Ionicons name="chevron-back-outline" size={20} color="#FFFFFF" />
           </TouchableOpacity>
-
-          <TouchableOpacity onPress={toggleCalendar} style={styles.dateButtonFullWidth}>
-            <Text style={styles.dateButtonText}>
-              {dayjs(selectedDate).format('M월 D일 (ddd)')}
-            </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity onPress={handleNextDay} style={styles.navButton}>
-            <Text style={styles.navButtonText}>{'>'}</Text>
+          <Text style={styles.dateText}>{dayjs(selectedDate).format('M월 D일 (ddd)')}</Text>
+          <TouchableOpacity onPress={handleNextDay} style={styles.arrowButton}>
+            <Ionicons name="chevron-forward-outline" size={20} color="#FFFFFF" />
           </TouchableOpacity>
         </View>
 
-        {/* 오늘의 섭취 영양성분 */}
-        <Text style={styles.nutritionTitle}>오늘의 섭취 영양성분</Text>
-        <View style={styles.nutritionContainer}>
-          <View style={styles.gaugeContainer}>
+        {/* 섭취 영양 성분 */}
+        <View style={styles.summaryBox}>
+          <Text style={styles.title}>오늘의 총 섭취량</Text>
+          <View style={styles.calorieRow}>
             <Text style={styles.subTitle}>총 칼로리</Text>
-            <ProgressBar styleAttr="Horizontal" indeterminate={false} progress={0.83} />
-            <Text style={styles.nutrientText}>1322/1600kcal</Text>
+            <ProgressBar styleAttr="Horizontal" indeterminate={false} progress={0.87} />
+            <Text style={styles.calorieText}>1822/2100 Kcal</Text>
           </View>
-
-          <Text style={styles.subTitle}>탄/단/지 비율</Text>
-          <View style={styles.nutrientRow}>
-            <View style={styles.nutrientColumn}>
-              <Text style={styles.nutrientText}>탄수화물</Text>
-              <ProgressBar styleAttr="Horizontal" indeterminate={false} progress={0.09} style={[styles.progressBar, { width: '90%' }]} />
-              <Text style={styles.nutrientText}>20g/225g</Text>
+          <View style={styles.macroRow}>
+            <View style={styles.macroItem}>
+              <Text style={styles.macroTitle}>탄수화물</Text>
+              <ProgressBar styleAttr="Horizontal" indeterminate={false} progress={0.56} />
+              <Text style={styles.macroText}>675/1200g</Text>
             </View>
-
-            <View style={styles.nutrientColumn}>
-              <Text style={styles.nutrientText}>단백질</Text>
-              <ProgressBar styleAttr="Horizontal" indeterminate={false} progress={0.25} style={[styles.progressBar, { width: '70%' }]} />
-              <Text style={styles.nutrientText}>40g/160g</Text>
+            <View style={styles.macroItem}>
+              <Text style={styles.macroTitle}>단백질</Text>
+              <ProgressBar styleAttr="Horizontal" indeterminate={false} progress={0.35} />
+              <Text style={styles.macroText}>80/225g</Text>
             </View>
-
-            <View style={styles.nutrientColumn}>
-              <Text style={styles.nutrientText}>지방</Text>
-              <ProgressBar styleAttr="Horizontal" indeterminate={false} progress={0.64} style={[styles.progressBar, { width: '50%' }]} />
-              <Text style={styles.nutrientText}>43g/67g</Text>
+            <View style={styles.macroItem}>
+              <Text style={styles.macroTitle}>지방</Text>
+              <ProgressBar styleAttr="Horizontal" indeterminate={false} progress={0.25} />
+              <Text style={styles.macroText}>20/80g</Text>
             </View>
           </View>
+          <Text style={styles.goalMessage}>오늘 목표 섭취량에 미달하였습니다.</Text>
         </View>
 
-        {/* 목표 섭취량 메시지 */}
-        <View style={styles.goalMessageContainer}>
-          <Text>
-            목표 섭취량에{' '}
-            <Text style={{ fontWeight: 'bold', color: 'black' }}>미달</Text>
-            하였습니다.
+        {/* 식단 */}
+        <Text style={styles.title}>식단</Text>
+        <View style={styles.gridContainer}>
+          {['아침', '점심', '저녁', '간식'].map((meal, index) => (
+            <TouchableOpacity
+              key={index}
+              style={styles.gridItem}
+              onPress={() => navigation.navigate('MealSetting', { mealType: meal })}
+            >
+              <Ionicons name="add-outline" size={30} color="#008080" />
+              <Text style={styles.gridItemText}>{meal}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+
+        {/* 운동 */}
+        <View style={styles.exerciseContainer}>
+          <Text style={styles.exerciseText}>
+            <Text style={styles.bold}>총 시간: 55분</Text>
+            {'  '}
+            내 훈련에 들어가서 기록하고 성장해보아요.
           </Text>
         </View>
 
-        {/* 큰 제목 */}
-        <Text style={styles.nutritionTitle}>식단</Text>
-
-        {/* 식단 박스 - 2행 2열 */}
-        <View style={styles.mealPlanGrid}>
-          {/* 아침 */}
-          <TouchableOpacity
-            style={styles.mealBox}
-            onPress={() => navigation.navigate('MealSetting', { mealType: 'breakfast' })}
-          >
-            <Ionicons name="cafe-outline" size={40} color="#FFA500" />
-            <Text style={styles.mealText}>아침</Text>
-          </TouchableOpacity>
-
-          {/* 점심 */}
-          <TouchableOpacity
-            style={styles.mealBox}
-            onPress={() => navigation.navigate('MealSetting', { mealType: 'lunch' })}
-          >
-            <Ionicons name="fast-food-outline" size={40} color="#32CD32" />
-            <Text style={styles.mealText}>점심</Text>
-          </TouchableOpacity>
-
-          {/* 저녁 */}
-          <TouchableOpacity
-            style={styles.mealBox}
-            onPress={() => navigation.navigate('MealSetting', { mealType: 'dinner' })}
-          >
-            <Ionicons name="restaurant-outline" size={40} color="#4682B4" />
-            <Text style={styles.mealText}>저녁</Text>
-          </TouchableOpacity>
-
-          {/* 간식 */}
-          <TouchableOpacity
-            style={styles.mealBox}
-            onPress={() => navigation.navigate('MealSetting', { mealType: 'snack' })}
-          >
-            <Ionicons name="ice-cream-outline" size={40} color="#DAA520" />
-            <Text style={styles.mealText}>간식</Text>
-          </TouchableOpacity>
-        </View>
+        {/* 통계 */}
+        <TouchableOpacity style={styles.statsBox} onPress={() => navigation.navigate('Statistics')}>
+          <Ionicons name="stats-chart-outline" size={30} color="#008080" />
+          <Text style={styles.statsText}>통계로 확인하기</Text>
+        </TouchableOpacity>
       </ScrollView>
 
       <Footer />
