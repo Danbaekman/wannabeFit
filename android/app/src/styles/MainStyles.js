@@ -39,7 +39,7 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     flex: 1,
-    backgroundColor: '#FFFFFF', // "오늘의 총 섭취량"과 "식단" 부분의 배경은 흰색
+    backgroundColor: '#F5F5F5', // "오늘의 총 섭취량"과 "식단" 부분의 배경은 흰색
     borderTopLeftRadius: 15, // 위쪽 둥근 모서리
     borderTopRightRadius: 15,
     marginTop: -10, // 달력과 자연스러운 연결
