@@ -38,10 +38,15 @@ const RoutineDetailScreen = ({ route, navigation }) => {
 
       const data = await response.json();
 
-      // `routineName`으로 운동 필터링
-      const filteredWorkouts = data.filter((exercise) =>
-        exercise.muscles.some((muscle) => muscle.name === routineName)
-      );
+      // `routineName`으로 운동 필터링 및 유효한 muscles 데이터만 포함
+      const filteredWorkouts = data
+        .filter((exercise) =>
+          exercise.muscles.some((muscle) => muscle.name === routineName && muscle._id) // 유효한 _id 필터링
+        )
+        .map((exercise) => ({
+          ...exercise,
+          muscles: exercise.muscles.filter((muscle) => muscle._id), // 유효한 muscles만 포함
+        }));
 
       // 중복 제거
       const uniqueWorkouts = Array.from(new Set(filteredWorkouts.map((workout) => workout.name))).map(
@@ -49,6 +54,7 @@ const RoutineDetailScreen = ({ route, navigation }) => {
       );
 
       setWorkouts(uniqueWorkouts); // 필터링된 운동 목록 저장
+      console.log('Filtered Workouts with Muscles:', JSON.stringify(uniqueWorkouts, null, 2));
     } catch (error) {
       Alert.alert('Error', '운동 목록을 불러오지 못했습니다.');
       console.error('Fetch workouts error:', error);
@@ -57,11 +63,18 @@ const RoutineDetailScreen = ({ route, navigation }) => {
 
   // 운동 선택/해제 토글
   const toggleWorkoutSelection = (workout) => {
+    if (!workout.muscles || workout.muscles.some((muscle) => !muscle._id)) {
+      Alert.alert('Error', '유효하지 않은 근육 정보가 포함된 운동입니다.');
+      return;
+    }
+
     setSelectedWorkouts((prevSelected) => {
       const exists = prevSelected.find((w) => w._id === workout._id);
       if (exists) {
+        // 선택 해제
         return prevSelected.filter((w) => w._id !== workout._id);
       } else {
+        // 선택 추가
         return [...prevSelected, workout];
       }
     });
@@ -69,7 +82,16 @@ const RoutineDetailScreen = ({ route, navigation }) => {
 
   // 다음 단계로 이동
   const handleNextStep = () => {
-    navigation.navigate('WorkoutEntry', { selectedWorkouts, routineName });
+    if (selectedWorkouts.length === 0) {
+      Alert.alert('Error', '최소 하나의 운동을 선택해주세요.');
+      return;
+    }
+
+    // `selectedWorkouts`에 `muscles` 정보를 포함하여 전달
+    navigation.navigate('WorkoutEntry', {
+      selectedWorkouts,
+      routineName,
+    });
   };
 
   // 운동 항목 렌더링

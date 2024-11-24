@@ -134,6 +134,18 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   
+  centerHighlightBox: {
+    position: 'absolute',
+    top: 40, // 달력 아래 위치 조정
+    left: '50%',
+    transform: [{ translateX: -30 }], // 중앙 정렬 (박스 크기의 절반)
+    width: 60,
+    height: 40,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 5,
+    zIndex: 10,
+  },
+  
   
 });
 

@@ -24,7 +24,7 @@ const App = () => {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <NavigationContainer>
         {/* <Stack.Navigator initialRouteName="Launch">*/}
-        <Stack.Navigator initialRouteName="Main"> 
+        <Stack.Navigator initialRouteName="Launch"> 
           <Stack.Screen name="Launch" component={LaunchScreen} />
           <Stack.Screen name="Login" component={LoginScreen} />
           <Stack.Screen name="InbodyInput" component={InbodyInputScreen} />

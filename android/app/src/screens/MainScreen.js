@@ -14,6 +14,7 @@ const MainScreen = ({ navigation }) => {
   const ITEM_WIDTH = 60; // 날짜 박스의 너비
   const SIDE_PADDING = (SCREEN_WIDTH - ITEM_WIDTH) / 2; // 강조된 날짜를 중앙에 고정시키기 위한 좌우 여백
 
+  // 주간 날짜 데이터 생성
   const renderWeekDays = () => {
     const currentDate = dayjs(selectedDate);
     const weekDays = [];
@@ -31,16 +32,18 @@ const MainScreen = ({ navigation }) => {
 
   const weekDays = renderWeekDays();
 
+  // 스크롤 종료 시 중앙 강조 날짜 업데이트
   const handleScrollEnd = (event) => {
     const { contentOffset } = event.nativeEvent;
     const index = Math.round((contentOffset.x - SIDE_PADDING) / ITEM_WIDTH); // 중앙 강조 위치 인덱스 계산
     const newDate = weekDays[index]?.fullDate;
 
     if (newDate) {
-      setSelectedDate(newDate);
+      setSelectedDate(newDate); // 선택된 날짜 업데이트
     }
   };
 
+  // 월 변경 시 처리
   const handleMonthChange = (direction) => {
     const newDate = dayjs(selectedDate).add(direction, 'month').format('YYYY-MM-DD');
     setSelectedDate(newDate);
@@ -48,19 +51,19 @@ const MainScreen = ({ navigation }) => {
     // 새 월에 맞춰 스크롤뷰 중앙 날짜로 이동
     const index = weekDays.findIndex((day) => day.fullDate === newDate);
     if (index !== -1 && scrollRef.current) {
-      const scrollPosition = index * ITEM_WIDTH - SCREEN_WIDTH / 2 + ITEM_WIDTH / 2;
+      const scrollPosition = index * ITEM_WIDTH - SIDE_PADDING;
       scrollRef.current.scrollTo({ x: scrollPosition, animated: true });
     }
   };
 
+  // 초기 로딩 시 중앙으로 스크롤
   React.useEffect(() => {
-    // 초기 로딩 시 중앙으로 스크롤
     const index = weekDays.findIndex((day) => day.fullDate === selectedDate);
     if (index !== -1 && scrollRef.current) {
       const scrollPosition = index * ITEM_WIDTH - SIDE_PADDING;
       scrollRef.current.scrollTo({ x: scrollPosition, animated: false });
     }
-  }, []);
+  }, [selectedDate]);
 
   return (
     <View style={styles.mainContainer}>
@@ -77,6 +80,10 @@ const MainScreen = ({ navigation }) => {
             <Ionicons name="chevron-forward-outline" size={20} color="#FFFFFF" />
           </TouchableOpacity>
         </View>
+
+        {/* 중앙 고정된 강조 박스 */}
+        <View style={[styles.centerHighlightBox]} />
+
         <ScrollView
           horizontal
           ref={scrollRef}
@@ -90,10 +97,7 @@ const MainScreen = ({ navigation }) => {
           {weekDays.map((day, index) => (
             <TouchableOpacity
               key={index}
-              style={[
-                styles.dateBox,
-                day.fullDate === selectedDate && styles.selectedDateBox,
-              ]}
+              style={styles.dateBox}
               onPress={() => setSelectedDate(day.fullDate)}
             >
               <Text

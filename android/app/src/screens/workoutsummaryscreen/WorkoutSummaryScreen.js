@@ -6,11 +6,42 @@ import styles from './WorkoutSummaryScreenStyles';
 import Icon from 'react-native-vector-icons/Ionicons';
 
 const WorkoutSummaryScreen = ({ route, navigation }) => {
-  const { date, routineName, memo, totalTime, exercises = [], volumeChanges = [] } = route.params || {};
+  const {
+    routineName,
+    generalMemo, // 수정된 부분: route.params.generalMemo로 참조
+    startTime,
+    endTime,
+    exercises = [],
+    volumeChanges = [],
+  } = route.params || {};
 
-  // 요일과 날짜를 추출 (예시용으로 임의로 지정)
-  const dayOfWeek = '월요일'; // 실제 요일 계산이 필요하다면 Date 객체와 함수를 사용할 수 있음
-  const formattedDate = date || '10월 23일';
+  // 현재 날짜와 요일 계산
+  const getCurrentDateInfo = () => {
+    const daysOfWeek = ['일요일', '월요일', '화요일', '수요일', '목요일', '금요일', '토요일'];
+    const date = new Date();
+    const dayOfWeek = daysOfWeek[date.getDay()];
+    const formattedDate = `${date.getMonth() + 1}월 ${date.getDate()}일`;
+    return { dayOfWeek, formattedDate };
+  };
+
+  const { dayOfWeek, formattedDate } = getCurrentDateInfo();
+
+  // 운동 시간 계산 함수
+  const calculateTotalTime = (start, end) => {
+    if (!start || !end) return '시간 정보 없음';
+    const startDate = new Date(start);
+    const endDate = new Date(end);
+
+    const diffMs = endDate - startDate;
+    if (diffMs < 0) return '종료 시간이 시작 시간보다 빠름';
+
+    const hours = Math.floor(diffMs / (1000 * 60 * 60));
+    const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+
+    return `${hours}시간 ${minutes}분`;
+  };
+
+  const totalTime = calculateTotalTime(startTime, endTime);
 
   return (
     <View style={{ flex: 1, backgroundColor: '#f0f0f0' }}>
@@ -43,8 +74,9 @@ const WorkoutSummaryScreen = ({ route, navigation }) => {
               ))}
             </View>
 
-            {memo ? (
-              <Text style={styles.memoText}>{memo}</Text>
+            {/* 전체 메모 렌더링 */}
+            {generalMemo && generalMemo.trim() ? (
+              <Text style={styles.memoText}>{generalMemo}</Text>
             ) : (
               <Text style={styles.noMemoText}>메모가 없습니다.</Text>
             )}
