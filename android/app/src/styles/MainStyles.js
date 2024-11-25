@@ -43,12 +43,19 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   selectedDateBox: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: 'transparent', // 박스를 투명하게
+    borderWidth: 2,
+    borderColor: '#FFFFFF',
     borderRadius: 5,
   },
   selectedDateNumber: {
     color: '#008080',
     fontWeight: 'bold',
+  },
+  highlightedDay: {
+    color: '#FFFFFF',
+    fontSize: 12,
+    marginTop: 2,
   },
   contentContainer: {
     flex: 1,
@@ -133,19 +140,30 @@ const styles = StyleSheet.create({
     color: '#666',
     marginBottom: 10,
   },
-  
   centerHighlightBox: {
     position: 'absolute',
     top: 40, // 달력 아래 위치 조정
     left: '50%',
-    transform: [{ translateX: -30 }], // 중앙 정렬 (박스 크기의 절반)
-    width: 60,
-    height: 40,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 5,
-    zIndex: 10,
+    transform: [{ translateX: -40 }], // 박스의 중앙 정렬 (박스 크기의 절반)
+    width: 80, // 박스 너비
+    height: 50, // 박스 높이
+    backgroundColor: '#FFFFFF', // 강조 박스 배경색
+    borderRadius: 10, // 강조 박스 테두리 둥글게
+    zIndex: 10, // 강조 박스가 위에 보이도록 설정
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000', // 그림자 추가
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5, // 안드로이드 그림자
   },
-  
+  highlightedDate: {
+    fontSize: 18,
+    color: '#008080', // 강조된 날짜 텍스트 색상
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
   
 });
 

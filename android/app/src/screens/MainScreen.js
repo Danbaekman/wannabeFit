@@ -10,20 +10,20 @@ import dayjs from 'dayjs';
 const MainScreen = ({ navigation }) => {
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
   const scrollRef = useRef(null);
+
   const SCREEN_WIDTH = Dimensions.get('window').width;
-  const ITEM_WIDTH = 60; // 날짜 박스의 너비
-  const SIDE_PADDING = (SCREEN_WIDTH - ITEM_WIDTH) / 2; // 강조된 날짜를 중앙에 고정시키기 위한 좌우 여백
+  const ITEM_WIDTH = SCREEN_WIDTH / 7; // 화면 너비를 7등분하여 날짜 크기 설정
 
   // 주간 날짜 데이터 생성
   const renderWeekDays = () => {
     const currentDate = dayjs(selectedDate);
     const weekDays = [];
-    for (let i = -14; i <= 14; i++) {
+    for (let i = -30; i <= 30; i++) {
       const date = currentDate.add(i, 'day');
       weekDays.push({
         key: i,
         formatted: date.format('D일'),
-        day: date.format('D일 (ddd)'),
+        day: date.format('ddd'), // 요일 추가
         fullDate: date.format('YYYY-MM-DD'),
       });
     }
@@ -35,36 +35,38 @@ const MainScreen = ({ navigation }) => {
   // 스크롤 종료 시 중앙 강조 날짜 업데이트
   const handleScrollEnd = (event) => {
     const { contentOffset } = event.nativeEvent;
-    const index = Math.round((contentOffset.x - SIDE_PADDING) / ITEM_WIDTH); // 중앙 강조 위치 인덱스 계산
-    const newDate = weekDays[index]?.fullDate;
-
-    if (newDate) {
-      setSelectedDate(newDate); // 선택된 날짜 업데이트
+  
+    // 중앙 인덱스 계산
+    const index = Math.round(contentOffset.x / ITEM_WIDTH);
+  
+    if (index >= 0 && index < weekDays.length) {
+      const newDate = weekDays[index]?.fullDate;
+  
+      if (newDate) {
+        setSelectedDate(newDate); // 선택된 날짜 업데이트
+      }
     }
   };
-
-  // 월 변경 시 처리
-  const handleMonthChange = (direction) => {
-    const newDate = dayjs(selectedDate).add(direction, 'month').format('YYYY-MM-DD');
-    setSelectedDate(newDate);
-
-    // 새 월에 맞춰 스크롤뷰 중앙 날짜로 이동
-    const index = weekDays.findIndex((day) => day.fullDate === newDate);
+  
+  const handleDatePress = (date) => {
+    const index = weekDays.findIndex((day) => day.fullDate === date);
+  
     if (index !== -1 && scrollRef.current) {
-      const scrollPosition = index * ITEM_WIDTH - SIDE_PADDING;
+      const scrollPosition = index * ITEM_WIDTH;
       scrollRef.current.scrollTo({ x: scrollPosition, animated: true });
+      setSelectedDate(date); // 선택된 날짜 업데이트
     }
   };
-
-  // 초기 로딩 시 중앙으로 스크롤
+  
   React.useEffect(() => {
     const index = weekDays.findIndex((day) => day.fullDate === selectedDate);
+  
     if (index !== -1 && scrollRef.current) {
-      const scrollPosition = index * ITEM_WIDTH - SIDE_PADDING;
+      const scrollPosition = index * ITEM_WIDTH;
       scrollRef.current.scrollTo({ x: scrollPosition, animated: false });
     }
   }, [selectedDate]);
-
+  
   return (
     <View style={styles.mainContainer}>
       <Navbar />
@@ -82,35 +84,37 @@ const MainScreen = ({ navigation }) => {
         </View>
 
         {/* 중앙 고정된 강조 박스 */}
-        <View style={[styles.centerHighlightBox]} />
+        <View style={styles.centerHighlightBox}>
+          <Text style={styles.highlightedDate}>
+            {dayjs(selectedDate).format('D일 (ddd)')}
+          </Text>
+        </View>
 
         <ScrollView
-          horizontal
-          ref={scrollRef}
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={[
-            styles.weekScroll,
-            { paddingHorizontal: SIDE_PADDING }, // 좌우 여백 추가
-          ]}
-          onMomentumScrollEnd={handleScrollEnd} // 스크롤이 끝났을 때 호출
-        >
-          {weekDays.map((day, index) => (
-            <TouchableOpacity
-              key={index}
-              style={styles.dateBox}
-              onPress={() => setSelectedDate(day.fullDate)}
-            >
-              <Text
-                style={[
-                  styles.dateNumber,
-                  day.fullDate === selectedDate && styles.selectedDateNumber,
-                ]}
-              >
-                {day.formatted}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </ScrollView>
+  horizontal
+  ref={scrollRef}
+  showsHorizontalScrollIndicator={false}
+  contentContainerStyle={styles.weekScroll}
+  onMomentumScrollEnd={handleScrollEnd} // 스크롤 종료 시 호출
+>
+  {weekDays.map((day, index) => (
+    <TouchableOpacity
+      key={index}
+      style={styles.dateBox}
+      onPress={() => handleDatePress(day.fullDate)} // 날짜 클릭 시 호출
+    >
+      <Text
+        style={[
+          styles.dateNumber,
+          day.fullDate === selectedDate && styles.selectedDateNumber, // 강조 스타일
+        ]}
+      >
+        {day.formatted}
+      </Text>
+    </TouchableOpacity>
+  ))}
+</ScrollView>
+
       </View>
 
       {/* 둥근 모서리가 적용된 컨텐츠 박스 */}
