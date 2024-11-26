@@ -31,26 +31,28 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
   },
   dateBox: {
-    width: 40,
-    alignItems: 'center',
+    width: 50, // 박스 너비
+    alignItems: 'center', // 중앙 정렬
     justifyContent: 'center',
-    marginHorizontal: 5,
-    paddingVertical: 5,
+    paddingVertical: 10, // 위아래 여백
   },
   dateNumber: {
     fontSize: 14,
     color: '#FFFFFF',
-    textAlign: 'center',
   },
   selectedDateBox: {
-    backgroundColor: 'transparent', // 박스를 투명하게
     borderWidth: 2,
-    borderColor: '#FFFFFF',
-    borderRadius: 5,
+    borderColor: '#FFFFFF', // 선택된 박스 테두리 강조
+    borderRadius: 10, // 둥근 모서리
   },
   selectedDateNumber: {
-    color: '#008080',
+    color: '#FFFFFF',
     fontWeight: 'bold',
+  },
+  selectedDay: {
+    fontSize: 12,
+    color: '#FFFFFF',
+    marginTop: 2,
   },
   highlightedDay: {
     color: '#FFFFFF',
