@@ -22,7 +22,7 @@ const Footer = () => {
                 <Text style={styles.iconText}>프로필</Text>
             </TouchableOpacity>
             {/* 차트 아이콘 추가 */}
-            <TouchableOpacity style={styles.iconContainer} onPress={() => navigation.navigate('Chart')}>
+            <TouchableOpacity style={styles.iconContainer} onPress={() => navigation.navigate('StaticsMain')}>
                 <Icon name="stats-chart-outline" size={24} color="#000" />
                 <Text style={styles.iconText}>통계</Text>
             </TouchableOpacity>

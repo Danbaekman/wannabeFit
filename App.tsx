@@ -14,6 +14,8 @@ import RoutineSetupScreen from './android/app/src/screens/routinesetupscreen/Rou
 import RoutineDetailScreen from './android/app/src/screens/routinedetailscreen/RoutineDetailScreen';
 import WorkoutEntryScreen from './android/app/src/screens/workoutentryscreen/WorkoutEntryScreen';
 import WorkoutSummaryScreen from './android/app/src/screens/workoutsummaryscreen/WorkoutSummaryScreen';
+import StaticsMainScreen from './android/app/src/screens/chart/staticsmainscreen/StaticsMainScreen';
+import VolumeScreen from './android/app/src/screens/chart/volumescreen/VolumeScreen';
 
 
 
@@ -36,6 +38,8 @@ const App = () => {
           <Stack.Screen name="RoutineDetail" component={RoutineDetailScreen} />
           <Stack.Screen name="WorkoutEntry" component={WorkoutEntryScreen} />
           <Stack.Screen name="WorkoutSummary" component={WorkoutSummaryScreen} />
+          <Stack.Screen name="StaticsMain" component={StaticsMainScreen} />
+          <Stack.Screen name="Volume" component={VolumeScreen} />
         </Stack.Navigator>
       </NavigationContainer>
     </GestureHandlerRootView>
