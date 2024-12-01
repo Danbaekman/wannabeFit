@@ -30,7 +30,15 @@ const inbodyRouter = require('./inbody');
 router.use('/inbody', inbodyRouter);
 
 // 헬스 라우터
-const workoutsRouter = require('./workouts');
-router.use('/workouts', workoutsRouter);
+const workoutRouter = require('./workout');
+router.use('/workout', workoutRouter);
+
+// 운동 라우터
+const exerciseRouter = require('./exercise');
+router.use('/exercise', exerciseRouter);
+
+// 통계 라우터
+const statisticRouter = require('./statistic');
+router.use('/statistic', statisticRouter);
 
 module.exports = router;
