@@ -5,44 +5,46 @@ export default StyleSheet.create({
     flex: 1,
     backgroundColor: '#008080', // 상단 여백 배경색
   },
-  contentWrapper: {
-    flex: 1,
-    backgroundColor: '#F5F5F5',
-    borderTopLeftRadius: 15, // MainScreen과 동일한 둥근 모서리
-    borderTopRightRadius: 15, // MainScreen과 동일한 둥근 모서리
-    paddingTop: 10, // 컨텐츠 상단 여백
-    paddingHorizontal: 20, // 좌우 여백
+  statsSection: {
+    marginBottom: 20,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 10,
+    padding: 16,
+    elevation: 2,
   },
-  tabContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    backgroundColor: '#008080',
-    paddingVertical: 10,
-    borderTopLeftRadius: 15,
-    borderTopRightRadius: 15,
-  },
-  tabButton: {
-    color: '#FFFFFF',
-    fontSize: 16,
-  },
-  tabButtonActive: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: 'bold',
-    textDecorationLine: 'underline',
-  },
-  summaryContainer: {
-    marginBottom: 20, // 아래 컨텐츠와 간격 추가
-  },
-  totalWorkoutTime: {
+  sectionTitle: {
     fontSize: 18,
     fontWeight: 'bold',
+    marginBottom: 10,
     color: '#333',
+    textAlign: 'left', // 제목을 좌측 정렬
+  },
+  statsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    width: '100%',
+  },
+  statCard: {
+    flex: 1,
+    alignItems: 'center',
+    paddingVertical: 10,
+  },
+  statValue: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#008080',
     marginBottom: 5,
   },
-  daysTracked: {
-    fontSize: 16,
+  statLabel: {
+    fontSize: 14,
     color: '#555',
+    textAlign: 'center',
+  },
+  divider: {
+    height: '100%',
+    width: 1,
+    backgroundColor: '#E0E0E0',
   },
   buttonContainer: {
     paddingVertical: 10,

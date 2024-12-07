@@ -7,6 +7,8 @@ import Navbar from '../../../components/navbar/Navbar';
 import Footer from '../../../components/footer/Footer';
 import styles from './VolumeScreenStyles';
 import CONFIG from '../../../config';
+import TabNavigation from '../../../components/tabnavigation/TabNavigation';
+import ContentWrapper from '../../../components/contentwrapper/ContentWrapper';
 
 const screenWidth = Dimensions.get('window').width;
 
@@ -70,17 +72,8 @@ const VolumeScreen = ({ navigation }) => {
       <Navbar />
 
       {/* 운동, 식단, 체중 탭 */}
-      <View style={styles.tabContainer}>
-        <Text style={styles.tabButtonActive}>운동</Text>
-        <TouchableOpacity onPress={() => navigation.navigate('Diet')}>
-          <Text style={styles.tabButton}>식단</Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => navigation.navigate('Weight')}>
-          <Text style={styles.tabButton}>체중</Text>
-        </TouchableOpacity>
-      </View>
-
-      <View style={styles.contentWrapper}>
+      <TabNavigation/>
+      <ContentWrapper>
         {/* 상단 제목 */}
         <View style={styles.headerContainer}>
           <Text style={styles.title}>볼륨</Text>
@@ -136,7 +129,7 @@ const VolumeScreen = ({ navigation }) => {
             <Text style={styles.summaryText}>평균 볼륨: {summary.average.toFixed(2)}kg</Text>
           </View>
         </ScrollView>
-      </View>
+        </ContentWrapper>
       <Footer />
     </View>
   );

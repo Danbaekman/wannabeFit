@@ -16,6 +16,9 @@ import WorkoutEntryScreen from './android/app/src/screens/workoutentryscreen/Wor
 import WorkoutSummaryScreen from './android/app/src/screens/workoutsummaryscreen/WorkoutSummaryScreen';
 import StaticsMainScreen from './android/app/src/screens/chart/staticsmainscreen/StaticsMainScreen';
 import VolumeScreen from './android/app/src/screens/chart/volumescreen/VolumeScreen';
+import MaxWeightScreen from './android/app/src/screens/chart/maxweightscreen/MaxWeightScreen';
+import TotalSetsScreen from './android/app/src/screens/chart/totalsetsscreen/TotalSetsScreen';
+import TotalRepsScreen from './android/app/src/screens/chart/toprepsscreen/TopRepsScreen';
 
 
 
@@ -40,6 +43,9 @@ const App = () => {
           <Stack.Screen name="WorkoutSummary" component={WorkoutSummaryScreen} />
           <Stack.Screen name="StaticsMain" component={StaticsMainScreen} />
           <Stack.Screen name="Volume" component={VolumeScreen} />
+          <Stack.Screen name="MaxWeight" component={MaxWeightScreen} />
+          <Stack.Screen name="TotalSets" component={TotalSetsScreen} />
+          <Stack.Screen name="TopReps" component={TotalRepsScreen} />
         </Stack.Navigator>
       </NavigationContainer>
     </GestureHandlerRootView>

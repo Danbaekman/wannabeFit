@@ -14,6 +14,7 @@ export default StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     color: '#008080',
+    marginBottom: 10, // 제목과 차트 간격
   },
   chartContainer: {
     backgroundColor: '#FFFFFF',
