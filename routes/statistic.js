@@ -246,4 +246,134 @@ router.get('/weight', authenticateToken, async (req, res) => {
   }
 });
 
+// 총 운동 통계 조회
+router.get('/summary', authenticateToken, async (req, res) => {
+  try {
+    const { id: userId } = req.user;
+
+    console.log('총 통계 요청:', { userId });
+
+    // 총 운동 통계 계산
+    const totalStats = await WorkoutLog.aggregate([
+      {
+        $match: {
+          user: new mongoose.Types.ObjectId(userId),
+          $expr: { $gte: ['$endTime', '$startTime'] },
+        },
+      },
+      { $unwind: '$exercises' },
+      { $unwind: '$exercises.sets' },
+      {
+        $group: {
+          _id: { $dateToString: { format: '%Y-%m-%d', date: '$startTime' } },
+          totalWorkoutTime: {
+            $sum: {
+              $divide: [{ $subtract: ['$endTime', '$startTime'] }, 1000 * 60], // 밀리초 -> 분
+            },
+          },
+          totalVolume: {
+            $sum: {
+              $multiply: ['$exercises.sets.weight', '$exercises.sets.reps'],
+            },
+          },
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          totalWorkoutTime: { $sum: '$totalWorkoutTime' },
+          totalVolume: { $sum: '$totalVolume' },
+          totalDays: { $sum: 1 },
+        },
+      },
+    ]);
+
+    const totalWorkoutTime = Math.floor(totalStats[0]?.totalWorkoutTime || 0);
+    const totalVolume = totalStats[0]?.totalVolume || 0;
+    const totalDays = totalStats[0]?.totalDays || 0;
+
+    console.log('총 통계 결과:', { totalWorkoutTime, totalVolume, totalDays });
+
+    res.status(200).json({
+      totalWorkoutTime,
+      totalVolume,
+      totalDays,
+    });
+  } catch (error) {
+    console.error('총 통계 오류:', error.message);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+router.get('/weekly', authenticateToken, async (req, res) => {
+  try {
+    const { id: userId } = req.user;
+
+    console.log('주당 운동 횟수 요청:', { userId });
+
+    const weeklyStats = await WorkoutLog.aggregate([
+      {
+        $match: {
+          user: new mongoose.Types.ObjectId(userId),
+          $expr: { $gte: ['$endTime', '$startTime'] },
+        },
+      },
+      {
+        $group: {
+          _id: { $isoWeek: '$startTime' }, // ISO 주 단위로 그룹화
+          workoutCount: { $sum: 1 },
+        },
+      },
+      { $sort: { _id: 1 } },
+    ]);
+
+    console.log('주당 운동 횟수 결과:', weeklyStats);
+
+    res.status(200).json(weeklyStats);
+  } catch (error) {
+    console.error('주당 운동 횟수 오류:', error.message);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+  
+
+router.get('/total-sets', authenticateToken, async (req, res) => {
+  try {
+    const { id: userId } = req.user;
+    const { period = 'day', startDate, endDate } = req.query;
+
+    console.log('총 세트 수 요청:', { userId, period, startDate, endDate });
+
+    const match = {
+      user: new mongoose.Types.ObjectId(userId),
+      startTime: { $gte: new Date(startDate), $lte: new Date(endDate) },
+      $expr: { $gte: ['$endTime', '$startTime'] },
+    };
+
+    const groupId = getGroupId(period, 'startTime');
+
+    const totalSetsStats = await WorkoutLog.aggregate([
+      { $match: match },
+      { $unwind: '$exercises' },
+      { $unwind: '$exercises.sets' },
+      {
+        $group: {
+          _id: groupId,
+          totalSets: { $sum: 1 }, // 세트 개수
+        },
+      },
+      { $sort: { _id: 1 } },
+    ]);
+
+    console.log('총 세트 수 결과:', totalSetsStats);
+
+    res.status(200).json(totalSetsStats);
+  } catch (error) {
+    console.error('총 세트 수 오류:', error.message);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+
 module.exports = router;
