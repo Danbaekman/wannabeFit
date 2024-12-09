@@ -142,22 +142,38 @@ const StaticsMainScreen = ({ navigation }) => {
           <ScrollView>
             {weeklyWorkoutCounts.length > 0 && (
               <BarChart
-                data={{
-                  labels: weeklyWorkoutCounts.map((item) => item.date),
-                  datasets: [{ data: weeklyWorkoutCounts.map((item) => item.count) }],
-                }}
-                width={screenWidth - 40}
-                height={220}
-                chartConfig={{
-                  backgroundColor: '#FFFFFF',
-                  backgroundGradientFrom: '#FFFFFF',
-                  backgroundGradientTo: '#FFFFFF',
-                  decimalPlaces: 0,
-                  color: (opacity = 1) => `rgba(0, 128, 128, ${opacity})`,
-                  labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-                }}
-                style={styles.chart}
-              />
+              data={{
+                labels: Array.from({ length: 7 }, (_, i) => {
+                  const date = new Date();
+                  date.setDate(date.getDate() + i * 7); // 현재 날짜부터 7일 간격
+                  return `${date.getMonth() + 1}/${date.getDate()}`; // MM/DD 형식
+                }),
+                datasets: [
+                  {
+                    data: weeklyWorkoutCounts.map((item) => item.count), // 운동 횟수 데이터
+                  },
+                ],
+              }}
+              width={screenWidth - 40} // 그래프 너비
+              height={220} // 그래프 높이
+              fromZero={true} // Y축 0부터 시작
+              yAxisInterval={1} // Y축 간격 설정
+              chartConfig={{
+                backgroundColor: '#FFFFFF',
+                backgroundGradientFrom: '#FFFFFF',
+                backgroundGradientTo: '#FFFFFF',
+                decimalPlaces: 0, // 소수점 제거
+                color: (opacity = 1) => `rgba(0, 128, 128, ${opacity})`, // 바 색상
+                labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`, // 축 라벨 색상
+              }}
+              style={{
+                marginVertical: 8,
+                borderRadius: 16,
+              }}
+              verticalLabelRotation={0} // X축 라벨 회전
+            />
+            
+            
             )}
           </ScrollView>
         </View>

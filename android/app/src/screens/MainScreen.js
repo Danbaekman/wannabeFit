@@ -7,9 +7,12 @@ import Navbar from '../components/navbar/Navbar';
 import Footer from '../components/footer/Footer';
 import styles from '../styles/MainStyles';
 import { ProgressBar } from '@react-native-community/progress-bar-android';
+import { useSelector, useDispatch }from 'react-redux';
+import { setSelectedDate } from '../store';
 
 const MainScreen = ({ navigation }) => {
-  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
+  const selectedDate = useSelector((state) => state.date.selectedDate);
+  const dispatch = useDispatch(); // Redux 액션 호출
   const [weekDays, setWeekDays] = useState([]);
 
   useEffect(() => {
@@ -33,23 +36,24 @@ const MainScreen = ({ navigation }) => {
 
   const handleGesture = (event) => {
     const { translationX } = event.nativeEvent;
-
+  
     if (Math.abs(translationX) > 50) {
       const daysToMove = Math.sign(translationX); // 양수: 오른쪽, 음수: 왼쪽
       const newCenterDate = dayjs(selectedDate).add(-daysToMove, 'day').format('YYYY-MM-DD');
-      setSelectedDate(newCenterDate);
+      dispatch(setSelectedDate(newCenterDate)); // Redux 상태 업데이트
     }
   };
 
+  // 날짜를 눌렀을 때 redux상태 업데이트
   const handleDatePress = (date) => {
-    setSelectedDate(date); // 선택된 날짜 업데이트
+    dispatch(setSelectedDate(date)); 
   };
 
   const changeMonth = (direction) => {
     const newDate = dayjs(selectedDate).add(direction, 'month').startOf('month').format('YYYY-MM-DD');
-    setSelectedDate(newDate);
+    dispatch(setSelectedDate(newDate)); // Redux 상태 업데이트
   };
-
+  
   return (
     <View style={styles.mainContainer}>
       <Navbar />
@@ -142,8 +146,7 @@ const MainScreen = ({ navigation }) => {
           </View>
         </ScrollView>
       </View>
-
-      <Footer />
+      <Footer/> 
     </View>
   );
 };

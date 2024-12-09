@@ -1,5 +1,7 @@
 import * as React from 'react';
+import { Provider } from 'react-redux';
 import 'react-native-reanimated';
+import store from './android/app/src/store';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -26,6 +28,7 @@ const Stack = createNativeStackNavigator();
 
 const App = () => {
   return (
+    <Provider store={store}>
     <GestureHandlerRootView style={{ flex: 1 }}>
       <NavigationContainer>
         {/* <Stack.Navigator initialRouteName="Launch">*/}
@@ -49,6 +52,7 @@ const App = () => {
         </Stack.Navigator>
       </NavigationContainer>
     </GestureHandlerRootView>
+    </Provider>
   );
 }
 

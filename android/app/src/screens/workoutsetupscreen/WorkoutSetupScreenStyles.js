@@ -6,74 +6,119 @@ const styles = StyleSheet.create({
     backgroundColor: '#F5F5F5',
   },
   contentContainer: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    width: '100%',
-  },
-  mytraining: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#008080',
-    alignSelf: 'center',
-    width: '100%',
-    marginBottom: 10,
-    marginTop: 30,
-  },
-  routineCard: {
-    backgroundColor: 'white',
-    borderRadius: 12,
+    flex: 1,
     padding: 20,
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 2,
-    elevation: 5,
-    width: '100%',
-    minHeight: 556,
   },
-  icon: {
-    width: 240,
-    height: 240,
-    marginBottom: 10, // 아이콘과 타이틀 간격 조정
-  },
-  title: {
-    fontSize: 25,
-    fontWeight: 'bold',
-    color: '#333',
-    marginTop: 30,
-    marginBottom: 5, // 타이틀과 서브타이틀 간격 줄이기
-  },
-  subtitle: {
-    fontSize: 14,
-    color: '#888',
-    marginTop: 5,
-    marginBottom: 10, // 서브타이틀과 버튼 간격
-  },
-  startButton: {
-    backgroundColor: '#008080',
-    paddingVertical: 10,
-    paddingHorizontal: 60,
-    borderRadius: 20,
-    marginTop: 'auto', // 버튼이 카드 박스 하단에 붙도록 설정
-  },
-  startButtonText: {
-    color: 'white',
+  dateTitle: {
     fontSize: 20,
     fontWeight: 'bold',
+    color: '#008080',
+    textAlign: 'center',
+    marginBottom: 10,
   },
-  navbar: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
+  warningText: {
+    fontSize: 14,
+    color: '#FF0000',
+    textAlign: 'center',
+    marginBottom: 20,
   },
-  footer: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
+  routineSection: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    padding: 20,
+    marginBottom: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  routineTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 10,
+  },
+  routineSubtitle: {
+    fontSize: 14,
+    color: '#888',
+    marginBottom: 20,
+  },
+  addRoutineContainer: {
+    borderWidth: 2,
+    borderColor: '#008080',
+    borderStyle: 'dotted', // 점선 테두리
+    borderRadius: 12, // 모서리 둥글게
+    padding: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#FFFFFF',
+    height: 150,
+  },
+  addRoutineText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#008080',
+    marginBottom: 15, // 버튼과 텍스트 사이 간격
+  },
+  addCircle: {
+    width: 50,
+    height: 50,
+    borderRadius: 25, // 원형
+    borderWidth: 2,
+    borderColor: '#008080',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  addCircleText: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#555',
+  },
+  recordSection: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    padding: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  recordTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 10,
+  },
+  recordCard: {
+    backgroundColor: '#E8F5F5',
+    borderRadius: 8,
+    padding: 15,
+  },
+  recordCardTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#008080',
+    marginBottom: 10,
+  },
+  recordDetails: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  recordTime: {
+    fontSize: 14,
+    color: '#555',
+  },
+  recordSets: {
+    fontSize: 14,
+    color: '#555',
+  },
+  noRecordText: {
+    fontSize: 14,
+    color: '#888',
+    textAlign: 'center',
+    marginTop: 20,
   },
 });
 
