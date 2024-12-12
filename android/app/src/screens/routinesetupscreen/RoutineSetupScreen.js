@@ -7,10 +7,13 @@ import Footer from '../../components/footer/Footer';
 import styles from './RoutineSetupScreenStyles';
 import CONFIG from '../../config';
 
-const RoutineSetupScreen = ({ navigation }) => {
+const RoutineSetupScreen = ({ navigation, route }) => {
+  const { selectedDate } = route.params;
   const [routines, setRoutines] = useState([]);
   const [newRoutine, setNewRoutine] = useState('');
   const [isAdding, setIsAdding] = useState(false);
+  
+  
 
   useEffect(() => {
     fetchRoutines();
@@ -57,7 +60,7 @@ const RoutineSetupScreen = ({ navigation }) => {
   };
 
   const handleRoutineDetail = (routineName) => {
-    navigation.navigate('RoutineDetail', { routineName });
+    navigation.navigate('RoutineDetail', { routineName, selectedDate }); // selectedDate 전달
   };
 
   const handleAddRoutine = () => {

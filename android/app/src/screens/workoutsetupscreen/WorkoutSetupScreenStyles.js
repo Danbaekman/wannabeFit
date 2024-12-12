@@ -3,26 +3,19 @@ import { StyleSheet } from 'react-native';
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F5F5F5',
+    backgroundColor: '#008080',
   },
   contentContainer: {
-    flex: 1,
+    flexGrow: 1, 
     padding: 20,
+    backgroundColor: '#F5F5F5',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
   },
   mytraining: {
     fontSize: 24,
     fontWeight: 'bold',
     color: '#008080',
-    marginBottom: 10,
-    marginTop: 30,
-    alignSelf: 'flex-start',
-    width: '100%',
-  },
-  dateTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#008080',
-    textAlign: 'center',
     marginBottom: 10,
   },
   warningText: {
@@ -110,16 +103,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
   },
-  recordRightSection: {
-    flexDirection: 'row', // 버튼과 시간/세트 수 나란히
-    alignItems: 'center', // 세로 가운데 정렬
-  },
-  timeAndSetsWrapper: {
-    flexDirection: 'column', // 세로 배치
-    alignItems: 'flex-end', // 우측 정렬
-    marginRight: 10, // 버튼과 간격 조정
-  },
-  
   recordSquare: {
     width: 50,
     height: 50,
@@ -133,41 +116,34 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#008080',
   },
+  recordRightSection: {
+    flexDirection: 'row', // 버튼과 시간/세트 수 나란히
+    alignItems: 'center', // 세로 가운데 정렬
+  },
+
   recordTimeWrapper: {
     flexDirection: 'row',
     alignItems: 'center', // 세로 가운데 정렬
-    marginRight: 10, // 세트 수와 간격 조정
+    marginBottom: 5, // 시간과 세트 수 간격 조정
   },
-  
-  recordInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  timeAndSetsWrapper: {
+    flexDirection: 'column', // 세로 배치
+    alignItems: 'flex-end', // 우측 정렬
+    marginRight: 10, // 버튼과 간격 조정
+    width: 'auto', // 우측 정렬을 위해 텍스트 폭 제한 제거
   },
-  recordDetails: {
-    flexDirection: 'row', // 가로 정렬
-    justifyContent: 'flex-end', // 오른쪽 정렬
-    alignItems: 'center', // 수직 가운데 정렬
-    gap: 10, // 시계와 버튼 간격
-  },
-  
   recordTime: {
     fontSize: 14,
-    color: '#555',
-    marginLeft: 5, // 아이콘과 간격
+    color: '#555', 
   },
-  
   recordSets: {
     fontSize: 14,
-    color: '#555',
-    marginRight: 10, // 버튼과 간격 조정
+    color: '#555', 
   },
-  
   chevronButton: {
     justifyContent: 'center',
     alignItems: 'center',
   },
-  
-  
   noRecordText: {
     fontSize: 14,
     color: '#888',

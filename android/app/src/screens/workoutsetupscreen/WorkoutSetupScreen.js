@@ -3,141 +3,170 @@ import {
   View,
   Text,
   TouchableOpacity,
-  Image,
   Modal,
   ScrollView,
+  Alert,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Icon from 'react-native-vector-icons/Ionicons';
 import Navbar from '../../components/navbar/Navbar';
 import Footer from '../../components/footer/Footer';
+import DateDisplay from '../../components/datedisplay/DateDisplay';
 import styles from './WorkoutSetupScreenStyles';
+import CONFIG from '../../config';
 
 const WorkoutSetupScreen = ({ navigation, route }) => {
-  const { selectedDate } = route.params; // 네비게이션으로 전달된 날짜
-  const [hasRoutine, setHasRoutine] = useState(false); // 루틴 존재 여부
-  const [workoutRecords, setWorkoutRecords] = useState(null); // 운동 기록 정보
+  const { selectedDate } = route.params; // MainScreen에서 전달된 날짜 값
+  console.log('WorkoutSetupScreen - Selected Date:', selectedDate);
+  console.log('WorkoutSetupScreen - Selected Date Type:', typeof selectedDate);
+
+  const [workoutRecords, setWorkoutRecords] = useState([]); // 운동 기록 정보
   const [isFutureDate, setIsFutureDate] = useState(false); // 선택한 날짜가 미래인지 여부
   const [modalVisible, setModalVisible] = useState(false); // 상세보기 모달 상태
+  const [selectedRecord, setSelectedRecord] = useState(null); // 선택된 기록 상세보기 데이터
 
   useEffect(() => {
-    checkRoutine();
-    checkWorkoutRecords();
-    checkDateIsFuture();
-  }, [selectedDate]);
+    const unsubscribe = navigation.addListener('focus', () => {
+      checkWorkoutRecords(); // 화면이 focus될 때 기록 다시 가져오기
+      checkDateIsFuture();
+    });
 
-  const checkRoutine = async () => {
+    return unsubscribe;
+  }, [navigation]);
+
+  const checkWorkoutRecords = async () => {
     try {
-      const routine = await AsyncStorage.getItem('workoutRoutine');
-      setHasRoutine(routine !== null);
+      const token = await AsyncStorage.getItem('jwtToken');
+      if (!token) {
+        Alert.alert('Error', '로그인이 필요합니다.');
+        navigation.navigate('Login');
+        return;
+      }
+
+      const response = await fetch(`${CONFIG.API_BASE_URL}/workout`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) throw new Error('운동 기록을 불러오지 못했습니다.');
+
+      const data = await response.json();
+      console.log('Workout logs from server:', data);
+
+      const filteredData = data.workoutLogs.filter((log) => {
+        const logDate = new Date(log.startTime).toISOString().split('T')[0];
+        const selected = new Date(selectedDate).toISOString().split('T')[0];
+        return logDate === selected;
+      });
+
+      setWorkoutRecords(filteredData);
     } catch (error) {
-      console.error('루틴 상태를 불러오는 중 오류 발생:', error);
+      Alert.alert('Error', '운동 기록을 불러오지 못했습니다.');
+      console.error('Fetch workout records error:', error);
     }
   };
 
-  const checkWorkoutRecords = async () => {
-    // WorkoutEntryScreen에서 저장한 데이터를 불러오는 로직
-    setWorkoutRecords({
-      title: '등', // 예시 데이터
-      time: '55:00',
-      totalSets: 40,
-      exercises: [
-        { name: '풀업', sets: [{ weight: 0, reps: 12 }, { weight: 0, reps: 10 }] },
-        { name: '바벨 로우', sets: [{ weight: 60, reps: 8 }, { weight: 70, reps: 6 }] },
-      ],
-      generalMemo: '오늘 운동 느낌 좋았음.',
-    });
-  };
-
   const checkDateIsFuture = () => {
-    const today = new Date().toISOString().split('T')[0];
-    setIsFutureDate(selectedDate > today);
+    const today = new Date(); // 오늘 날짜
+    const selected = new Date(selectedDate); // 문자열을 Date 객체로 변환
+    if (isNaN(selected)) {
+      console.error('Invalid date format:', selectedDate);
+      return;
+    }
+    setIsFutureDate(selected > today); // 비교 수행
   };
 
-  const handleSetupRoutine = () => {
-    navigation.navigate('RoutineSetup', { selectedDate });
+  const handleAddRoutine = () => {
+    navigation.navigate('RoutineSetup', { selectedDate }); // 선택한 날짜 전달
   };
 
-  const toggleModal = () => {
+  const toggleModal = (record) => {
+    setSelectedRecord(record);
     setModalVisible(!modalVisible);
   };
 
   return (
     <View style={styles.container}>
       <Navbar />
-      <Text style={styles.dateTitle}>{selectedDate} 운동 일지</Text>
-      <View style={styles.contentContainer}>
+      <DateDisplay date={selectedDate} />
+      <ScrollView contentContainerStyle={styles.contentContainer}>
         <Text style={styles.mytraining}>내 훈련</Text>
         {/* 주의 문구 표시 (미래 날짜 선택 시) */}
         {isFutureDate && (
           <Text style={styles.warningText}>주의: 미래 날짜입니다.</Text>
         )}
 
-        {/* 운동 루틴 기록하기 섹션 */}
+        {/* 운동 루틴 추가 섹션 */}
         <View style={styles.routineSection}>
-          <Text style={styles.routineTitle}>운동 루틴 기록하기</Text>
-          <Text style={styles.routineSubtitle}>나만의 루틴을 기록해보세요</Text>
+          <Text style={styles.routineTitle}>운동 루틴 추가</Text>
+          <Text style={styles.routineSubtitle}>나만의 루틴을 추가해보세요</Text>
           <View style={styles.addRoutineContainer}>
-            <Text style={styles.addRoutineText}>추가하기</Text>
-            <TouchableOpacity style={styles.addCircle} onPress={handleSetupRoutine}>
+            <TouchableOpacity style={styles.addCircle} onPress={handleAddRoutine}>
               <Text style={styles.addCircleText}>+</Text>
             </TouchableOpacity>
+            <Text style={styles.addRoutineText}>루틴 추가</Text>
           </View>
         </View>
 
-       {/* 운동 기록 표시 섹션 */}
-<View style={styles.recordSection}>
-  <Text style={styles.recordTitle}>오늘의 기록</Text>
-  {workoutRecords ? (
-    <View style={styles.recordCard}>
-    <View style={styles.recordHeader}>
-      {/* 제목 정사각형 */}
-      <View style={styles.recordSquare}>
-        <Text style={styles.recordSquareText}>{workoutRecords.title}</Text>
-      </View>
-  
-      {/* 시간, 세트 수, 버튼 */}
-      <View style={styles.recordRightSection}>
-        {/* 시간과 세트 수 (세로 배치) */}
-        <View style={styles.timeAndSetsWrapper}>
-          <View style={styles.recordTimeWrapper}>
-            <Icon name="time-outline" size={16} color="#555" />
-            <Text style={styles.recordTime}>{workoutRecords.time}</Text>
-          </View>
-          <Text style={styles.recordSets}>총 세트 수: {workoutRecords.totalSets}</Text>
-        </View>
-  
-        {/* 버튼 */}
-        <TouchableOpacity onPress={toggleModal} style={styles.chevronButton}>
-          <Icon name="chevron-down-outline" size={20} color="#555" />
-        </TouchableOpacity>
-      </View>
-    </View>
-  </View>
-  
-  ) : (
-    <Text style={styles.noRecordText}>운동 기록이 필요합니다</Text>
-  )}
-</View>
+        {/* 운동 기록 표시 섹션 */}
+        <View style={styles.recordSection}>
+          <Text style={styles.recordTitle}>오늘의 기록</Text>
+          {workoutRecords && workoutRecords.length > 0 ? (
+            workoutRecords.map((record, index) => (
+              <View key={index} style={styles.recordCard}>
+                <View style={styles.recordHeader}>
+                  {/* 제목 정사각형 */}
+                  <View style={styles.recordSquare}>
+                    <Text style={styles.recordSquareText}>
+                      {record.muscles?.map((muscle) => muscle.name).join(', ') || '기록 없음'}
+                    </Text>
+                  </View>
 
-      </View>
+                  {/* 시간과 세트 수 */}
+                  <View style={styles.recordRightSection}>
+                    <View style={styles.timeAndSetsWrapper}>
+                      <View style={styles.recordTimeWrapper}>
+                        <Icon name="time-outline" size={16} color="#555" />
+                        <Text style={styles.recordTime}>{record.totalTime || '00:00'}</Text>
+                      </View>
+                      <Text style={styles.recordSets}>
+                        총 세트 수: {record.totalSets || 0}
+                      </Text>
+                    </View>
+
+                    {/* 상세보기 버튼 */}
+                    <TouchableOpacity onPress={() => toggleModal(record)} style={styles.chevronButton}>
+                      <Icon name="chevron-down-outline" size={20} color="#555" />
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              </View>
+            ))
+          ) : (
+            <Text style={styles.noRecordText}>운동 기록이 없습니다</Text>
+          )}
+        </View>
+      </ScrollView>
 
       {/* 상세보기 모달 */}
       <Modal
         visible={modalVisible}
         animationType="slide"
         transparent={true}
-        onRequestClose={toggleModal}
+        onRequestClose={() => toggleModal(null)}
       >
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>{workoutRecords?.title} 상세보기</Text>
+            <Text style={styles.modalTitle}>
+              {selectedRecord?.muscles?.map((muscle) => muscle.name).join(', ') || '운동 기록'} 상세보기
+            </Text>
             <ScrollView>
-              <Text style={styles.modalSubtitle}>총 시간: {workoutRecords?.time}</Text>
+              <Text style={styles.modalSubtitle}>총 시간: {selectedRecord?.totalTime || '00:00'}</Text>
               <Text style={styles.modalSubtitle}>
-                총 세트 수: {workoutRecords?.totalSets}
+                총 세트 수: {selectedRecord?.totalSets || 0}
               </Text>
-              {workoutRecords?.exercises.map((exercise, index) => (
+              {selectedRecord?.exercises?.map((exercise, index) => (
                 <View key={index} style={styles.exerciseContainer}>
                   <Text style={styles.exerciseName}>{exercise.name}</Text>
                   {exercise.sets.map((set, setIndex) => (
@@ -149,10 +178,10 @@ const WorkoutSetupScreen = ({ navigation, route }) => {
               ))}
               <Text style={styles.memoTitle}>메모</Text>
               <Text style={styles.memoText}>
-                {workoutRecords?.generalMemo || '메모가 없습니다.'}
+                {selectedRecord?.memo || '메모가 없습니다.'}
               </Text>
             </ScrollView>
-            <TouchableOpacity onPress={toggleModal} style={styles.closeButton}>
+            <TouchableOpacity onPress={() => toggleModal(null)} style={styles.closeButton}>
               <Text style={styles.closeButtonText}>닫기</Text>
             </TouchableOpacity>
           </View>

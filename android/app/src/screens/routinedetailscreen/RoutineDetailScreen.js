@@ -7,7 +7,7 @@ import Navbar from '../../components/navbar/Navbar';
 import CONFIG from '../../config';
 
 const RoutineDetailScreen = ({ route, navigation }) => {
-  const { routineName } = route.params; // routineName만 사용
+  const { routineName, selectedDate } = route.params; // routineName만 사용
   const [selectedWorkouts, setSelectedWorkouts] = useState([]);
   const [workouts, setWorkouts] = useState([]);
 
@@ -91,6 +91,7 @@ const RoutineDetailScreen = ({ route, navigation }) => {
     navigation.navigate('WorkoutEntry', {
       selectedWorkouts,
       routineName,
+      selectedDate,
     });
   };
 

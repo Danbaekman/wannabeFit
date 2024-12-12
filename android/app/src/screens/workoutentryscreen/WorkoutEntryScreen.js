@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -13,19 +13,26 @@ import Footer from '../../components/footer/Footer';
 import styles from './WorkoutEntryScreenStyles';
 import CONFIG from '../../config';
 
-const getCurrentTime = () => {
-  const date = new Date();
-  return `${date.getHours()}:${String(date.getMinutes()).padStart(2, '0')}`;
+// 현재 시간을 가져와 선택된 날짜를 기준으로 초기화하는 함수
+const getCurrentTimeWithSelectedDate = (selectedDate) => {
+  const now = new Date(); // 현재 시간
+  const date = new Date(selectedDate); // 선택된 날짜
+  date.setHours(now.getHours(), now.getMinutes(), 0, 0); // 현재 시간을 선택된 날짜로 설정
+  return date;
 };
 
-const formatDateTime = (hours, minutes) => {
-  const now = new Date();
-  now.setHours(parseInt(hours, 10), parseInt(minutes, 10), 0, 0);
-  return now.toISOString();
+// ISO 포맷으로 변환하는 함수
+const formatDateTime = (date, hours, minutes) => {
+  const selectedDate = new Date(date); // 선택된 날짜
+  selectedDate.setHours(parseInt(hours, 10), parseInt(minutes, 10), 0, 0); // 로컬 시간 설정
+  return selectedDate.toISOString(); // ISO 형식 반환
 };
 
 const WorkoutEntryScreen = ({ route, navigation }) => {
-  const { selectedWorkouts, routineName } = route.params;
+  const { selectedWorkouts, routineName, selectedDate } = route.params;
+
+  // 선택된 날짜와 현재 시간 기준으로 초기화된 시작 시간
+  const initialStartTime = getCurrentTimeWithSelectedDate(selectedDate);
 
   const [workoutData, setWorkoutData] = useState(
     selectedWorkouts.map((workout) => ({
@@ -36,16 +43,15 @@ const WorkoutEntryScreen = ({ route, navigation }) => {
     }))
   );
 
-  const [startTimeHours, setStartTimeHours] = useState(getCurrentTime().split(':')[0]);
-  const [startTimeMinutes, setStartTimeMinutes] = useState(getCurrentTime().split(':')[1]);
-  const [endTimeHours, setEndTimeHours] = useState('00');
+  const [startTimeHours, setStartTimeHours] = useState(
+    String(initialStartTime.getHours()).padStart(2, '0')
+  );
+  const [startTimeMinutes, setStartTimeMinutes] = useState(
+    String(initialStartTime.getMinutes()).padStart(2, '0')
+  );
+  const [endTimeHours, setEndTimeHours] = useState('00'); // 끝나는 시간은 항상 초기값 00
   const [endTimeMinutes, setEndTimeMinutes] = useState('00');
   const [generalMemo, setGeneralMemo] = useState('');
-
-  const getCurrentDate = () => {
-    const date = new Date();
-    return `${date.getMonth() + 1}월 ${date.getDate()}일`;
-  };
 
   const handleComplete = async () => {
     const muscles = [
@@ -70,8 +76,10 @@ const WorkoutEntryScreen = ({ route, navigation }) => {
         })),
     }));
 
-    const startTime = formatDateTime(startTimeHours, startTimeMinutes);
-    const endTime = formatDateTime(endTimeHours, endTimeMinutes);
+    const startTime = formatDateTime(selectedDate, startTimeHours, startTimeMinutes);
+    const endTime = formatDateTime(selectedDate, endTimeHours, endTimeMinutes);
+    console.log('Start Time:', startTime);
+    console.log('End Time:', endTime);
 
     const formattedData = {
       muscles,
@@ -80,8 +88,6 @@ const WorkoutEntryScreen = ({ route, navigation }) => {
       endTime,
       memo: generalMemo,
     };
-
-    console.log('Formatted Data:', JSON.stringify(formattedData, null, 2));
 
     try {
       const token = await AsyncStorage.getItem('jwtToken');
@@ -100,16 +106,14 @@ const WorkoutEntryScreen = ({ route, navigation }) => {
         body: JSON.stringify(formattedData),
       });
 
-      const responseJson = await response.json();
       if (response.ok) {
         Alert.alert('Success', '운동 세션이 저장되었습니다!');
-        navigation.navigate('WorkoutSummary', { exercises: workoutData, startTime, endTime, generalMemo });
+        navigation.navigate('WorkoutSetup', { selectedDate });
       } else {
-        console.error('Server Error:', responseJson);
+        const responseJson = await response.json();
         Alert.alert('Error', responseJson.message || '운동 기록 저장 실패');
       }
     } catch (error) {
-      console.error('Error saving workout session:', error);
       Alert.alert('Error', '운동 세션 저장 중 오류가 발생했습니다.');
     }
   };
@@ -191,7 +195,7 @@ const WorkoutEntryScreen = ({ route, navigation }) => {
       <Navbar />
       <ScrollView contentContainerStyle={styles.scrollContentContainer}>
         <View style={styles.headerRow}>
-          <Text style={styles.dateText}>{getCurrentDate()}</Text>
+          <Text style={styles.dateText}>{selectedDate}</Text>
           <TouchableOpacity style={styles.completeButton} onPress={handleComplete}>
             <Text style={styles.completeButtonText}>완료</Text>
           </TouchableOpacity>
