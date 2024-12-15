@@ -27,7 +27,7 @@ const styles = StyleSheet.create({
   routineSection: {
     backgroundColor: '#FFFFFF',
     borderRadius: 12,
-    padding: 20,
+    padding: 10,
     marginBottom: 20,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
@@ -96,7 +96,8 @@ const styles = StyleSheet.create({
   recordCard: {
     backgroundColor: '#E8F5F5',
     borderRadius: 8,
-    padding: 15,
+    padding: 5,
+    marginBottom: 20,
   },
   recordHeader: {
     flexDirection: 'row',
@@ -134,7 +135,8 @@ const styles = StyleSheet.create({
   },
   recordTime: {
     fontSize: 14,
-    color: '#555', 
+    color: '#555',
+    paddingLeft: 5, 
   },
   recordSets: {
     fontSize: 14,

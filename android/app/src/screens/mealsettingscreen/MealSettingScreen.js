@@ -4,12 +4,15 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useFocusEffect } from '@react-navigation/native';
 import styles from './MealSettingScreenStyles';
 import Navbar from '../../components/navbar/Navbar';
+import Footer from '../../components/footer/Footer';
+import DateDisplay from '../../components/datedisplay/DateDisplay';
+import ContentWrapper from '../../components/contentwrapper/ContentWrapper';
 import FoodDetailModal from '../../components/modal/FoodDetailModal';
 import CONFIG from '../../config';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const MealSettingScreen = ({ route = {}, navigation }) => {
-  const { mealType = '식단' } = route.params || {};  
+  const { mealType = '식단' } = route.params || {};
   const [foodList, setFoodList] = useState([]);
   const [searchText, setSearchText] = useState('');
   const [selectedFood, setSelectedFood] = useState(null);
@@ -29,7 +32,7 @@ const MealSettingScreen = ({ route = {}, navigation }) => {
       const response = await fetch(`${CONFIG.API_BASE_URL}/meal/meals?date=${date}&meal_type=${mealType}`, {
         method: 'GET',
         headers: {
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
         },
       });
 
@@ -66,7 +69,7 @@ const MealSettingScreen = ({ route = {}, navigation }) => {
         const response = await fetch(`${CONFIG.API_BASE_URL}/food/search?query=${text}`, {
           method: 'GET',
           headers: {
-            'Authorization': `Bearer ${token}`,
+            Authorization: `Bearer ${token}`,
           },
         });
 
@@ -103,7 +106,7 @@ const MealSettingScreen = ({ route = {}, navigation }) => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
           meal_type: mealType,
@@ -127,40 +130,14 @@ const MealSettingScreen = ({ route = {}, navigation }) => {
     }
   };
 
-  // Handle food removal from meal
-  const handleRemoveFood = async (mealId, foodId) => {
-    try {
-      const token = await AsyncStorage.getItem('jwtToken');
-      if (!token) {
-        Alert.alert('오류', '로그인이 필요합니다.');
-        return;
-      }
-
-      const response = await fetch(`${CONFIG.API_BASE_URL}/meal/${mealId}/food/${foodId}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-
-      if (response.ok) {
-        await fetchMeals(); // Refresh meal list
-      } else {
-        const errorText = await response.text();
-        console.error('음식 제거 실패:', response.status, errorText);
-      }
-    } catch (error) {
-      console.error('음식 제거 중 오류 발생:', error);
-    }
-  };
-
   const renderFoodItem = ({ item }) => (
-    <View style={styles.foodBox}>
-      <Text style={styles.foodName}>{item.food_name || "음식 이름 없음"}</Text>
-      <Text style={styles.foodCalories}>{item.calories || 0} Kcal</Text>
-    </View>
+    <TouchableOpacity onPress={() => handleFoodSelect(item)} style={styles.itemContainer}>
+      <View style={styles.itemContent}>
+        <Text style={styles.foodName}>{item.food_name}</Text>
+        <Text style={styles.foodCalories}>{item.calories} Kcal</Text>
+      </View>
+    </TouchableOpacity>
   );
-  
 
   const renderMealItem = ({ item }) => (
     <View style={styles.mealContainer}>
@@ -169,64 +146,68 @@ const MealSettingScreen = ({ route = {}, navigation }) => {
       {/* 각 음식 개별 박스 출력 */}
       <FlatList
         data={item.foods}
-        keyExtractor={(foodItem, index) => `${foodItem._id}-${index}`}  // `foods` 배열의 `_id` 사용
-        renderItem={renderFoodItem}
+        keyExtractor={(foodItem, index) => `${foodItem._id}-${index}`}
+        renderItem={({ item }) => (
+          <View style={styles.foodBox}>
+            <Text style={styles.foodName}>{item.food_name || '음식 이름 없음'}</Text>
+            <Text style={styles.foodCalories}>{item.calories || 0} Kcal</Text>
+          </View>
+        )}
         ListEmptyComponent={<Text>음식 목록이 없습니다.</Text>}
       />
     </View>
   );
 
   return (
-    <View style={{ flex: 1 }}>
+    <View style={styles.container}>
       <Navbar />
-      <View style={styles.container}>
-        <View style={styles.header}>
-          <Text>{mealType + ' 식단'}</Text>
-        </View>
+      <DateDisplay />
 
-        <View style={styles.searchContainer}>
-          <Ionicons name="search-outline" size={24} color="gray" />
-          <TextInput
-            style={styles.searchInput}
-            placeholder="음식 검색"
-            value={searchText}
-            onChangeText={handleSearch}
-          />
-        </View>
+      <ContentWrapper>
+  <View style={{ flex: 1 }}>
+    <View style={styles.searchContainer}>
+      <Ionicons name="search-outline" size={24} color="gray" />
+      <TextInput
+        style={styles.searchInput}
+        placeholder="음식명, 브랜드명으로 검색"
+        value={searchText}
+        onChangeText={handleSearch}
+      />
+    </View>
 
-        {/* Food search results */}
-        {foodList.length > 0 && (
-         <FlatList
-         data={foodList}
-         keyExtractor={item => item._id}
-         renderItem={({ item }) => (
-           <TouchableOpacity onPress={() => handleFoodSelect(item)} style={styles.itemContainer}>
-             <View style={styles.itemContent}>
-               <Text style={styles.foodName}>{item.food_name}</Text>
-               <Text style={styles.foodCalories}>{item.calories} Kcal</Text>
-             </View>
-           </TouchableOpacity>
-         )}
-         ListEmptyComponent={<Text>음식 목록이 없습니다.</Text>}
-       />
-        )}
+    {foodList.length > 0 ? (
+      <FlatList
+        data={foodList}
+        keyExtractor={(item) => item._id}
+        renderItem={renderFoodItem}
+        ListEmptyComponent={<Text>음식 목록이 없습니다.</Text>}
+      />
+    ) : (
+      <Text>검색 결과가 없습니다.</Text>
+    )}
 
-        {/* Added meals list */}
-        <FlatList
-          data={mealList}
-          keyExtractor={(item) => `${item._id}-${item.__v}`}
-          renderItem={renderMealItem}
-          ListEmptyComponent={<Text>식단 목록이 없습니다.</Text>}
-        />
+    {mealList.length > 0 ? (
+      <FlatList
+        data={mealList}
+        keyExtractor={(item) => `${item._id}-${item.__v}`}
+        renderItem={renderMealItem}
+        ListEmptyComponent={<Text>식단 목ㅇㅇ록이 없습니다.</Text>}
+      />
+    ) : (
+      <Text>식단 목록이 없습니다.</Text>
+    )}
+  </View>
+</ContentWrapper>
 
-        {/* Food detail modal */}
-        <FoodDetailModal
-          visible={modalVisible}
-          onClose={() => setModalVisible(false)}
-          food={selectedFood}
-          onAddFood={(food, grams) => handleAddFood(food, grams)}
-        />
-      </View>
+ {/* ContentWrapper 끝 */}
+
+      <FoodDetailModal
+        visible={modalVisible}
+        onClose={() => setModalVisible(false)}
+        food={selectedFood}
+        onAddFood={handleAddFood}
+      />
+      <Footer />
     </View>
   );
 };

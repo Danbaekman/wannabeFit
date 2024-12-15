@@ -66,6 +66,20 @@ const WorkoutSetupScreen = ({ navigation, route }) => {
       console.error('Fetch workout records error:', error);
     }
   };
+  const formatTotalTime = (totalTime) => {
+    if (!totalTime || totalTime <= 0) return '0분';
+  
+    const hours = Math.floor(totalTime / 60);
+    const minutes = totalTime % 60;
+  
+    if (hours > 0 && minutes > 0) {
+      return `${hours}시간 ${minutes}분`;
+    } else if (hours > 0) {
+      return `${hours}시간`;
+    } else {
+      return `${minutes}분`;
+    }
+  };  
 
   const checkDateIsFuture = () => {
     const today = new Date(); // 오늘 날짜
@@ -128,7 +142,7 @@ const WorkoutSetupScreen = ({ navigation, route }) => {
                     <View style={styles.timeAndSetsWrapper}>
                       <View style={styles.recordTimeWrapper}>
                         <Icon name="time-outline" size={16} color="#555" />
-                        <Text style={styles.recordTime}>{record.totalTime || '00:00'}</Text>
+                        <Text style={styles.recordTime}>{formatTotalTime(record.totalTime)}</Text>
                       </View>
                       <Text style={styles.recordSets}>
                         총 세트 수: {record.totalSets || 0}

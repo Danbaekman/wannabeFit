@@ -2,8 +2,7 @@ import { StyleSheet } from 'react-native';
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 16,
-    backgroundColor: 'white',
+    backgroundColor: '#008080',
   },
   header: {
     alignItems: 'center',
@@ -12,8 +11,8 @@ const styles = StyleSheet.create({
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#f0f0f0',
-    borderRadius: 5,
+    backgroundColor: '#90DADA',
+    borderRadius: 30,
     paddingHorizontal: 10,
     marginVertical: 5,
   },
