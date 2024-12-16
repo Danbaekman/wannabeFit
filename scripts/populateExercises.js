@@ -4,7 +4,7 @@ const Muscle = require('../models/Muscle'); // Muscle 모델 경로
 
 // MongoDB 연결
 mongoose.connect('mongodb://localhost:27017/wannabeFit')
-  .then(() => console.log('MongoDB connected'))
+  .then()
   .catch((error) => console.error('MongoDB connection error:', error));
 
 // 기본 운동 이름 데이터 (운동 이름과 해당 부위 정보)

@@ -340,14 +340,21 @@ router.get('/weekly', authenticateToken, async (req, res) => {
 
 router.get('/total-sets', authenticateToken, async (req, res) => {
   try {
-    const { id: userId } = req.user;
-    const { period = 'day', startDate, endDate } = req.query;
+    let { id: userId } = req.user;
+    let { period = 'day', startDate, endDate } = req.query; // startDate와 endDate를 let으로 선언
 
-    console.log('총 세트 수 요청:', { userId, period, startDate, endDate });
+    if (!startDate || !endDate) {
+      const defaultDates = await getDefaultDateRange(Inbody, { userId: new mongoose.Types.ObjectId(userId) }, 'date');
+      startDate = startDate || defaultDates.startDate;
+      endDate = endDate || defaultDates.endDate;
+    }
 
     const match = {
       user: new mongoose.Types.ObjectId(userId),
-      startTime: { $gte: new Date(startDate), $lte: new Date(endDate) },
+      startTime: { 
+        $gte: new Date(startDate), 
+        $lte: new Date(endDate)
+      },
       $expr: { $gte: ['$endTime', '$startTime'] },
     };
 
@@ -374,6 +381,7 @@ router.get('/total-sets', authenticateToken, async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+
 
 
 module.exports = router;
