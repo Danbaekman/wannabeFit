@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const foodSchema = new mongoose.Schema({
-  user_id: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }, // 사용자 ID
+  user_id: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null }, // 사용자 구분을 위한 user_id 추가
   food_name: { type: String, required: true }, // 음식 이름
   protein: { type: Number }, // 단백질 함량
   fat: { type: Number }, // 지방 함량
