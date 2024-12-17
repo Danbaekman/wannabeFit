@@ -129,6 +129,11 @@ const MealSettingScreen = ({ route = {}, navigation }) => {
       console.error('음식 추가 중 오류 발생:', error);
     }
   };
+  const handleClearSearch = () => {
+    setSearchText('');
+    setFoodList([]);
+  };
+  
 
   const renderFoodItem = ({ item }) => (
     <TouchableOpacity onPress={() => handleFoodSelect(item)} style={styles.itemContainer}>
@@ -160,56 +165,75 @@ const MealSettingScreen = ({ route = {}, navigation }) => {
 
   return (
     <View style={styles.container}>
+      {/* 상단 Navbar */}
       <Navbar />
+      {/* 날짜 표시 */}
       <DateDisplay />
-
+  
+      {/* 회색 컨텐츠 박스 */}
       <ContentWrapper>
-  <View style={{ flex: 1 }}>
-    <View style={styles.searchContainer}>
-      <Ionicons name="search-outline" size={24} color="gray" />
-      <TextInput
-        style={styles.searchInput}
-        placeholder="음식명, 브랜드명으로 검색"
-        value={searchText}
-        onChangeText={handleSearch}
-      />
-    </View>
-
-    {foodList.length > 0 ? (
-      <FlatList
-        data={foodList}
-        keyExtractor={(item) => item._id}
-        renderItem={renderFoodItem}
-        ListEmptyComponent={<Text>음식 목록이 없습니다.</Text>}
-      />
-    ) : (
-      <Text>검색 결과가 없습니다.</Text>
-    )}
-
-    {mealList.length > 0 ? (
-      <FlatList
-        data={mealList}
-        keyExtractor={(item) => `${item._id}-${item.__v}`}
-        renderItem={renderMealItem}
-        ListEmptyComponent={<Text>식단 목ㅇㅇ록이 없습니다.</Text>}
-      />
-    ) : (
-      <Text>식단 목록이 없습니다.</Text>
-    )}
-  </View>
-</ContentWrapper>
-
- {/* ContentWrapper 끝 */}
-
+        {/* 검색창과 취소 버튼 */}
+        <View style={styles.searchContainer}>
+          <Ionicons name="search-outline" size={24} color="gray" />
+          <TextInput
+            style={styles.searchInput}
+            placeholder="음식명, 브랜드명으로 검색"
+            value={searchText}
+            onChangeText={handleSearch}
+          />
+          <TouchableOpacity onPress={handleClearSearch}>
+            <Text style={styles.cancelText}>취소</Text>
+          </TouchableOpacity>
+        </View>
+  
+        {/* 검색 결과 - 덮어씌우는 형태 */}
+        {foodList.length > 0 && (
+          <View style={styles.searchResultsContainer}>
+            <FlatList
+              data={foodList}
+              keyExtractor={(item) => item._id}
+              renderItem={renderFoodItem}
+              ItemSeparatorComponent={() => <View style={styles.itemSeparator} />}
+              ListEmptyComponent={
+                <Text style={styles.noResultsText}>검색된 음식이 없습니다.</Text>
+              }
+            />
+          </View>
+        )}
+  
+        {/* 식단 제목과 목록 */}
+        <View style={styles.header}>
+          <Text style={styles.mealTitle}>{mealType} 식단</Text>
+        </View>
+        <View style={styles.whiteBox}>
+          <Text style={styles.subtitle}>추가된 음식 목록</Text>
+          {mealList.length > 0 ? (
+            <FlatList
+              data={mealList}
+              keyExtractor={(item) => `${item._id}-${item.__v}`}
+              renderItem={renderMealItem}
+              ListEmptyComponent={
+                <Text style={styles.noResultsText}>식단이 비어 있습니다.</Text>
+              }
+            />
+          ) : (
+            <Text style={styles.noResultsText}>식단이 비어 있습니다.</Text>
+          )}
+        </View>
+      </ContentWrapper>
+  
+      {/* Food Detail Modal */}
       <FoodDetailModal
         visible={modalVisible}
         onClose={() => setModalVisible(false)}
         food={selectedFood}
-        onAddFood={handleAddFood}
       />
+  
+      {/* 하단 Footer */}
       <Footer />
     </View>
-  );
+  );  
+  
 };
 
 export default MealSettingScreen;
