@@ -12,15 +12,24 @@ import CONFIG from '../../config';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const MealSettingScreen = ({ route = {}, navigation }) => {
-  const { mealType = '식단' } = route.params || {};
+  const { mealType = '식단', selectedDate } = route.params || {};
   const [foodList, setFoodList] = useState([]);
   const [searchText, setSearchText] = useState('');
   const [selectedFood, setSelectedFood] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
   const [mealList, setMealList] = useState([]);
+  const [selectedTab, setSelectedTab] = useState('recent'); // 'recent' or 'favorites'
+
+  const mealTypeMap = {
+    '아침': 'breakfast',
+    '점심': 'lunch',
+    '저녁': 'dinner',
+    '간식': 'snack',
+  };
 
   // Fetch meals for the current date and meal type
   const fetchMeals = async () => {
+    console.log('FetchMeals 실행 - 선택된 날짜:', selectedDate, 'mealType:', mealType);
     try {
       const token = await AsyncStorage.getItem('jwtToken');
       if (!token) {
@@ -28,16 +37,19 @@ const MealSettingScreen = ({ route = {}, navigation }) => {
         return;
       }
 
-      const date = new Date().toISOString().split("T")[0];
-      const response = await fetch(`${CONFIG.API_BASE_URL}/meal/meals?date=${date}&meal_type=${mealType}`, {
-        method: 'GET',
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await fetch(
+        `${CONFIG.API_BASE_URL}/meal/meals?date=${selectedDate}&meal_type=${mealTypeMap[mealType]}`,
+        {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
       if (response.ok) {
         const data = await response.json();
+        console.log('서버에서 반환된 식단 데이터:', data);
         setMealList(data);
       } else {
         const errorText = await response.text();
@@ -52,7 +64,7 @@ const MealSettingScreen = ({ route = {}, navigation }) => {
   useFocusEffect(
     useCallback(() => {
       fetchMeals();
-    }, [])
+    }, [selectedDate, mealType])
   );
 
   // Handle food search
@@ -96,6 +108,13 @@ const MealSettingScreen = ({ route = {}, navigation }) => {
   // Handle adding food to meal
   const handleAddFood = async (food, grams) => {
     try {
+      console.log('음식 추가 요청:', {
+        meal_type: mealTypeMap[mealType],
+        food_ids: [food._id],
+        grams: [grams],
+        created_at: selectedDate,
+      });
+
       const token = await AsyncStorage.getItem('jwtToken');
       if (!token) {
         Alert.alert('오류', '로그인이 필요합니다.');
@@ -109,15 +128,16 @@ const MealSettingScreen = ({ route = {}, navigation }) => {
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          meal_type: mealType,
+          meal_type: mealTypeMap[mealType],
           food_ids: [food._id],
           grams: [grams],
-          created_at: new Date().toISOString(),
+          created_at: selectedDate,
         }),
       });
 
       if (response.ok) {
-        await fetchMeals(); // Refresh meal list
+        console.log('음식이 성공적으로 추가되었습니다.');
+        await fetchMeals();
         setModalVisible(false);
         setSearchText('');
         setFoodList([]);
@@ -129,26 +149,25 @@ const MealSettingScreen = ({ route = {}, navigation }) => {
       console.error('음식 추가 중 오류 발생:', error);
     }
   };
+
   const handleClearSearch = () => {
     setSearchText('');
     setFoodList([]);
   };
-  
 
   const renderFoodItem = ({ item }) => (
-    <TouchableOpacity onPress={() => handleFoodSelect(item)} style={styles.itemContainer}>
-      <View style={styles.itemContent}>
+    <TouchableOpacity onPress={() => handleFoodSelect(item)} style={styles.whiteBox}>
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
         <Text style={styles.foodName}>{item.food_name}</Text>
         <Text style={styles.foodCalories}>{item.calories} Kcal</Text>
       </View>
     </TouchableOpacity>
   );
-
+  
   const renderMealItem = ({ item }) => (
     <View style={styles.mealContainer}>
       <Text style={styles.mealType}>{item.meal_type} 식단</Text>
       <Text style={styles.totalCalories}>총 칼로리: {item.total_calories} Kcal</Text>
-      {/* 각 음식 개별 박스 출력 */}
       <FlatList
         data={item.foods}
         keyExtractor={(foodItem, index) => `${foodItem._id}-${index}`}
@@ -158,81 +177,88 @@ const MealSettingScreen = ({ route = {}, navigation }) => {
             <Text style={styles.foodCalories}>{item.calories || 0} Kcal</Text>
           </View>
         )}
-        ListEmptyComponent={<Text>음식 목록이 없습니다.</Text>}
       />
     </View>
   );
-
+  
   return (
     <View style={styles.container}>
-      {/* 상단 Navbar */}
       <Navbar />
-      {/* 날짜 표시 */}
       <DateDisplay />
-  
-      {/* 회색 컨텐츠 박스 */}
       <ContentWrapper>
-        {/* 검색창과 취소 버튼 */}
-        <View style={styles.searchContainer}>
-          <Ionicons name="search-outline" size={24} color="gray" />
-          <TextInput
-            style={styles.searchInput}
-            placeholder="음식명, 브랜드명으로 검색"
-            value={searchText}
-            onChangeText={handleSearch}
-          />
+        <View style={styles.searchWrapper}>
+          <View style={styles.searchContainer}>
+            <Ionicons name="search-outline" size={24} color="gray" />
+            <TextInput
+              style={styles.searchInput}
+              placeholder="음식명, 브랜드명으로 검색"
+              value={searchText}
+              onChangeText={handleSearch}
+            />
+          </View>
           <TouchableOpacity onPress={handleClearSearch}>
             <Text style={styles.cancelText}>취소</Text>
           </TouchableOpacity>
         </View>
   
-        {/* 검색 결과 - 덮어씌우는 형태 */}
         {foodList.length > 0 && (
-          <View style={styles.searchResultsContainer}>
-            <FlatList
-              data={foodList}
-              keyExtractor={(item) => item._id}
-              renderItem={renderFoodItem}
-              ItemSeparatorComponent={() => <View style={styles.itemSeparator} />}
-              ListEmptyComponent={
-                <Text style={styles.noResultsText}>검색된 음식이 없습니다.</Text>
-              }
-            />
-          </View>
+          <FlatList
+            data={foodList}
+            keyExtractor={(item) => item._id}
+            renderItem={renderFoodItem}
+          />
         )}
   
-        {/* 식단 제목과 목록 */}
-        <View style={styles.header}>
-          <Text style={styles.mealTitle}>{mealType} 식단</Text>
+        <View style={styles.tabContainer}>
+          <TouchableOpacity
+            onPress={() => setSelectedTab('recent')}
+            style={[
+              styles.tabButton,
+              selectedTab === 'recent' && { borderBottomWidth: 2, borderBottomColor: '#008080' },
+            ]}
+          >
+            <Text
+              style={[
+                styles.tabText,
+                selectedTab === 'recent' && styles.activeTabText,
+              ]}
+            >
+              최근 기록
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => setSelectedTab('favorites')}
+            style={[
+              styles.tabButton,
+              selectedTab === 'favorites' && { borderBottomWidth: 2, borderBottomColor: '#008080' },
+            ]}
+          >
+            <Text
+              style={[
+                styles.tabText,
+                selectedTab === 'favorites' && styles.activeTabText,
+              ]}
+            >
+              즐겨찾기
+            </Text>
+          </TouchableOpacity>
         </View>
-        <View style={styles.whiteBox}>
-          <Text style={styles.subtitle}>추가된 음식 목록</Text>
-          {mealList.length > 0 ? (
-            <FlatList
-              data={mealList}
-              keyExtractor={(item) => `${item._id}-${item.__v}`}
-              renderItem={renderMealItem}
-              ListEmptyComponent={
-                <Text style={styles.noResultsText}>식단이 비어 있습니다.</Text>
-              }
-            />
-          ) : (
-            <Text style={styles.noResultsText}>식단이 비어 있습니다.</Text>
-          )}
-        </View>
-      </ContentWrapper>
   
-      {/* Food Detail Modal */}
+        <FlatList
+          data={mealList}
+          keyExtractor={(item) => `${item._id}-${item.__v}`}
+          renderItem={renderMealItem}
+        />
+      </ContentWrapper>
       <FoodDetailModal
         visible={modalVisible}
         onClose={() => setModalVisible(false)}
         food={selectedFood}
+        onAddFood={handleAddFood}
       />
-  
-      {/* 하단 Footer */}
       <Footer />
     </View>
-  );  
+  );
   
 };
 

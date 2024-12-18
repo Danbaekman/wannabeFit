@@ -5,13 +5,21 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#008080',
   },
+  searchWrapper: {
+    flexDirection: 'row', // 가로 배치
+    alignItems: 'center',
+    justifyContent: 'space-between', // 좌우로 분리
+    marginVertical: 5,
+    marginHorizontal: 10,
+  },
   searchContainer: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: 'rgba(0, 128, 128, 0.1)',
     borderRadius: 30,
     paddingHorizontal: 10,
-    marginVertical: 5,
+    height: 40, // 검색창 세로 크기 축소
   },
   searchInput: {
     flex: 1,
@@ -20,19 +28,30 @@ const styles = StyleSheet.create({
   },
   cancelText: {
     fontSize: 16,
-    color: '#007AFF',
+    color: 'rgba(0, 128, 128, 0.6)',
     marginLeft: 10,
   },
   header: {
-    alignItems: 'center',
+    alignItems: 'flex-start',
     marginTop: 10,
   },
   mealTitle: {
     fontSize: 24,
     fontWeight: 'bold',
     color: '#008080',
-    marginBottom: 10,
+    marginBottom: 5,
   },
+  tabContainer: { 
+    flexDirection: 'row',
+    marginTop: 10
+  },
+  registerButton: { marginTop: 10, alignSelf: 'flex-center', marginHorizontal: 10 },
+  registerButtonText: { color: '#008080', fontSize: 16, fontWeight: 'bold' },
+  tabButton: { flex: 1, alignItems: 'center' },
+  tabText: { fontSize: 16, color: '#555' },
+  activeTabText: { color: '#008080', fontWeight: 'bold' },
+  activeTabLine: { width: '100%', height: 2, backgroundColor: '#008080', marginTop: 5 },
+
   whiteBox: {
     backgroundColor: '#fff',
     borderRadius: 10,

@@ -136,7 +136,7 @@ const MainScreen = ({ navigation }) => {
                 <TouchableOpacity
                   key={index}
                   style={styles.gridItem}
-                  onPress={() => navigation.navigate('MealSetting', { mealType: meal })}
+                  onPress={() => navigation.navigate('MealSetting', { mealType: meal, selectedDate })}
                 >
                   <Ionicons name="add-outline" size={30} color="#008080" />
                   <Text style={styles.gridItemText}>{meal}</Text>
