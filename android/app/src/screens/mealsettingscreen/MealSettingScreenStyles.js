@@ -40,10 +40,11 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#008080',
     marginBottom: 5,
+    marginTop:10,
   },
   tabContainer: { 
     flexDirection: 'row',
-    marginTop: 10
+    marginTop: 10,
   },
   registerButton: { marginTop: 10, alignSelf: 'flex-center', marginHorizontal: 10 },
   registerButtonText: { color: '#008080', fontSize: 16, fontWeight: 'bold' },

@@ -19,6 +19,8 @@ const MealSettingScreen = ({ route = {}, navigation }) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [mealList, setMealList] = useState([]);
   const [selectedTab, setSelectedTab] = useState('recent'); // 'recent' or 'favorites'
+  console.log('mealType:', mealType);
+
 
   const mealTypeMap = {
     '아침': 'breakfast',
@@ -156,35 +158,51 @@ const MealSettingScreen = ({ route = {}, navigation }) => {
   };
 
   const renderFoodItem = ({ item }) => (
-    <TouchableOpacity onPress={() => handleFoodSelect(item)} style={styles.whiteBox}>
-      <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-        <Text style={styles.foodName}>{item.food_name}</Text>
-        <Text style={styles.foodCalories}>{item.calories} Kcal</Text>
-      </View>
+    <TouchableOpacity style={styles.foodBox} onPress={() => handleFoodSelect(item)}>
+      <Text style={styles.foodName}>{item.food_name}</Text>
+      <Text style={styles.foodCalories}>{item.calories} Kcal</Text>
     </TouchableOpacity>
   );
   
+
+  const renderTabButton = (label, tabName) => (
+    <TouchableOpacity onPress={() => setSelectedTab(tabName)} style={styles.tabButton}>
+      <Text style={[styles.tabText, selectedTab === tabName && styles.activeTabText]}>{label}</Text>
+      {selectedTab === tabName && <View style={styles.activeTabLine} />}
+    </TouchableOpacity>
+  );
+  
+  
   const renderMealItem = ({ item }) => (
     <View style={styles.mealContainer}>
-      <Text style={styles.mealType}>{item.meal_type} 식단</Text>
-      <Text style={styles.totalCalories}>총 칼로리: {item.total_calories} Kcal</Text>
-      <FlatList
-        data={item.foods}
-        keyExtractor={(foodItem, index) => `${foodItem._id}-${index}`}
-        renderItem={({ item }) => (
-          <View style={styles.foodBox}>
-            <Text style={styles.foodName}>{item.food_name || '음식 이름 없음'}</Text>
-            <Text style={styles.foodCalories}>{item.calories || 0} Kcal</Text>
-          </View>
-        )}
-      />
+      {/* whiteBox 내부 식단 데이터 */}
+      <View style={styles.whiteBox}>
+        <Text style={styles.totalCalories}>총 칼로리: {item.total_calories} Kcal</Text>
+        <FlatList
+          data={item.foods}
+          keyExtractor={(foodItem, index) => `${foodItem._id}-${index}`}
+          renderItem={({ item }) => (
+            <View style={styles.foodBox}>
+              <Text style={styles.foodName}>{item.food_name || '음식 이름 없음'}</Text>
+              <Text style={styles.foodCalories}>{item.calories || 0} Kcal</Text>
+            </View>
+          )}
+        />
+      </View>
     </View>
   );
+  // 동적으로 식단 제목을 반환하는 함수
+  // mealType 값을 한글 제목으로 변환하는 함수
+  const getMealTitle = () => {
+    // mealType이 한글로 전달된 경우에만 매칭
+    const title = mealTypeMap[mealType] ? mealType : '알 수 없는';
+    return `${title} 식단`;
+  };
   
   return (
     <View style={styles.container}>
       <Navbar />
-      <DateDisplay />
+      <DateDisplay date={selectedDate} />
       <ContentWrapper>
         <View style={styles.searchWrapper}>
           <View style={styles.searchContainer}>
@@ -201,54 +219,38 @@ const MealSettingScreen = ({ route = {}, navigation }) => {
           </TouchableOpacity>
         </View>
   
+        {/* 검색 결과 */}
         {foodList.length > 0 && (
-          <FlatList
-            data={foodList}
-            keyExtractor={(item) => item._id}
-            renderItem={renderFoodItem}
-          />
+          <View style={styles.searchResultsContainer}>
+            <FlatList
+              data={foodList}
+              keyExtractor={(item) => item._id}
+              renderItem={renderFoodItem}
+              ItemSeparatorComponent={() => <View style={styles.itemSeparator} />}
+            />
+          </View>
         )}
+
   
-        <View style={styles.tabContainer}>
-          <TouchableOpacity
-            onPress={() => setSelectedTab('recent')}
-            style={[
-              styles.tabButton,
-              selectedTab === 'recent' && { borderBottomWidth: 2, borderBottomColor: '#008080' },
-            ]}
-          >
-            <Text
-              style={[
-                styles.tabText,
-                selectedTab === 'recent' && styles.activeTabText,
-              ]}
-            >
-              최근 기록
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() => setSelectedTab('favorites')}
-            style={[
-              styles.tabButton,
-              selectedTab === 'favorites' && { borderBottomWidth: 2, borderBottomColor: '#008080' },
-            ]}
-          >
-            <Text
-              style={[
-                styles.tabText,
-                selectedTab === 'favorites' && styles.activeTabText,
-              ]}
-            >
-              즐겨찾기
-            </Text>
-          </TouchableOpacity>
+       {/* 탭 메뉴 */}
+       <View style={styles.tabContainer}>
+          {renderTabButton('최근 기록', 'recent')}
+          {renderTabButton('즐겨찾기', 'favorites')}
         </View>
-  
-        <FlatList
-          data={mealList}
-          keyExtractor={(item) => `${item._id}-${item.__v}`}
-          renderItem={renderMealItem}
-        />
+        <Text style={styles.mealTitle}>{getMealTitle()}</Text>
+        {/* 탭에 따라 데이터 표시 */}
+        <View style={styles.whiteBox}>
+          <Text style={styles.subtitle}>{selectedTab === 'recent' ? '최근 기록' : '즐겨찾기 음식'}</Text>
+          {mealList.length > 0 ? (
+            <FlatList
+            data={mealList}
+            keyExtractor={(item) => `${item._id}-${item.__v}`}
+            renderItem={renderMealItem}
+          />
+          ) : (
+            <Text style={styles.noResultsText}>등록된 음식이 없습니다.</Text>
+          )}
+        </View>
       </ContentWrapper>
       <FoodDetailModal
         visible={modalVisible}
