@@ -9,8 +9,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row', // 가로 배치
     alignItems: 'center',
     justifyContent: 'space-between', // 좌우로 분리
-    marginVertical: 5,
-    marginHorizontal: 10,
   },
   searchContainer: {
     flex: 1,
@@ -91,6 +89,42 @@ const styles = StyleSheet.create({
     height: 1, // 선의 높이
     backgroundColor: '#CCCCCC', // 회색
     marginVertical: 5, // 위아래 간격
+  },
+  directInputButton: {
+    backgroundColor: '#008080', // 회색 배경색
+    paddingVertical: 10, // 세로 여백
+    borderRadius: 10, // 둥근 모서리
+    marginVertical: 5, // 위아래 여백
+    alignSelf: 'stretch', // 버튼을 부모의 가로 크기에 맞춤
+    borderWidth: 2, // 테두리 두께
+    borderColor: 'rgba(0, 128, 128, 0.1)', // 검색창 배경색과 동일한 테두리 색상
+  },
+  directInputText: {
+    color: '#fff', // 글자색
+    fontSize: 16, // 글자 크기
+    textAlign: 'center', // 중앙 정렬
+    fontWeight: 'bold', // 글자 굵기
+  },
+  foodRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e0e0e0', // 밑줄
+  },
+  foodName: {
+    fontSize: 16,
+    color: '#000', // 검정색
+  },
+  foodCalories: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#555', // 회색
+  },
+  editIcon: {
+    marginLeft: 10,
   },
   
 });
