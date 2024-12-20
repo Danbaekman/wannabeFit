@@ -20,6 +20,8 @@ const MealSettingScreen = ({ route = {}, navigation }) => {
   const [mealList, setMealList] = useState([]);
   const [selectedTab, setSelectedTab] = useState('recent');
   const [favoritesList, setFavoritesList] = useState([]);
+  const [isEditMode, setIsEditMode] = useState(false); // 편집 모드
+
 
   useEffect(() => {
     const fetchFavorites = async () => {
@@ -78,6 +80,7 @@ const MealSettingScreen = ({ route = {}, navigation }) => {
     }, [selectedDate, mealType])
   );
 
+  
   const handleSearch = async (text) => {
     setSearchText(text);
     if (text.length > 0) {
@@ -178,38 +181,123 @@ const MealSettingScreen = ({ route = {}, navigation }) => {
     </TouchableOpacity>
   );
 
-  const renderMealItem = ({ item }) => (
-    <View style={styles.mealContainer}>
-      {item.foods ? (
+  const renderMealItem = ({ item }) => {
+    return selectedTab === 'favorites' ? (
+      // Favorites Tab: 개별 음식 렌더링
+      <View style={styles.foodRow}>
+        <Text style={styles.foodName}>{item.food_name || 'Unknown Food'}</Text>
+        <Text style={styles.foodCalories}>{item.calories || 0} Kcal</Text>
+  
+        {/* 편집 모드 활성화 시 편집/삭제 버튼 표시 */}
+        {isEditMode && (
+          <View style={styles.editControls}>
+            <TouchableOpacity
+              onPress={() => handleEditFavorite(item)}
+              style={styles.editButton}
+            >
+              <Ionicons name="pencil" size={20} color="gray" />
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => handleDeleteFavorite(item._id)} // Favorites 삭제
+              style={styles.deleteButton}
+            >
+              <Ionicons name="close-circle" size={20} color="red" />
+            </TouchableOpacity>
+          </View>
+        )}
+      </View>
+    ) : (
+      // Recent Tab: mealList 렌더링
+      <View style={styles.mealContainer}>
+        <Text style={styles.mealType}>
+          {mealTypeMap[item.meal_type] || 'Meal'} ({item.total_calories} Kcal)
+        </Text>
+  
         <FlatList
-          data={item.foods}
+          data={item.foods} // foods 배열 렌더링
           keyExtractor={(foodItem, index) => `${foodItem._id}-${index}`}
-          renderItem={({ item }) => (
+          renderItem={({ item: foodItem }) => (
             <View style={styles.foodRow}>
-              <Text style={styles.foodName}>{item.food_name || 'Unknown Food'}</Text>
-              <Text style={styles.foodCalories}>{item.calories || 0} Kcal</Text>
-              
-              {/* 편집 버튼 추가 */}
-              <TouchableOpacity onPress={() => handleEditFavorite(item)} style={styles.editButton}>
-                <Ionicons name="pencil" size={20} color="gray" />
-              </TouchableOpacity>
+              <Text style={styles.foodName}>{foodItem.food_name || 'Unknown Food'}</Text>
+              <Text style={styles.foodCalories}>{foodItem.calories || 0} Kcal</Text>
+  
+              {isEditMode && (
+                <View style={styles.editControls}>
+                  <TouchableOpacity
+                    onPress={() => handleEditFavorite(foodItem)}
+                    style={styles.editButton}
+                  >
+                    <Ionicons name="pencil" size={20} color="gray" />
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={() => handleDeleteMealItem(item._id, foodItem._id)} // mealId와 foodId 전달
+                    style={styles.deleteButton}
+                  >
+                    <Ionicons name="close-circle" size={20} color="red" />
+                  </TouchableOpacity>
+                </View>
+              )}
             </View>
           )}
         />
-      ) : (
-        <View style={styles.foodRow}>
-          <Text style={styles.foodName}>{item.food_name || 'Unknown Food'}</Text>
-          <Text style={styles.foodCalories}>{item.calories || 0} Kcal</Text>
-          
-          {/* 편집 버튼 추가 */}
-          <TouchableOpacity onPress={() => handleEditFavorite(item)} style={styles.editButton}>
-            <Ionicons name="pencil" size={20} color="gray" />
-          </TouchableOpacity>
-        </View>
-      )}
-    </View>
-  );
+      </View>
+    );
+  };
   
+  
+  
+  const renderEditButton = () => (
+    <TouchableOpacity onPress={() => setIsEditMode(!isEditMode)} style={styles.editModeButton}>
+      <Text style={styles.editButtonText}>편집모드</Text>
+    </TouchableOpacity>
+  );
+
+  // 삭제 처리 함수 
+  const handleDeleteMealItem = async (mealId, foodId) => {
+    const url = `${CONFIG.API_BASE_URL}/meal/${mealId}/food/${foodId}`;
+    console.log('DELETE URL:', url); // URL 확인
+    console.log('Deleting Meal:', mealId);
+    console.log('Deleting Food:', foodId);
+  
+    try {
+      const token = await AsyncStorage.getItem('jwtToken');
+      if (!token) {
+        Alert.alert('Error', 'You must be logged in.');
+        return;
+      }
+  
+      // 서버와 동일한 형식으로 foodId를 전달
+      const normalizedFoodId = foodId.toString(); // 문자열로 변환
+  
+      const response = await fetch(`${CONFIG.API_BASE_URL}/meal/${mealId}/food/${foodId}`, {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+  
+      if (response.ok) {
+        await fetchMeals(); // 삭제 후 목록 갱신
+        Alert.alert('Success', 'Food item removed successfully.');
+      } else {
+        const errorText = await response.text();
+        console.error('Failed to delete food:', response.status, errorText);
+        Alert.alert('Error', `Failed to delete food: ${errorText}`);
+      }
+    } catch (error) {
+      console.error('Error deleting food:', error);
+      Alert.alert('Error', 'An unexpected error occurred while deleting food.');
+    }
+  };
+  
+  
+
+// 즐겨찾기 삭제 처리 함수 (로컬)
+const handleDeleteFavorite = (foodId) => {
+  const updatedFavorites = favoritesList.filter((item) => item._id !== foodId);
+  setFavoritesList(updatedFavorites);
+  AsyncStorage.setItem('favorites', JSON.stringify(updatedFavorites));
+};
 
   const getMealTitle = () => {
     const title = mealTypeMap[mealType] ? mealType : 'Unknown';
@@ -254,7 +342,8 @@ const MealSettingScreen = ({ route = {}, navigation }) => {
           <View style={styles.searchResultsContainer}>
             <FlatList
               data={foodList}
-              keyExtractor={(item) => item._id}
+              extraData={isEditMode}
+              keyExtractor={(foodItem, index) => `${foodItem._id || index}`}
               renderItem={renderFoodItem}
             />
           </View>
@@ -270,6 +359,7 @@ const MealSettingScreen = ({ route = {}, navigation }) => {
         </View>
 
         <Text style={styles.mealTitle}>{getMealTitle()}</Text>
+        {renderEditButton()}
 
         <View style={styles.whiteBox}>
           <FlatList

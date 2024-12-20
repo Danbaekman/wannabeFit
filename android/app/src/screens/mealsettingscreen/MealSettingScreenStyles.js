@@ -127,6 +127,28 @@ const styles = StyleSheet.create({
     marginLeft: 10,
   },
   
+
+  editModeButton: {
+    marginLeft: 'auto',
+    padding: 5,
+    borderRadius: 5,
+    backgroundColor: '#008080',
+  },
+  editButtonText: {
+    color: '#fff'
+  },
+  editControls: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+  },
+  editButton: {
+    marginRight: 10,
+  },
+  deleteButton: {
+    marginLeft: 10,
+  },
+  
 });
 
 export default styles;
