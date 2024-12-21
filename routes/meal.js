@@ -3,7 +3,7 @@ const router = express.Router();
 const Meal = require('../models/Meal');
 const Food = require('../models/Food');
 const authenticateToken = require('../middleware/authenticateToken');
-
+const mongoose = require('mongoose');
 
 // Create a new meal or use existing one
 router.post('/meal', authenticateToken, async (req, res) => {
@@ -187,37 +187,37 @@ function calculateTotals(foods) {
 }
 
 // Delete a food from a meal
-router.delete('/meal/:mealId/food/:foodId', authenticateToken, async (req, res) => {
+router.delete('/:mealId/food/:foodId', authenticateToken, async (req, res) => {
+  console.log('DELETE route reached with params:', req.params);
+
   const { mealId, foodId } = req.params;
 
   try {
     const meal = await Meal.findById(mealId);
-
     if (!meal) {
+      console.log('Meal not found:', mealId);
       return res.status(404).json({ error: 'Meal not found' });
     }
+    console.log('Meal found:', meal);
+    const foodIndex = meal.foods.findIndex((food) => food.equals(new mongoose.Types.ObjectId(foodId)));
 
-    const foodIndex = meal.foods.indexOf(foodId);
     if (foodIndex === -1) {
+      console.log('Food not found in meal:', foodId);
       return res.status(404).json({ error: 'Food not found in the meal' });
     }
 
-    // Remove the food and its corresponding grams
+    console.log('Removing food at index:', foodIndex);
     meal.foods.splice(foodIndex, 1);
     meal.grams.splice(foodIndex, 1);
 
-    // Recalculate totals for remaining foods
-    const remainingFoods = await Food.find({ '_id': { $in: meal.foods } });
-    const totals = calculateTotals(remainingFoods);
-
-    // Update the meal's totals
-    Object.assign(meal, totals);
-    
     await meal.save();
-    res.status(200).json({ message: 'Food removed successfully.', meal });
+    console.log('Meal updated successfully');
+    return res.status(200).json({ message: 'Food removed successfully', meal });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('Error during DELETE request:', error);
+    return res.status(500).json({ error: error.message });
   }
 });
+
 
 module.exports = router;

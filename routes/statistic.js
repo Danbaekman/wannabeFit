@@ -1,10 +1,11 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const router = express.Router();
-
+const moment = require('moment');
 const WorkoutLog = require('../models/WorkoutLog');
 const Meal = require('../models/Meal');
 const Inbody = require('../models/Inbody');
+const User = require('../models/User');
 const authenticateToken = require('../middleware/authenticateToken');
 
 // **현재까지 운동한 총 시간 및 일 단위 반환**
@@ -57,7 +58,266 @@ router.get('/workout/total', authenticateToken, async (req, res) => {
   }
 });
 
+// 총 칼로리 섭취량 API
+router.get('/calories/total', authenticateToken, async (req, res) => {
+  const { period = 'week' } = req.query; // 기간(e.g., day, week, month)을 쿼리로 받음
+  console.log('Requested period for total calories:', period);
+  const { startDate, endDate } = await getDateRange(period); // 비동기 호출로 시작일과 종료일을 기본 값으로 설정
+  console.log('Calculated date range:', { startDate, endDate });
 
+  try {
+        // Meal 컬렉션에서 사용자 ID와 기간에 해당하는 데이터 집계
+        const totalCalories = await Meal.aggregate([
+          {
+              $match: {
+                  user_id: new mongoose.Types.ObjectId(req.user.id), // user_id로 필터링
+                  created_at: { $gte: new Date(startDate), $lte: new Date(endDate) } // 날짜 범위 필터링
+              }
+          },
+          {
+              $group: {
+                  _id: null,
+                  totalCalories: { $sum: "$total_calories" } // 총 칼로리 합산
+              }
+          }
+      ]);
+      
+     
+      console.log('Total calories calculated:', totalCalories);
+
+      // 응답으로 총 칼로리 반환
+      res.json({
+          totalCalories: totalCalories.length ? totalCalories[0].totalCalories : 0 // 데이터가 있을 경우 총 칼로리 반환, 없으면 0
+      });
+  } catch (error) {
+      console.error('Error in total calories API:', error.message);
+      res.status(500).json({ error: error.message }); // 오류 발생 시 오류 메시지 반환
+  }
+});
+
+// 영양소 분포 API
+router.get('/nutrition/distribution', authenticateToken, async (req, res) => {
+  const { period } = req.query; // 기간을 쿼리로 받음
+  console.log('Requested period for nutrition distribution:', period);
+
+  try {
+      const { startDate, endDate } = await getDateRange(period); // 비동기 호출로 기간에 맞는 시작일과 종료일 계산
+      console.log('Calculated date range:', { startDate, endDate });
+
+      // Meal 컬렉션에서 기간에 해당하는 데이터 집계
+      const nutrientData = await Meal.aggregate([
+          {
+              $match: {
+                  user_id: new mongoose.Types.ObjectId(req.user.id), // 사용자의 ID로 필터링
+                  created_at: { $gte: new Date(startDate), $lte: new Date(endDate) } // 기간 필터링
+              }
+          },
+          {
+              $group: {
+                  _id: null,
+                  totalProtein: { $sum: "$total_protein" }, // 단백질 합산
+                  totalFat: { $sum: "$total_fat" }, // 지방 합산
+                  totalCarbs: { $sum: "$total_carbohydrates" } // 탄수화물 합산
+              }
+          }
+      ]);
+
+      console.log('Nutrient distribution data:', nutrientData);
+
+      if (nutrientData.length) {
+          const { totalProtein, totalFat, totalCarbs } = nutrientData[0];
+          const total = totalProtein + totalFat + totalCarbs; // 총 영양소 합산
+
+          // 비율 계산 및 응답
+          res.json({
+              protein: total ? ((totalProtein / total) * 100).toFixed(2) + '%' : '0%',
+              fat: total ? ((totalFat / total) * 100).toFixed(2) + '%' : '0%',
+              carbs: total ? ((totalCarbs / total) * 100).toFixed(2) + '%' : '0%'
+          });
+      } else {
+          // 데이터가 없으면 0% 반환
+          res.json({ protein: '0%', fat: '0%', carbs: '0%' });
+      }
+  } catch (error) {
+      console.error('Error in nutrition distribution API:', error.message);
+      res.status(500).json({ error: error.message }); // 오류 발생 시 오류 메시지 반환
+  }
+});
+
+
+// 음식 빈도 API
+router.get('/nutrition/frequency', authenticateToken, async (req, res) => {
+  const { period } = req.query; // 기간을 쿼리로 받음
+  console.log('Requested period for food frequency:', period);
+
+  try {
+      const { startDate, endDate } = await getDateRange(period); // 비동기 호출로 시작일과 종료일 계산
+      console.log('Calculated date range:', { startDate, endDate });
+
+      // Meal 컬렉션에서 음식 항목을 분리하여 빈도 계산
+      const foodFrequency = await Meal.aggregate([
+          {
+              $match: {
+                  user_id: new mongoose.Types.ObjectId(req.user.id), // 사용자의 ID로 필터링
+                  created_at: { $gte: new Date(startDate), $lte: new Date(endDate) } // 기간 필터링
+              }
+          },
+          {
+              $unwind: "$foods" // "foods" 배열을 펼침
+          },
+          {
+              $group: {
+                  _id: "$foods", // 음식 항목별로 그룹화
+                  count: { $sum: 1 } // 각 음식 항목의 빈도 계산
+              }
+          },
+          {
+              $lookup: {
+                  from: "foods", // 조인할 컬렉션 이름
+                  localField: "_id", // 현재 컬렉션에서 조인할 필드
+                  foreignField: "_id", // 조인할 컬렉션의 필드
+                  as: "foodDetails" // 결과를 저장할 필드
+              }
+          },
+          {
+              $unwind: "$foodDetails" // 조인 결과를 펼침
+          },
+          {
+              $project: {
+                  _id: 0, // _id 필드를 숨김
+                  food_name: "$foodDetails.food_name", // food_name 필드만 표시
+                  count: 1 // count 필드를 유지
+              }
+          },
+          {
+              $sort: { count: -1 } // 빈도가 높은 순으로 정렬
+          }
+      ]);
+
+      console.log('Food frequency data:', foodFrequency);
+
+      res.json(foodFrequency); // 빈도 결과 반환
+  } catch (error) {
+      console.error('Error in food frequency API:', error.message);
+      res.status(500).json({ error: error.message }); // 오류 발생 시 오류 메시지 반환
+  }
+});
+
+
+
+
+// 목표 대비 실제 섭취 API
+router.get('/nutrition/goal-comparison', authenticateToken, async (req, res) => {
+  const { period } = req.query; // 기간만 쿼리로 받음
+  console.log('Requested period for goal comparison:', period);
+
+  try {
+      // 사용자 정보 가져오기
+      const user = await User.findById(req.user.id); // 인증된 사용자 ID로 사용자 정보 조회
+      if (!user) {
+          return res.status(404).json({ error: 'User not found.' });
+      }
+
+      const { target_calories, recommended_protein, recommended_fat, recommended_carbs } = user;
+      console.log('User goals from database:', { 
+          target_calories, 
+          recommended_protein, 
+          recommended_fat, 
+          recommended_carbs 
+      });
+
+      // 기간 검증 및 계산
+      const { startDate, endDate } = await getDateRange(period);
+      if (!startDate || !endDate) {
+          return res.status(400).json({ error: 'Invalid period. Please provide a valid period.' });
+      }
+      console.log('Calculated date range:', { startDate, endDate });
+
+      // 실제 섭취량 집계
+      const actualIntake = await Meal.aggregate([
+        {
+          $match: {
+            user_id: new mongoose.Types.ObjectId(req.user.id), // 사용자의 ID로 필터링
+            created_at: { $gte: new Date(startDate), $lte: new Date(endDate) } // 기간 필터링
+          }
+        },
+        {
+          $group: {
+            _id: null,
+            totalCalories: { $sum: "$total_calories" }, // 총 칼로리 합산 (total_calories로 변경)
+            totalProtein: { $sum: "$total_protein" }, // 총 단백질 합산
+            totalFat: { $sum: "$total_fat" }, // 총 지방 합산
+            totalCarbs: { $sum: "$total_carbohydrates" } // 총 탄수화물 합산
+          }
+        }
+      ]);
+      
+
+      console.log('Actual intake data:', actualIntake);
+
+      // 섭취 데이터가 없을 경우 처리
+      if (actualIntake.length === 0) {
+          console.log('No data found for the specified period.');
+          return res.json({ 
+              calorieComparison: '0%', 
+              proteinComparison: '0%', 
+              fatComparison: '0%', 
+              carbsComparison: '0%' 
+          });
+      }
+
+      // 섭취량 비교 계산
+      const { totalCalories, totalProtein, totalFat, totalCarbs } = actualIntake[0];
+      console.log('Total intake values:', { totalCalories, totalProtein, totalFat, totalCarbs });
+
+      const comparisonData = {
+          calorieComparison: target_calories ? ((totalCalories / target_calories) * 100).toFixed(2) + '%' : 'N/A',
+          proteinComparison: recommended_protein ? ((totalProtein / recommended_protein) * 100).toFixed(2) + '%' : 'N/A',
+          fatComparison: recommended_fat ? ((totalFat / recommended_fat) * 100).toFixed(2) + '%' : 'N/A',
+          carbsComparison: recommended_carbs ? ((totalCarbs / recommended_carbs) * 100).toFixed(2) + '%' : 'N/A'
+      };
+
+      console.log('Comparison data:', comparisonData);
+
+      res.json(comparisonData); // 결과 반환
+  } catch (error) {
+      console.error('Error in goal comparison API:', error);
+      res.status(500).json({ error: 'An error occurred while processing the request.' }); // 오류 메시지 반환
+  }
+});
+
+
+
+
+
+const getDateRange = (period) => {
+  const now = moment(); // 현재 시간
+  let startDate, endDate;
+
+  switch (period) {
+    case 'day':
+      startDate = now.startOf('day').toDate(); // 오늘 시작
+      endDate = now.endOf('day').toDate();   // 오늘 끝
+      break;
+    case 'week':
+      startDate = now.startOf('week').toDate(); // 이번 주 시작 (ISO-8601, 일요일 기준)
+      endDate = now.endOf('week').toDate();     // 이번 주 끝
+      break;
+    case 'month':
+      startDate = now.startOf('month').toDate(); // 이번 달 시작
+      endDate = now.endOf('month').toDate();     // 이번 달 끝
+      break;
+    case 'year':  // 올해의 날짜 범위
+      startDate = now.startOf('year').toDate(); // 올해 시작 (1월 1일)
+      endDate = now.endOf('year').toDate();     // 올해 끝 (12월 31일)
+      break;
+    default:
+      startDate = now.startOf('week').toDate();
+      endDate = now.endOf('week').toDate();
+  }
+
+  return { startDate, endDate };
+};
 
 // **공통 유틸 함수: 기본 날짜 가져오기**
 async function getDefaultDateRange(model, matchCondition, dateField = 'created_at') {
