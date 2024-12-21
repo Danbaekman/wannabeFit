@@ -167,8 +167,9 @@ const MealSettingScreen = ({ route = {}, navigation }) => {
     setFoodList([]);
   };
 
+  // 검색했을 때 식단목록 나열
   const renderFoodItem = ({ item }) => (
-    <TouchableOpacity style={styles.foodBox} onPress={() => handleFoodSelect(item)}>
+    <TouchableOpacity style={styles.foodRow} onPress={() => handleFoodSelect(item)}>
       <Text style={styles.foodName}>{item.food_name}</Text>
       <Text style={styles.foodCalories}>{item.calories} Kcal</Text>
     </TouchableOpacity>
@@ -185,9 +186,11 @@ const MealSettingScreen = ({ route = {}, navigation }) => {
     return selectedTab === 'favorites' ? (
       // Favorites Tab: 개별 음식 렌더링
       <View style={styles.foodRow}>
-        <Text style={styles.foodName}>{item.food_name || 'Unknown Food'}</Text>
-        <Text style={styles.foodCalories}>{item.calories || 0} Kcal</Text>
-  
+        <View style={styles.foodInfo}>
+          <Text style={styles.foodName}>{item.food_name || 'Unknown Food'}</Text>
+          <Text style={styles.foodCalories}>{item.calories || 0} Kcal</Text>
+        </View>
+       
         {/* 편집 모드 활성화 시 편집/삭제 버튼 표시 */}
         {isEditMode && (
           <View style={styles.editControls}>
@@ -210,7 +213,7 @@ const MealSettingScreen = ({ route = {}, navigation }) => {
       // Recent Tab: mealList 렌더링
       <View style={styles.mealContainer}>
         <Text style={styles.mealType}>
-          {mealTypeMap[item.meal_type] || 'Meal'} ({item.total_calories} Kcal)
+          {mealTypeMap[item.meal_type] || '총 칼로리'} ({item.total_calories} Kcal)
         </Text>
   
         <FlatList
@@ -218,8 +221,10 @@ const MealSettingScreen = ({ route = {}, navigation }) => {
           keyExtractor={(foodItem, index) => `${foodItem._id}-${index}`}
           renderItem={({ item: foodItem }) => (
             <View style={styles.foodRow}>
-              <Text style={styles.foodName}>{foodItem.food_name || 'Unknown Food'}</Text>
-              <Text style={styles.foodCalories}>{foodItem.calories || 0} Kcal</Text>
+              <View style={styles.foodInfo}>
+                <Text style={styles.foodName}>{foodItem.food_name || 'Unknown Food'}</Text>
+                <Text style={styles.foodCalories}>{foodItem.calories || 0} Kcal</Text>
+              </View>
   
               {isEditMode && (
                 <View style={styles.editControls}>
@@ -301,7 +306,7 @@ const handleDeleteFavorite = (foodId) => {
 
   const getMealTitle = () => {
     const title = mealTypeMap[mealType] ? mealType : 'Unknown';
-    return `${title} Meal`;
+    return `${title} 식단`;
   };
 
   const getFilteredMealList = () => {
@@ -328,13 +333,13 @@ const handleDeleteFavorite = (foodId) => {
             <Ionicons name="search-outline" size={24} color="gray" />
             <TextInput
               style={styles.searchInput}
-              placeholder="Search by food or brand"
+              placeholder="음식 이름이나 브랜드명을 검색.."
               value={searchText}
               onChangeText={handleSearch}
             />
           </View>
           <TouchableOpacity onPress={handleClearSearch}>
-            <Text style={styles.cancelText}>Cancel</Text>
+            <Text style={styles.cancelText}>닫기</Text>
           </TouchableOpacity>
         </View>
 
@@ -350,16 +355,18 @@ const handleDeleteFavorite = (foodId) => {
         )}
 
         <TouchableOpacity onPress={() => console.log('Direct Add Button Pressed')} style={styles.directInputButton}>
-          <Text style={styles.directInputText}>+ Add Directly</Text>
+          <Text style={styles.directInputText}>+ 직접 추가</Text>
         </TouchableOpacity>
 
         <View style={styles.tabContainer}>
-          {renderTabButton('Recent', 'recent')}
-          {renderTabButton('Favorites', 'favorites')}
+          {renderTabButton('최근기록', 'recent')}
+          {renderTabButton('즐겨찾기', 'favorites')}
         </View>
 
-        <Text style={styles.mealTitle}>{getMealTitle()}</Text>
-        {renderEditButton()}
+        <View style={styles.titleWrapper}>
+          <Text style={styles.mealTitle}>{getMealTitle()}</Text>
+          {renderEditButton()}
+        </View>
 
         <View style={styles.whiteBox}>
           <FlatList

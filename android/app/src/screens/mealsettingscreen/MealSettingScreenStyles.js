@@ -61,6 +61,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 3,
     elevation: 4,
+    flex: 1, // 높이를 부모에 맞추도록 설정
   },
   subtitle: {
     fontSize: 18,
@@ -106,27 +107,30 @@ const styles = StyleSheet.create({
     fontWeight: 'bold', // 글자 굵기
   },
   foodRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: 'row', // 세로 방향으로 배치
     alignItems: 'center',
+    justifyContent: 'space-between',
     paddingVertical: 10,
     paddingHorizontal: 15,
     borderBottomWidth: 1,
     borderBottomColor: '#e0e0e0', // 밑줄
+  },
+  foodInfo: {
+    flex: 1,
+    flexDirection: 'column', // 음식 이름과 칼로리를 세로로 배치
   },
   foodName: {
     fontSize: 16,
     color: '#000', // 검정색
   },
   foodCalories: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: 'bold',
     color: '#555', // 회색
   },
   editIcon: {
     marginLeft: 10,
   },
-  
 
   editModeButton: {
     marginLeft: 'auto',
@@ -147,6 +151,11 @@ const styles = StyleSheet.create({
   },
   deleteButton: {
     marginLeft: 10,
+  },
+  titleWrapper: {
+    flexDirection: 'row', // 가로 정렬
+    alignItems: 'center', // 세로 중앙 정렬
+    justifyContent: 'space-between', // 좌우로 분리
   },
   
 });
