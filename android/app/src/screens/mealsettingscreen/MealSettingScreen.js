@@ -53,7 +53,7 @@ const MealSettingScreen = ({ route = {}, navigation }) => {
       }
 
       const response = await fetch(
-        `${CONFIG.API_BASE_URL}/meal/meals?date=${selectedDate}&meal_type=${mealTypeMap[mealType]}`,
+        `${CONFIG.API_BASE_URL}/meal/meals/?date=${selectedDate}&meal_type=${mealTypeMap[mealType]}`,
         {
           method: 'GET',
           headers: {
@@ -64,6 +64,8 @@ const MealSettingScreen = ({ route = {}, navigation }) => {
 
       if (response.ok) {
         const data = await response.json();
+        console.log('Fetched Meal List:', data); // 추가된 로그
+
         setMealList(data);
       } else {
         const errorText = await response.text();
@@ -119,40 +121,56 @@ const MealSettingScreen = ({ route = {}, navigation }) => {
   };
 
   const handleAddFood = async (foodData) => {
+    console.log('handleAddFood called');
+  
     try {
       const { food, quantity, isFavorite } = foodData;
-
+  
+      // 서버로 전송할 데이터
+      const foodPayload = {
+        food: food.food, // 음식 ID
+        grams: quantity, // 섭취량 (그램)
+      };
+  
+      const payload = {
+        meal_type: mealTypeMap[mealType],
+        foods: [foodPayload],
+        created_at: selectedDate,
+      };
+  
+      console.log('Payload being sent to server:', JSON.stringify(payload, null, 2));
+  
       const token = await AsyncStorage.getItem('jwtToken');
       if (!token) {
         Alert.alert('Error', 'You must be logged in.');
         return;
       }
-
+  
       const response = await fetch(`${CONFIG.API_BASE_URL}/meal/meal`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({
-          meal_type: mealTypeMap[mealType],
-          food_ids: [food._id],
-          grams: [quantity],
-          created_at: selectedDate,
-        }),
+        body: JSON.stringify(payload),
       });
-
+  
       if (response.ok) {
+        console.log('Food successfully added to meal.');
+  
+        // 즐겨찾기 업데이트
         if (isFavorite) {
           const savedFavorites = await AsyncStorage.getItem('favorites');
           const favorites = savedFavorites ? JSON.parse(savedFavorites) : [];
+  
+          // 중복된 음식이 있는지 확인 후 업데이트
           const updatedFavorites = [...favorites.filter((f) => f._id !== food._id), food];
           await AsyncStorage.setItem('favorites', JSON.stringify(updatedFavorites));
           setFavoritesList(updatedFavorites);
         }
-
-        await fetchMeals();
-        setModalVisible(false);
+  
+        await fetchMeals(); // 식단 목록 갱신
+        setModalVisible(false); // 모달 닫기
       } else {
         const errorText = await response.text();
         console.error('Failed to add food:', response.status, errorText);
@@ -161,6 +179,7 @@ const MealSettingScreen = ({ route = {}, navigation }) => {
       console.error('Error adding food:', error);
     }
   };
+  
 
   const handleClearSearch = () => {
     setSearchText('');
@@ -183,49 +202,54 @@ const MealSettingScreen = ({ route = {}, navigation }) => {
   );
 
   const renderMealItem = ({ item }) => {
-    return selectedTab === 'favorites' ? (
-      // Favorites Tab: 개별 음식 렌더링
-      <View style={styles.foodRow}>
-        <View style={styles.foodInfo}>
-          <Text style={styles.foodName}>{item.food_name || 'Unknown Food'}</Text>
-          <Text style={styles.foodCalories}>{item.calories || 0} Kcal</Text>
-        </View>
-       
-        {/* 편집 모드 활성화 시 편집/삭제 버튼 표시 */}
-        {isEditMode && (
-          <View style={styles.editControls}>
-            <TouchableOpacity
-              onPress={() => handleEditFavorite(item)}
-              style={styles.editButton}
-            >
-              <Ionicons name="pencil" size={20} color="gray" />
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={() => handleDeleteFavorite(item._id)} // Favorites 삭제
-              style={styles.deleteButton}
-            >
-              <Ionicons name="close-circle" size={20} color="red" />
-            </TouchableOpacity>
-          </View>
-        )}
+  return selectedTab === 'favorites' ? (
+    // Favorites Tab: 개별 음식 렌더링
+    <View style={styles.foodRow}>
+      <View style={styles.foodInfo}>
+        <Text style={styles.foodName}>{item.food?.food_name || '음식이름 오류'}</Text>
+        <Text style={styles.foodCalories}>{item.food?.calories
+    ? (item.food.calories * (item.grams / 100)).toFixed(2) + ' Kcal'
+    : '0 Kcal'} </Text>
       </View>
-    ) : (
-      // Recent Tab: mealList 렌더링
-      <View style={styles.mealContainer}>
-        <Text style={styles.mealType}>
-          {mealTypeMap[item.meal_type] || '총 칼로리'} ({item.total_calories} Kcal)
-        </Text>
-  
-        <FlatList
-          data={item.foods} // foods 배열 렌더링
-          keyExtractor={(foodItem, index) => `${foodItem._id}-${index}`}
-          renderItem={({ item: foodItem }) => (
-            <View style={styles.foodRow}>
+
+      {isEditMode && (
+        <View style={styles.editControls}>
+          <TouchableOpacity
+            onPress={() => handleEditFavorite(item)}
+            style={styles.editButton}
+          >
+            <Ionicons name="pencil" size={20} color="gray" />
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => handleDeleteFavorite(item._id)} // Favorites 삭제
+            style={styles.deleteButton}
+          >
+            <Ionicons name="close-circle" size={20} color="red" />
+          </TouchableOpacity>
+        </View>
+      )}
+    </View>
+  ) : (
+    // Recent Tab: mealList 렌더링
+    <View style={styles.mealContainer} key={item._id}>
+      <Text style={styles.mealType}>
+        {mealTypeMap[item.meal_type] || '총 칼로리'} ({item.total_calories?.toFixed(2) || 0} Kcal)
+      </Text>
+
+      <FlatList
+        data={item.foods} // foods 배열 렌더링
+        keyExtractor={(foodItem, index) => `${foodItem._id}-${index}`}
+        renderItem={({ item: foodItem}) => {
+          
+          return (
+            <View style={styles.foodRow} key={foodItem._id}>
               <View style={styles.foodInfo}>
-                <Text style={styles.foodName}>{foodItem.food_name || 'Unknown Food'}</Text>
-                <Text style={styles.foodCalories}>{foodItem.calories || 0} Kcal</Text>
+                <Text style={styles.foodName}>{foodItem.food?.food_name || '클라 변수 확인'}</Text>
+                <Text style={styles.foodCalories}>{foodItem.food?.calories
+    ? (foodItem.food.calories * (foodItem.grams / 100)).toFixed(2) + ' Kcal'
+    : '0 Kcal'}</Text>
               </View>
-  
+
               {isEditMode && (
                 <View style={styles.editControls}>
                   <TouchableOpacity
@@ -243,12 +267,13 @@ const MealSettingScreen = ({ route = {}, navigation }) => {
                 </View>
               )}
             </View>
-          )}
-        />
-      </View>
-    );
-  };
-  
+          );
+        }}
+      />
+    </View>
+  );
+};
+
   
   
   const renderEditButton = () => (
@@ -391,7 +416,11 @@ const handleDeleteFavorite = (foodId) => {
           AsyncStorage.setItem('favorites', JSON.stringify(updatedFavorites));
         }}
         entryPoint={selectedTab === 'favorites' ? 'favorites' : 'search'}
-        onAddFood={handleAddFood}
+        // onAddFood={handleAddFood}
+        onAddFood={(foodData) => {
+          console.log('onAddFood called in MealSettingScreen:', foodData); // 전달된 foodData 확인
+          handleAddFood(foodData);
+        }}
       />
 
       <Footer />
