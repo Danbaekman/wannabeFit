@@ -51,7 +51,7 @@ const MealSettingScreen = ({ route = {}, navigation }) => {
         console.error('No JWT token found. Please log in.');
         return;
       }
-
+  
       const response = await fetch(
         `${CONFIG.API_BASE_URL}/meal/meals/?date=${selectedDate}&meal_type=${mealTypeMap[mealType]}`,
         {
@@ -61,12 +61,35 @@ const MealSettingScreen = ({ route = {}, navigation }) => {
           },
         }
       );
-
+  
       if (response.ok) {
         const data = await response.json();
-        console.log('Fetched Meal List:', data); // 추가된 로그
-
         setMealList(data);
+  
+        // 서버 데이터를 기반으로 즐겨찾기 동기화
+        const syncedFavorites = favoritesList.map((favorite) => {
+          const matchingMeal = data.find((meal) =>
+            meal.foods.some((food) => food.food._id === favorite._id)
+          );
+  
+          if (matchingMeal) {
+            const matchingFood = matchingMeal.foods.find(
+              (food) => food.food._id === favorite._id
+            );
+            return {
+              ...favorite,
+              calories: (matchingFood.food.calories * (matchingFood.grams / 100)).toFixed(2),
+              grams: matchingFood.grams,
+            };
+          }
+          return favorite; // 일치하는 음식이 없는 경우 기본값 유지
+        });
+  
+        // 상태 업데이트
+        setFavoritesList(syncedFavorites);
+  
+        // **동기화된 favoritesList를 AsyncStorage에 저장**
+        await AsyncStorage.setItem('favorites', JSON.stringify(syncedFavorites));
       } else {
         const errorText = await response.text();
         console.error('Failed to fetch meal list:', response.status, errorText);
@@ -75,13 +98,73 @@ const MealSettingScreen = ({ route = {}, navigation }) => {
       console.error('Error fetching meal list:', error);
     }
   };
+  
 
   useFocusEffect(
     useCallback(() => {
-      fetchMeals();
-    }, [selectedDate, mealType])
+      const fetchData = async () => {
+        try {
+          // 1. AsyncStorage에서 favoritesList 가져오기
+          const savedFavorites = await AsyncStorage.getItem('favorites');
+          const favorites = savedFavorites ? JSON.parse(savedFavorites) : [];
+  
+          // 2. 서버에서 mealList 가져오기
+          const token = await AsyncStorage.getItem('jwtToken');
+          if (!token) {
+            console.error('No JWT token found. Please log in.');
+            return;
+          }
+  
+          const response = await fetch(
+            `${CONFIG.API_BASE_URL}/meal/meals/?date=${selectedDate}&meal_type=${mealTypeMap[mealType]}`,
+            {
+              method: 'GET',
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
+  
+          if (response.ok) {
+            const mealData = await response.json();
+  
+            // 3. favorites와 mealData 동기화
+            const syncedFavorites = favorites.map((favorite) => {
+              const matchingMeal = mealData.find((meal) =>
+                meal.foods.some((food) => food.food._id === favorite._id)
+              );
+  
+              if (matchingMeal) {
+                const matchingFood = matchingMeal.foods.find(
+                  (food) => food.food._id === favorite._id
+                );
+                return {
+                  ...favorite,
+                  calories: matchingFood
+                    ? (matchingFood.food.calories * (matchingFood.grams / 100)).toFixed(2)
+                    : favorite.calories,
+                  grams: matchingFood ? matchingFood.grams : favorite.grams,
+                };
+              }
+              return favorite; // 일치하는 음식이 없는 경우 기본값 유지
+            });
+  
+            setMealList(mealData);
+            setFavoritesList(syncedFavorites);
+          } else {
+            const errorText = await response.text();
+            console.error('Failed to fetch meal list:', response.status, errorText);
+          }
+        } catch (error) {
+          console.error('Error fetching data:', error);
+        }
+      };
+  
+      fetchData();
+    }, [selectedDate, mealType]) // 날짜와 식단 타입 변경 시 호출
   );
-
+  
+  
   
   const handleSearch = async (text) => {
     setSearchText(text);
@@ -158,17 +241,6 @@ const MealSettingScreen = ({ route = {}, navigation }) => {
       if (response.ok) {
         console.log('Food successfully added to meal.');
   
-        // 즐겨찾기 업데이트
-        if (isFavorite) {
-          const savedFavorites = await AsyncStorage.getItem('favorites');
-          const favorites = savedFavorites ? JSON.parse(savedFavorites) : [];
-  
-          // 중복된 음식이 있는지 확인 후 업데이트
-          const updatedFavorites = [...favorites.filter((f) => f._id !== food._id), food];
-          await AsyncStorage.setItem('favorites', JSON.stringify(updatedFavorites));
-          setFavoritesList(updatedFavorites);
-        }
-  
         await fetchMeals(); // 식단 목록 갱신
         setModalVisible(false); // 모달 닫기
       } else {
@@ -201,15 +273,16 @@ const MealSettingScreen = ({ route = {}, navigation }) => {
     </TouchableOpacity>
   );
 
-  const renderMealItem = ({ item }) => {
+  const renderMealItem = ({ item, index }) => {
+    console.log("Favorite Item:", item);
+
   return selectedTab === 'favorites' ? (
+    
     // Favorites Tab: 개별 음식 렌더링
-    <View style={styles.foodRow}>
+    <View style={styles.foodRow} key={item._id || `favorite-${index}`}>
       <View style={styles.foodInfo}>
-        <Text style={styles.foodName}>{item.food?.food_name || '음식이름 오류'}</Text>
-        <Text style={styles.foodCalories}>{item.food?.calories
-    ? (item.food.calories * (item.grams / 100)).toFixed(2) + ' Kcal'
-    : '0 Kcal'} </Text>
+        <Text style={styles.foodName}>{item.food_name|| '음식이름 오류'}</Text>
+        <Text style={styles.foodCalories}> {item.calories ? `${item.calories} Kcal` : '0 Kcal'}</Text>
       </View>
 
       {isEditMode && (
@@ -238,11 +311,11 @@ const MealSettingScreen = ({ route = {}, navigation }) => {
 
       <FlatList
         data={item.foods} // foods 배열 렌더링
-        keyExtractor={(foodItem, index) => `${foodItem._id}-${index}`}
+        keyExtractor={(foodItem, index) => foodItem._id || `key-${index}`}
         renderItem={({ item: foodItem}) => {
           
           return (
-            <View style={styles.foodRow} key={foodItem._id}>
+            <View style={styles.foodRow} key={foodItem._id || `key-${index}`}>
               <View style={styles.foodInfo}>
                 <Text style={styles.foodName}>{foodItem.food?.food_name || '클라 변수 확인'}</Text>
                 <Text style={styles.foodCalories}>{foodItem.food?.calories
@@ -338,6 +411,8 @@ const handleDeleteFavorite = (foodId) => {
     return selectedTab === 'favorites' ? favoritesList : mealList;
   };
   const handleEditFavorite = (food) => {
+    console.log("Editing food:", food); // 디버깅용 로그
+
     // 편집 모달을 열고 선택된 음식 설정
     setSelectedFood(food);
     setModalVisible(true);
@@ -347,7 +422,28 @@ const handleDeleteFavorite = (foodId) => {
     setSearchText(''); // 검색 텍스트 초기화
     setFoodList([]); // 검색 결과 초기화
   };
-
+  const handleFavoriteToggle = async (food) => {
+    try {
+      const savedFavorites = await AsyncStorage.getItem('favorites');
+      const favorites = savedFavorites ? JSON.parse(savedFavorites) : [];
+  
+      // 중복 확인
+      const isAlreadyFavorite = favorites.some((item) => item._id === food._id);
+  
+      // 즐겨찾기 추가 또는 삭제
+      const updatedFavorites = isAlreadyFavorite
+        ? favorites.filter((item) => item._id !== food._id) // 삭제
+        : [...favorites, { _id: food._id, food_name: food.food_name, calories: food.calories }]; // 추가
+  
+      // AsyncStorage에 저장
+      await AsyncStorage.setItem('favorites', JSON.stringify(updatedFavorites));
+      setFavoritesList(updatedFavorites); // 상태 업데이트
+    } catch (error) {
+      console.error('Error updating favorites in AsyncStorage:', error);
+    }
+  };
+  
+  
   return (
     <View style={styles.container}>
       <Navbar />
@@ -373,7 +469,7 @@ const handleDeleteFavorite = (foodId) => {
             <FlatList
               data={foodList}
               extraData={isEditMode}
-              keyExtractor={(foodItem, index) => `${foodItem._id || index}`}
+              keyExtractor={(foodItem, index) => foodItem._id || `key-${index}`}
               renderItem={renderFoodItem}
             />
           </View>
@@ -396,6 +492,7 @@ const handleDeleteFavorite = (foodId) => {
         <View style={styles.whiteBox}>
           <FlatList
             data={getFilteredMealList()}
+            extraData={favoritesList}
             keyExtractor={(item) => item._id}
             renderItem={renderMealItem}
           />
@@ -410,17 +507,13 @@ const handleDeleteFavorite = (foodId) => {
           selectedTab === 'favorites' ||
           (selectedFood && favoritesList.some((favorite) => favorite._id === selectedFood._id))
         }
-        onFavoriteChange={(updatedFood) => {
-          const updatedFavorites = favoritesList.filter((item) => item._id !== updatedFood._id);
-          setFavoritesList(updatedFavorites);
-          AsyncStorage.setItem('favorites', JSON.stringify(updatedFavorites));
-        }}
         entryPoint={selectedTab === 'favorites' ? 'favorites' : 'search'}
         // onAddFood={handleAddFood}
         onAddFood={(foodData) => {
           console.log('onAddFood called in MealSettingScreen:', foodData); // 전달된 foodData 확인
           handleAddFood(foodData);
         }}
+        onFavoriteToggle={handleFavoriteToggle}
       />
 
       <Footer />

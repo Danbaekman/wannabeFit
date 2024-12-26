@@ -5,6 +5,8 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import styles from './FoodDetailModalStyles';
 import { PanResponder } from 'react-native';
 import NutrientPieChart from '../nutrientpiechart/NutrientPieChart';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 
 const FoodDetailModal = ({
   visible,
@@ -12,8 +14,8 @@ const FoodDetailModal = ({
   food = {},
   onAddFood,
   initialFavorite = false,
-  onFavoriteChange,
   entryPoint,
+  onFavoriteToggle, 
 }) => {
   const translateY = useSharedValue(0);
   const [quantity, setQuantity] = useState(1);
@@ -24,29 +26,26 @@ const FoodDetailModal = ({
 
 
   useEffect(() => {
-    if (visible) {
+    if (visible && food) {
+      console.log("Modal Opened with Food:", food); // 디버깅용 로그
       setQuantity(1);
       setInputValue('100g');
+      calculateNutrients(1); // 기본 섭취량 (100g)으로 계산
       setIsFavorite(entryPoint === 'favorites' ? true : initialFavorite);
-      calculateNutrients(1);
     }
-  }, [visible, initialFavorite, entryPoint]);
-
+  }, [visible, food, initialFavorite, entryPoint]);
+  
+  // FoodDetailModal.js
   const handleFavoriteToggle = () => {
     const updatedFavorite = !isFavorite;
-    setIsFavorite(updatedFavorite);
-
-    if (entryPoint === 'favorites') {
-      if (onFavoriteChange) {
-        onFavoriteChange({ ...food, isFavorite: updatedFavorite });
-      }
-      if (!updatedFavorite) {
-        onClose();
-      }
-    } else {
-      console.log('검색 모드에서 즐겨찾기 상태 변경:', updatedFavorite);
+    setIsFavorite(updatedFavorite); // 로컬 UI 업데이트
+  
+    // MealSettingScreen으로 상태 변경 요청 전달
+    if (onFavoriteToggle) {
+      onFavoriteToggle(food);
     }
   };
+  
 
   const handleAddFood = () => {
     // 사용자가 입력한 섭취량 (grams)
