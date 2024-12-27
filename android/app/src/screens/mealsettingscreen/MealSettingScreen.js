@@ -288,7 +288,7 @@ const MealSettingScreen = ({ route = {}, navigation }) => {
       {isEditMode && (
         <View style={styles.editControls}>
           <TouchableOpacity
-            onPress={() => handleEditFavorite(item)}
+            onPress={() => handleEditFood(item, item._id)}
             style={styles.editButton}
           >
             <Ionicons name="pencil" size={20} color="gray" />
@@ -326,7 +326,7 @@ const MealSettingScreen = ({ route = {}, navigation }) => {
               {isEditMode && (
                 <View style={styles.editControls}>
                   <TouchableOpacity
-                    onPress={() => handleEditFavorite(foodItem)}
+                    onPress={() => handleEditFood(foodItem, item._id)}
                     style={styles.editButton}
                   >
                     <Ionicons name="pencil" size={20} color="gray" />
@@ -393,8 +393,20 @@ const MealSettingScreen = ({ route = {}, navigation }) => {
     }
   };
   
+  //편집버튼
+  const handleEditFood = (food, mealId) => {
+    console.log("편집할 식사:", food);
+    // 현재 음식을 선택하여 모달로 전달
+    setSelectedFood({
+      ...food,
+      mealId, // Meal ID 전달
+      grams: food.grams, // 기존 그램수
+      isFavorite: favoritesList.some(fav => fav._id === food._id), // 즐겨찾기 여부
+    });
+    setIsEditMode(true);
+    setModalVisible(true); // 모달 열기
+  };
   
-
 // 즐겨찾기 삭제 처리 함수 (로컬)
 const handleDeleteFavorite = (foodId) => {
   const updatedFavorites = favoritesList.filter((item) => item._id !== foodId);
@@ -491,11 +503,11 @@ const handleDeleteFavorite = (foodId) => {
 
         <View style={styles.whiteBox}>
           <FlatList
-            data={getFilteredMealList()}
-            extraData={favoritesList}
-            keyExtractor={(item) => item._id}
-            renderItem={renderMealItem}
-          />
+          data={getFilteredMealList()}
+          extraData={favoritesList}
+          keyExtractor={(item, index) => `${item._id || 'default'}-${index}`} // _id + index를 결합하여 고유한 key 생성
+          renderItem={renderMealItem}
+        />
         </View>
       </ContentWrapper>
 
@@ -514,6 +526,8 @@ const handleDeleteFavorite = (foodId) => {
           handleAddFood(foodData);
         }}
         onFavoriteToggle={handleFavoriteToggle}
+        onEditFood={handleEditFood}
+        isEditMode={isEditMode}
       />
 
       <Footer />

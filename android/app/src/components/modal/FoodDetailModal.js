@@ -5,8 +5,6 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import styles from './FoodDetailModalStyles';
 import { PanResponder } from 'react-native';
 import NutrientPieChart from '../nutrientpiechart/NutrientPieChart';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-
 
 const FoodDetailModal = ({
   visible,
@@ -16,6 +14,8 @@ const FoodDetailModal = ({
   initialFavorite = false,
   entryPoint,
   onFavoriteToggle, 
+  onEditFood,
+  isEditMode,
 }) => {
   const translateY = useSharedValue(0);
   const [quantity, setQuantity] = useState(1);
@@ -28,9 +28,16 @@ const FoodDetailModal = ({
   useEffect(() => {
     if (visible && food) {
       console.log("Modal Opened with Food:", food); // 디버깅용 로그
-      setQuantity(1);
-      setInputValue('100g');
-      calculateNutrients(1); // 기본 섭취량 (100g)으로 계산
+      if (isEditMode) {
+        // 편집 모드일 때는 food.grams 값을 기반으로 설정
+        setQuantity(food.grams / 100);  // grams 값을 100으로 나누어 quantity 설정
+        setInputValue(`${food.grams}g`); // 섭취량 입력 값 설정
+        calculateNutrients(food.grams); // 설정했던 grams기반 계산된것
+      } else {
+        setQuantity(1);  // 기본 섭취량 100g
+        setInputValue('100g');
+      }
+      calculateNutrients(1);  // 기본 섭취량으로 계산
       setIsFavorite(entryPoint === 'favorites' ? true : initialFavorite);
     }
   }, [visible, food, initialFavorite, entryPoint]);
@@ -57,36 +64,59 @@ const FoodDetailModal = ({
       grams: totalQuantity, // 섭취량
     };
   
-    console.log('Food Object:', food); // 원본 food 객체 확인
-    console.log('Formatted Food Data:', formattedFoodData); // 서버로 전송할 데이터 확인
-  
-    // `onAddFood` 호출
+    // 편집 모드에서 음식 수정
+    if (isEditMode) {
+    const updatedFoodData = {
+      ...food,
+      grams: totalQuantity,  // 수정된 그램수
+      isFavorite,              // 수정된 즐겨찾기 여부
+    };
+    if (onEditFood) {
+      onEditFood(updatedFoodData); // 수정된 데이터 부모 컴포넌트로 전달
+    }
+  } else {
+    // 새로운 음식 추가
     if (onAddFood && food) {
       onAddFood({
-        food: formattedFoodData, // 서버로 전송할 데이터 전달
+        food: formattedFoodData,
         quantity: totalQuantity,
         isFavorite,
       });
     }
-    onClose(); // 모달 닫기
-  };
+  }
+  onClose(); // 모달 닫기
+};
   
+  const handleSaveEdit = () => {
+    // 편집된 음식 정보
+    const updatedFoodData = {
+      ...food,
+      grams: quantity * 100,  // 입력된 섭취량 (그램 수)
+      isFavorite,              // 즐겨찾기 여부
+    };
+  
+    // 부모 컴포넌트에 수정된 데이터 전달
+    if (onEditFood) {
+      onEditFood(updatedFoodData);
+    }
+  
+    // 모달 닫기
+    onClose();
+  };
   
 
   const calculateNutrients = (grams) => {
     const scaleFactor = grams / 100; // 기준량 100g 대비 비율
   
     const newNutrients = {
-      calories: (food.calories || 0) * scaleFactor,
-      carbohydrates: (food.carbohydrates || 0) * scaleFactor,
-      protein: (food.protein || 0) * scaleFactor,
-      fat: (food.fat || 0) * scaleFactor,
-      sugar: (food.sugar || 0) * scaleFactor,
-      sodium: (food.natrium || 0) * scaleFactor,
+      calories: (isEditMode ? food.food?.calories : food.calories) * scaleFactor,
+      carbohydrates: (isEditMode ? food.food?.carbohydrates : food.carbohydrates) * scaleFactor,
+      protein: (isEditMode ? food.food?.protein : food.protein) * scaleFactor,
+      fat: (isEditMode ? food.food?.fat : food.fat) * scaleFactor,
+      sugar: (isEditMode ? food.food?.sugar : food.sugar) * scaleFactor,
+      sodium: (isEditMode ? food.food?.natrium : food.natrium) * scaleFactor,
     };
-  
-    console.log('Calculated Nutrients:', newNutrients); // 디버깅용 로그
-    setCalculatedNutrients(newNutrients);
+    setCalculatedNutrients(newNutrients); // 영양소 상태 업데이트
   
     const total = newNutrients.carbohydrates + newNutrients.protein + newNutrients.fat;
     setNutrientRatios(
@@ -99,7 +129,6 @@ const FoodDetailModal = ({
         : { carbs: 0, protein: 0, fat: 0 }
     );
   };
-  
 
   const handleQuantityChange = (newQuantity) => {
     // `quantity` 값이 1 미만으로 떨어지지 않도록 방어 코드 작성
@@ -153,7 +182,7 @@ const FoodDetailModal = ({
             />
           </TouchableOpacity>
 
-          <Text style={styles.modalTitle}>{food?.food_name || '음식 정보'}</Text>
+          <Text style={styles.modalTitle}>{food?.food_name || food?.food?.food_name || '음식 정보'}</Text>
 
       
           <NutrientPieChart nutrients={calculatedNutrients} />
@@ -234,7 +263,9 @@ const FoodDetailModal = ({
           </View>
 
           <TouchableOpacity style={styles.addButton} onPress={handleAddFood}>
-            <Text style={styles.addButtonText}>식단에 추가</Text>
+            <Text style={styles.addButtonText}>
+              {isEditMode ? '식단 변경' : '식단에 추가'} {/* 버튼 텍스트 변경 */}
+            </Text>
           </TouchableOpacity>
         </Animated.View>
       </View>
