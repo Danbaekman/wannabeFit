@@ -26,6 +26,7 @@ const FoodDetailModal = ({
   const [isFavorite, setIsFavorite] = useState(initialFavorite);
   const [calculatedNutrients, setCalculatedNutrients] = useState({});
   const [nutrientRatios, setNutrientRatios] = useState({ carbs: 0, protein: 0, fat: 0 });
+  const [selectedFoodData, setSelectedFoodData] = useState(null); // foodData 상태로 관리
 
   useEffect(() => {
     console.log("FoodDetailModal props:", {
@@ -34,70 +35,60 @@ const FoodDetailModal = ({
       entryPoint,
     });
   }, []);
+  useEffect(() => {
+    if (selectedFoodData) {
+      setQuantity(selectedFoodData.grams / 100); // grams 값에 따라 quantity 동기화
+    }
+  }, [selectedFoodData]);
+  useEffect(() => {
+    if (entryPoint === 'favorites' && !selectedFoodData) {
+      console.warn("Favorites entry point without valid food data:", food);
+      setSelectedFoodData(food?.food || food); // 기본값 설정
+    }
+  }, [entryPoint, selectedFoodData, food]);
   
-
-  // useEffect(() => {
-  //   if (visible && food) {
-  //     console.log("Modal Opened with Food:", food); // 디버깅용 로그
-  //     if (isEditMode) {
-  //       // 편집 모드일 때는 food.grams 값을 기반으로 설정
-  //       setQuantity(food.grams / 100);  // grams 값을 100으로 나누어 quantity 설정
-  //       setInputValue(`${food.grams}g`); // 섭취량 입력 값 설정
-  //       calculateNutrients(food.grams); // 설정했던 grams기반 계산된것
-  //     } else {
-  //       setQuantity(1);  // 기본 섭취량 100g
-  //       setInputValue('100g');
-  //     }
-  //     calculateNutrients(1);  // 기본 섭취량으로 계산
-  //     setIsFavorite(entryPoint === 'favorites' ? true : initialFavorite);
-  //   }
-  // }, [visible, food, initialFavorite, entryPoint]);
   useEffect(() => {
     if (visible && food) {
       console.log("Modal Opened with Food:", food);
   
-      if (isEditMode) {
-        // 편집 모드일 때
-        const foodData = entryPoint === 'favorites' ? food : food.food; // entryPoint에 따라 food 구조 선택
-        console.log('food:',food);
-        console.log('food.food:', food.food);
-        const grams = food.grams || 100; // grams 기본값 100
-        const calories = foodData.calories || 0;
+      // entryPoint와 isEditMode에 따라 foodData 설정
+      // const foodData = isEditMode
+      //   ? entryPoint === 'favorites'
+      //     ? food?.food || food // favorites && editMode
+      //     : food?.food
+      //   : food?.food || food;
+      
+  const foodData = food.food || food; // food 내부에 food가 있는 경우 우선 참조
+      // 방어적 코딩: food와 foodData 확인
+      const grams = food?.grams || 100; // 기본 grams 설정
+      const calories = foodData?.calories || 0; // calories 값 설정
   
-        setQuantity(grams / 100); // grams를 100으로 나눈 기본량
-        setInputValue(`${grams}g`); // 섭취량 표시
-        calculateNutrients(grams); // grams 기반 영양소 계산
+      // setSelectedFoodData(foodData);
+      setSelectedFoodData({
+        ...food,
+        grams,
+      });
+      setQuantity(grams / 100); // 기본 섭취량 설정
+      setInputValue(`${grams}g`); // 입력값 표시
   
-        setCalculatedNutrients({
-          calories: calories * (grams / 100),
-          carbohydrates: foodData.carbohydrates || 0,
-          protein: foodData.protein || 0,
-          fat: foodData.fat || 0,
-          sugar: foodData.sugar || 0,
-          sodium: foodData.natrium || 0,
-        });
-      } else {
-        // 새로 추가할 때 기본값 처리
-        setQuantity(1); // 기본량 100g
-        setInputValue('100g');
-        calculateNutrients(100); // 기본값 100g으로 계산
-      }
+      // 중복 계산 방지
+      setCalculatedNutrients({
+        calories:
+          entryPoint === 'favorites' && isEditMode
+            ? food?.food.calories // favorites + editMode: 이미 저장된 값 사용
+            : calories * (grams / 100),
+        carbohydrates: foodData?.carbohydrates * (grams / 100) || 0,
+        protein: foodData?.protein * (grams / 100) || 0,
+        fat: foodData?.fat * (grams / 100) || 0,
+        sugar: foodData?.sugar * (grams / 100) || 0,
+        sodium: foodData?.natrium * (grams / 100) || 0,
+      });
   
-      setIsFavorite(entryPoint === 'favorites' ? true : initialFavorite); // 즐겨찾기 여부 설정
+      // 즐겨찾기 여부 설정
+      setIsFavorite(entryPoint === 'favorites' ? true : initialFavorite);
     }
   }, [visible, food, initialFavorite, entryPoint, isEditMode]);
   
-  
-  // FoodDetailModal.js
-  const handleFavoriteToggle = () => {
-    const updatedFavorite = !isFavorite;
-    setIsFavorite(updatedFavorite); // 로컬 UI 업데이트
-  
-    // MealSettingScreen으로 상태 변경 요청 전달
-    if (onFavoriteToggle) {
-      onFavoriteToggle(food);
-    }
-  };
   
 
   const handleAddFood = () => {
@@ -125,6 +116,7 @@ const FoodDetailModal = ({
         if (onFavoriteToggle) {
           onFavoriteToggle(updatedFoodData);
         }
+        console.log('즐겨찾기 편집시 updatedFoodData:', updatedFoodData);
       }
     } else {
       // 새로운 음식 추가
@@ -143,38 +135,11 @@ const FoodDetailModal = ({
     onClose(); // 모달 닫기
   };
   
-  
-  // const handleSaveEdit = () => {
-  //   const totalQuantity = quantity * 100;
-  //   console.log('entryPoint:', entryPoint); // entryPoint 확인
 
-  //   if (entryPoint === 'recent') {
-  //     // 최근기록 탭: 서버 동기화
-  //     const updatedFoodData = {
-  //       meal_id: food.mealId,
-  //       food_id: food.food._id,
-  //       grams: totalQuantity,
-  //     };
-  //     console.log('Updated Food Data:', updatedFoodData);
-  //     if (onSaveEdit) {
-  //       onSaveEdit(updatedFoodData);
-  //     }
-  //   } else if (entryPoint === 'favorites') {
-  //     // 즐겨찾기 탭: 로컬 데이터만 업데이트
-  //     const updatedFoodData = {
-  //       ...food,
-  //       grams: totalQuantity,
-  //     };
-  //     if (onFavoriteToggle) {
-  //       onFavoriteToggle(updatedFoodData);
-  //     }
-  //   }
-  //   onClose(); // 모달 닫기
-  // };
   const handleSaveEdit = () => {
     const totalQuantity = quantity * 100;
-    console.log("Entry Point:", entryPoint);
-    console.log("Food before update:", food);
+    console.log('handleSaveEdit - Quantity:', quantity);
+    console.log('handleSaveEdit - Total Quantity (Grams):', totalQuantity);
   
     let updatedFoodData;
   
@@ -187,8 +152,7 @@ const FoodDetailModal = ({
         calories: (baseFood.calories / baseFood.grams) * totalQuantity, // baseFood에서 칼로리 계산
       };
   
-      console.log("Updated Food Data for favorites:", updatedFoodData);
-  
+      console.log('즐겨찾기 탭에서의 업데이트된 음식:', updatedFoodData);  
       // favoritesList 업데이트
       const updatedFavorites = favoritesList.map((fav) =>
         fav._id === (baseFood._id || food._id) ? updatedFoodData : fav
@@ -198,13 +162,19 @@ const FoodDetailModal = ({
       AsyncStorage.setItem("favorites", JSON.stringify(updatedFavorites)); // 저장
     } else if (entryPoint === "recent") {
       // 최근 기록 데이터 업데이트
+      // updatedFoodData = {
+      //   meal_id: food.mealId,
+      //   food_id: food.food?._id || food._id,
+      //   grams: totalQuantity,
+      // };
       updatedFoodData = {
+        ...food, // 기존 food 객체 복제
         meal_id: food.mealId,
         food_id: food.food?._id || food._id,
         grams: totalQuantity,
       };
   
-      console.log("Updated Food Data for recent:", updatedFoodData);
+      console.log("최근기록에서의 업데이트된 음식:", updatedFoodData);
   
       if (onSaveEdit) {
         onSaveEdit(updatedFoodData);
@@ -215,68 +185,89 @@ const FoodDetailModal = ({
     onClose(); // 모달 닫기
   };
   
-  
-  
 
-  // const calculateNutrients = (grams) => {
-  //   const scaleFactor = grams / 100; // 기준량 100g 대비 비율
-  
-  //   const newNutrients = {
-  //     calories: (isEditMode ? food.food?.calories : food.calories) * scaleFactor,
-  //     carbohydrates: (isEditMode ? food.food?.carbohydrates : food.carbohydrates) * scaleFactor,
-  //     protein: (isEditMode ? food.food?.protein : food.protein) * scaleFactor,
-  //     fat: (isEditMode ? food.food?.fat : food.fat) * scaleFactor,
-  //     sugar: (isEditMode ? food.food?.sugar : food.sugar) * scaleFactor,
-  //     sodium: (isEditMode ? food.food?.natrium : food.natrium) * scaleFactor,
-  //   };
-  //   setCalculatedNutrients(newNutrients); // 영양소 상태 업데이트
-  
-  //   const total = newNutrients.carbohydrates + newNutrients.protein + newNutrients.fat;
-  //   setNutrientRatios(
-  //     total > 0
-  //       ? {
-  //           carbs: newNutrients.carbohydrates / total,
-  //           protein: newNutrients.protein / total,
-  //           fat: newNutrients.fat / total,
-  //         }
-  //       : { carbs: 0, protein: 0, fat: 0 }
-  //   );
-  // };
+
   const calculateNutrients = (grams) => {
+    if (!grams || grams <= 0) {
+      console.error("Invalid grams value:", grams);
+      return;
+    }
+  
     const scaleFactor = grams / 100;
   
+    // const foodData = entryPoint === 'favorites' && isEditMode
+    //   ? food.food
+    //   : selectedFoodData || food;
+    const foodData = selectedFoodData?.food || selectedFoodData;
+  
+    if (!foodData || !foodData.calories) {
+      console.error("Invalid food data for nutrient calculation:", foodData);
+      return;
+    }
+  
     const newNutrients = {
-      calories: (entryPoint === 'favorites' ? food.calories : food.food?.calories) * scaleFactor,
-      carbohydrates: (entryPoint === 'favorites' ? food.carbohydrates : food.food?.carbohydrates) * scaleFactor,
-      protein: (entryPoint === 'favorites' ? food.protein : food.food?.protein) * scaleFactor,
-      fat: (entryPoint === 'favorites' ? food.fat : food.food?.fat) * scaleFactor,
-      sugar: (entryPoint === 'favorites' ? food.sugar : food.food?.sugar) * scaleFactor,
-      sodium: (entryPoint === 'favorites' ? food.natrium : food.food?.natrium) * scaleFactor,
+      calories: foodData.grams
+        ? foodData.calories * (grams / foodData.grams) // grams 기반 계산
+        : (foodData.calories || 0) * scaleFactor, // 기본 계산
+      carbohydrates: (foodData.carbohydrates || 0) * scaleFactor,
+      protein: (foodData.protein || 0) * scaleFactor,
+      fat: (foodData.fat || 0) * scaleFactor,
+      sugar: (foodData.sugar || 0) * scaleFactor,
+      sodium: (foodData.natrium || 0) * scaleFactor,
     };
   
+    console.log("calculateNutrients - New Nutrients:", newNutrients);
     setCalculatedNutrients(newNutrients);
-  
-    const total = newNutrients.carbohydrates + newNutrients.protein + newNutrients.fat;
-    setNutrientRatios(
-      total > 0
-        ? {
-            carbs: newNutrients.carbohydrates / total,
-            protein: newNutrients.protein / total,
-            fat: newNutrients.fat / total,
-          }
-        : { carbs: 0, protein: 0, fat: 0 }
-    );
   };
-  
   
 
   const handleQuantityChange = (newQuantity) => {
-    // `quantity` 값이 1 미만으로 떨어지지 않도록 방어 코드 작성
-    if (newQuantity < 1) return;
-  
-    // `quantity` 값을 업데이트하고 영양소 계산 호출
+    if (newQuantity < 1) return; // 방어 코드
+
+    const updatedGrams = newQuantity * 100;
+    console.log('진입 지점:', entryPoint);
+    console.log('편집모드인지:', isEditMode);
+    if (entryPoint === 'favorites' && isEditMode) {
+      console.log('setSelectedFoodData:', selectedFoodData);
+        setSelectedFoodData((prevData) => {
+            const updatedData = {
+                ...prevData,
+                grams: updatedGrams,
+            };
+            console.log('handleQuantityChange - Updated Selected Food Data:', updatedData);
+
+            calculateNutrients(updatedGrams); // 업데이트 후 재계산
+            return updatedData;
+        });
+        return;
+    }
+
     setQuantity(newQuantity);
-    calculateNutrients(newQuantity * 100); // 100g 단위로 영양소 계산
+    if (selectedFoodData) {
+        calculateNutrients(updatedGrams); // grams와 동기화
+    }
+};
+  
+  const handleFavoriteToggle = (food) => {
+    console.log('즐겨찾기에 추가할 음식 정보 확인:', food);
+    const isCurrentlyFavorite = favoritesList.some((fav) => fav._id === food._id);
+    // const updatedFavorites = favoritesList.some((fav) => fav._id === food._id)
+    //   ? favoritesList.filter((fav) => fav._id !== food._id) // 이미 즐겨찾기인 경우 제거
+    //   : [...favoritesList, food]; // 즐겨찾기에 추가
+    const updatedFood = {
+      ...food,
+      isFavorite: !isCurrentlyFavorite, // `isFavorite` 값 반전
+    };
+  
+    // `favoritesList` 업데이트
+    const updatedFavorites = isCurrentlyFavorite
+      ? favoritesList.filter((fav) => fav._id !== food._id) // 이미 즐겨찾기인 경우 제거
+      : [...favoritesList, updatedFood]; // 새로운 객체 추가
+
+    setFavoritesList(updatedFavorites);
+    AsyncStorage.setItem('favorites', JSON.stringify(updatedFavorites)); // AsyncStorage에 저장
+    console.log('즐겨찾기에 업데이트 됬나 확인:', updatedFavorites);
+
   };
   
 
@@ -313,7 +304,13 @@ const FoodDetailModal = ({
 
           <TouchableOpacity
             style={styles.favoriteButton}
-            onPress={handleFavoriteToggle}
+            // onPress={handleFavoriteToggle}
+            onPress={() => {
+              handleFavoriteToggle(food, entryPoint);
+              if (isFavorite && entryPoint === 'favorites') {
+                onClose(); // 모달 닫기
+              }
+            }}
           >
             <Ionicons
               name={isFavorite ? 'star' : 'star-outline'}

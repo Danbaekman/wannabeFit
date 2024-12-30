@@ -351,7 +351,6 @@ const MealSettingScreen = ({ route = {}, navigation }) => {
         data={item.foods} // foods 배열 렌더링
         keyExtractor={(foodItem, index) => foodItem._id || `key-${index}`}
         renderItem={({ item: foodItem}) => {
-          console.log("Food Item:", foodItem); // foodItem 출력
 
           return (
             <View style={styles.foodRow} key={foodItem._id || `key-${index}`}>
@@ -457,6 +456,8 @@ const MealSettingScreen = ({ route = {}, navigation }) => {
 // 즐겨찾기 삭제 처리 함수 (로컬)
 const handleDeleteFavorite = async (foodId) => {
   try {
+    console.log('삭제할 음식 Id:', foodId);
+    console.log('삭제 전 즐겨찾기 리스트', favoritesList);
     // 현재 즐겨찾기 목록에서 해당 항목 제거
     const updatedFavorites = favoritesList.filter((item) => item._id !== foodId);
 
@@ -482,34 +483,48 @@ const handleDeleteFavorite = async (foodId) => {
     return selectedTab === 'favorites' ? favoritesList : mealList;
   };
 
-  const handleFavoriteToggle = async (food) => {
+  const handleFavoriteToggle = async (food, entryPoint) => {
     try {
       const savedFavorites = await AsyncStorage.getItem('favorites');
       const favorites = savedFavorites ? JSON.parse(savedFavorites) : [];
+      const isAlreadyFavorite = favorites.some((item) => item._id === (food._id || food.food?._id));
   
-      const isAlreadyFavorite = favorites.some((item) => item._id === food._id);
+      let updatedFavorites;
   
-      const updatedFavorites = isAlreadyFavorite
-        ? favorites.filter((item) => item._id !== food._id) // 즐겨찾기에서 제거
-        : [
-            ...favorites,
-            {
-              _id: food._id || food.food._id, // 음식 ID
-              food_name: food.food_name || food.food.food_name, // 음식 이름
-              calories:
-                food.calories ||
-                (food.food.calories * (food.grams / 100)).toFixed(2), // 칼로리 계산
-              grams: food.grams || 100, // 기본 섭취량
-              mealId: food.mealId || null, // mealId 저장
-            },
-          ];
+      if (isAlreadyFavorite) {
+        // 즐겨찾기 해제: 해당 항목 삭제
+        updatedFavorites = favorites.filter((item) => item._id !== (food._id || food.food?._id));
+      } else {
+        // 즐겨찾기 추가
+        updatedFavorites = [
+          ...favorites,
+          {
+            _id: food._id || food.food._id, // 음식 ID
+            food_name: food.food_name || food.food.food_name, // 음식 이름
+            calories:
+              food.calories ||
+              (food.food.calories * (food.grams / 100)).toFixed(2), // 칼로리 계산
+            grams: food.grams || 100, // 기본 섭취량
+            mealId: food.mealId || null, // mealId 저장
+          },
+        ];
+      }
   
+      // AsyncStorage 및 상태 업데이트
       await AsyncStorage.setItem('favorites', JSON.stringify(updatedFavorites));
-      setFavoritesList(updatedFavorites); // 상태 업데이트
+      setFavoritesList(updatedFavorites);
+  
+      console.log('Favorites updated:', updatedFavorites);
+  
+      // 즐겨찾기 해제 시 모달 닫기
+      if (isAlreadyFavorite && entryPoint === 'favorites') {
+        onClose(); // 모달 닫기
+      }
     } catch (error) {
       console.error('Error updating favorites in AsyncStorage:', error);
     }
   };
+  
   
   // 편집 후 서버로 저장 
   // const handleSaveEdit = async (updatedFoodData) => {
@@ -719,7 +734,6 @@ const handleDeleteFavorite = async (foodId) => {
         isEditMode={isEditMode}
         favoritesList={favoritesList} // 즐겨찾기 데이터 전달
         setFavoritesList={setFavoritesList} // 상태 업데이트 함수 전달
-
       />
 
       <Footer />
