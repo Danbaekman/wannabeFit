@@ -47,22 +47,24 @@ const MealSettingScreen = ({ route = {}, navigation }) => {
           const matchingMeal = mealList.find((meal) =>
             meal.foods.some((food) => food.food._id === favorite._id)
           );
-  
+        
           if (matchingMeal) {
             const matchingFood = matchingMeal.foods.find(
               (food) => food.food._id === favorite._id
             );
+        
             return {
               ...favorite,
-              food_name: matchingFood.food.food_name || favorite.food_name,
+              food_name: matchingFood?.food.food_name || favorite.food_name,
               calories:
-                matchingFood.food.calories * (matchingFood.grams / 100) || favorite.calories,
-              grams: matchingFood.grams || favorite.grams,
+                (matchingFood?.food.calories || 0) * (matchingFood?.grams / 100 || 1),
+              grams: matchingFood?.grams || favorite.grams,
               mealId: matchingMeal._id || favorite.mealId,
             };
           }
           return favorite;
         });
+        
   
         setFavoritesList(syncedFavorites);
         await AsyncStorage.setItem('favorites', JSON.stringify(syncedFavorites));
@@ -74,7 +76,10 @@ const MealSettingScreen = ({ route = {}, navigation }) => {
     fetchFavorites();
   }, [mealList]);
   
-
+  useEffect(() => {
+    console.log("Favorites List:", favoritesList);
+  }, [favoritesList]);
+  
   const mealTypeMap = {
     '아침': 'breakfast',
     '점심': 'lunch',
@@ -312,6 +317,8 @@ const MealSettingScreen = ({ route = {}, navigation }) => {
   );
 
   const renderMealItem = ({ item, index }) => {
+    console.log("Item in Meal List:", item); // item 데이터 확인
+  console.log("Item.food:", item.food); // item.food가 유효한지 확인
 
   return selectedTab === 'favorites' ? (
     
@@ -480,6 +487,7 @@ const handleDeleteFavorite = async (foodId) => {
   };
 
   const getFilteredMealList = () => {
+    console.log("Favorites List:", favoritesList);
     return selectedTab === 'favorites' ? favoritesList : mealList;
   };
 

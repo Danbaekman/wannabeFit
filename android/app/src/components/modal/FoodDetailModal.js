@@ -40,12 +40,23 @@ const FoodDetailModal = ({
       setQuantity(selectedFoodData.grams / 100); // grams 값에 따라 quantity 동기화
     }
   }, [selectedFoodData]);
+  // useEffect(() => {
+  //   if (entryPoint === 'favorites' && !selectedFoodData) {
+  //     console.warn("Favorites entry point without valid food data:", food);
+  //     setSelectedFoodData(food?.food || food); // 기본값 설정
+  //   }
+  // }, [entryPoint, selectedFoodData, food]);
+
   useEffect(() => {
     if (entryPoint === 'favorites' && !selectedFoodData) {
-      console.warn("Favorites entry point without valid food data:", food);
-      setSelectedFoodData(food?.food || food); // 기본값 설정
+      if (food?.food) {
+        setSelectedFoodData(food.food);
+      } else if (food) {
+        setSelectedFoodData(food);
+      } 
     }
-  }, [entryPoint, selectedFoodData, food]);
+  }, [entryPoint, food, selectedFoodData]);
+  
   
   useEffect(() => {
     if (visible && food) {
