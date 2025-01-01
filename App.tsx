@@ -20,6 +20,7 @@ import VolumeScreen from './android/app/src/screens/chart/volumescreen/VolumeScr
 import MaxWeightScreen from './android/app/src/screens/chart/maxweightscreen/MaxWeightScreen';
 import TotalSetsScreen from './android/app/src/screens/chart/totalsetsscreen/TotalSetsScreen';
 import TotalRepsScreen from './android/app/src/screens/chart/toprepsscreen/TopRepsScreen';
+import MealStatsScreen from './android/app/src/screens/chart/mealstatsscreen/MealStatsScreen';
 
 
 
@@ -47,6 +48,7 @@ const App = () => {
           <Stack.Screen name="MaxWeight" component={MaxWeightScreen} />
           <Stack.Screen name="TotalSets" component={TotalSetsScreen} />
           <Stack.Screen name="TopReps" component={TotalRepsScreen} />
+          <Stack.Screen name="MealStats" component={MealStatsScreen} />
         </Stack.Navigator>
       </NavigationContainer>
     </GestureHandlerRootView>
