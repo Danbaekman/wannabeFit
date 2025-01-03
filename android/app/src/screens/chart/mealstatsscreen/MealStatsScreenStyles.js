@@ -3,63 +3,38 @@ import { StyleSheet } from 'react-native';
 export default StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#008080', // 상단 여백 배경색
+    backgroundColor: '#008080',
   },
   statsSection: {
     marginBottom: 20,
     backgroundColor: '#FFFFFF',
     borderRadius: 10,
-    padding: 16,
     elevation: 2,
+    padding: 16,
   },
   sectionTitle: {
     fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 10,
     color: '#333',
-    textAlign: 'left', // 제목을 좌측 정렬
   },
-  statsContainer: {
+  
+  goalHeader: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    width: '100%',
-  },
-  statCard: {
-    flex: 1,
-    alignItems: 'center',
-    paddingVertical: 10,
-  },
-  statValue: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#008080',
-    marginBottom: 5,
-  },
-  statLabel: {
-    fontSize: 14,
-    color: '#555',
-    textAlign: 'center',
-  },
-  divider: {
-    height: '100%',
-    width: 1,
-    backgroundColor: '#E0E0E0',
-  },
-  buttonContainer: {
-    paddingVertical: 10,
-  },
-  statButton: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 10,
-    paddingVertical: 15,
-    paddingHorizontal: 20,
+    justifyContent: 'center',
     marginBottom: 10,
-    elevation: 2,
   },
-  statButtonText: {
+  goalSubtitle: {
     fontSize: 16,
+    fontWeight: 'bold',
     color: '#333',
-    fontWeight: '600',
+    marginLeft: 5,
+  },
+  goalStatus: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    color: '#008080',
   },
 });

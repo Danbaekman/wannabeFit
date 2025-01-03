@@ -56,6 +56,19 @@ const StaticsMainScreen = ({ navigation }) => {
       Alert.alert('Error', '운동 통계 데이터를 불러오지 못했습니다.');
     }
   };
+  const handleTabPress = (tab) => {
+    if (tab === '운동') {
+      console.log('운동 탭 클릭됨');
+      // 운동 탭 클릭 시의 동작을 지정
+      navigation.navigate('StaticsMain'); // 이미 운동 통계 화면일 경우 그대로 유지
+    } else if (tab === '식단') {
+      console.log('식단 탭 클릭됨');
+      navigation.navigate('MealStats'); // 식단 화면으로 이동
+    } else if (tab === '체중') {
+      console.log('체중 탭 클릭됨');
+      navigation.navigate('WeightStats'); // 체중 화면으로 이동 (WeightStatsScreen 가정)
+    }
+  };
 
   // 서버에서 주당 운동 횟수 데이터 가져오기
   const fetchWeeklyWorkoutCounts = async () => {
@@ -111,7 +124,7 @@ const StaticsMainScreen = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <Navbar />
-      <TabNavigation activeTab="운동" onTabPress={(tab) => console.log('탭 선택:', tab)} />
+      <TabNavigation activeTab="운동" onTabPress={handleTabPress} />
       <ContentWrapper>
         {/* 총 통계 제목 */}
         <Text style={styles.sectionTitle}>총 통계</Text>

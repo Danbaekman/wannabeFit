@@ -23,7 +23,6 @@ import TotalRepsScreen from './android/app/src/screens/chart/toprepsscreen/TopRe
 import MealStatsScreen from './android/app/src/screens/chart/mealstatsscreen/MealStatsScreen';
 
 
-
 const Stack = createNativeStackNavigator();
 
 const App = () => {
