@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, ScrollView } from 'react-native';
 import { Dimensions } from 'react-native';
-import Svg, { Rect, Text as SvgText } from 'react-native-svg';
+import Svg, { Rect, Text as SvgText, Circle } from 'react-native-svg';
 import Navbar from '../../../components/navbar/Navbar';
 import TabNavigation from '../../../components/tabnavigation/TabNavigation';
 import ContentWrapper from '../../../components/contentwrapper/ContentWrapper';
@@ -12,21 +12,38 @@ const MealStatsScreen = ({ navigation }) => {
 
   // State 관리
   const [weeklyCalories, setWeeklyCalories] = useState([]);
-  const [goalComparison, setGoalComparison] = useState({});
+  const [goalComparison, setGoalComparison] = useState([]);
+  const [nutritionData, setNutritionData] = useState({});
+  const [goalData, setGoalData] = useState({});
   const [selectedGoal, setSelectedGoal] = useState('다이어트'); // 사용자 목표
 
   // 하드코딩 데이터 설정
   useEffect(() => {
     const hardcodedWeeklyCalories = [1800, 2000, 2200, 1900, 2100, 2300, 2500];
-    const hardcodedGoalComparison = {
-      calorieComparison: 85,
-      proteinComparison: 90,
-      fatComparison: 80,
-      carbsComparison: 70,
+    const hardcodedGoalComparison = [
+      { day: '월', status: '만족' },
+      { day: '화', status: '보통' },
+      { day: '수', status: '미흡' },
+      { day: '목', status: '만족' },
+      { day: '금', status: '보통' },
+      { day: '토', status: '만족' },
+      { day: '일', status: '미흡' },
+    ];
+    const hardcodedGoalData = {
+      carbs: 200,
+      protein: 150,
+      fat: 50,
+    };
+    const hardcodedNutritionData = {
+      carbs: 174,
+      protein: 140,
+      fat: 40,
     };
 
     setWeeklyCalories(hardcodedWeeklyCalories);
     setGoalComparison(hardcodedGoalComparison);
+    setGoalData(hardcodedGoalData);
+    setNutritionData(hardcodedNutritionData);
   }, []);
 
   const handleTabPress = (tab) => {
@@ -37,33 +54,24 @@ const MealStatsScreen = ({ navigation }) => {
     }
   };
 
-  const generateLabels = () => {
-    const labels = [];
-    const days = ['일', '월', '화', '수', '목', '금', '토'];
-    const today = new Date();
-    for (let i = 0; i < 7; i++) {
-      const date = new Date();
-      date.setDate(today.getDate() - (6 - i));
-      const day = days[date.getDay()];
-      const formattedDate = `${day}\n${date.getMonth() + 1}.${date.getDate()}`;
-      labels.push(formattedDate);
-    }
-    return labels;
+  const calculatePercentage = (actual, target) => {
+    const percentage = ((actual / target) * 100).toFixed(0);
+    if (percentage >= 95) return { percentage, status: '과도' };
+    if (percentage >= 85) return { percentage, status: '근접' };
+    return { percentage, status: '미흡' };
   };
 
   const renderCustomBarChart = () => {
-    const barWidth = (screenWidth - 40) / weeklyCalories.length; // 각 막대의 너비
-    const maxHeight = 140; // 그래프 최대 높이 (텍스트 포함)
-    const boxPadding = 120; // 그래프 위아래 여유 공간 추가
-
-    const maxCalories = 2500; // 최대 칼로리 값
+    const barWidth = (screenWidth - 40) / weeklyCalories.length;
+    const maxHeight = 140;
+    const boxPadding = 120;
 
     return (
-      <Svg height={maxHeight + 100} width={screenWidth}>
+      <Svg height={maxHeight + boxPadding} width={screenWidth}>
         {weeklyCalories.map((value, index) => {
-          const barHeight = (value / maxCalories) * maxHeight; // 막대 높이 비율 조정
-          const x = index * barWidth + barWidth / 4; // X축 위치 계산
-          const y = maxHeight - barHeight + boxPadding / 2; // 막대가 박스 하단에 붙도록 Y축 조정
+          const barHeight = (value / 2500) * maxHeight;
+          const x = index * barWidth + barWidth / 4;
+          const y = maxHeight - barHeight + boxPadding / 2;
 
           return (
             <React.Fragment key={index}>
@@ -74,12 +82,12 @@ const MealStatsScreen = ({ navigation }) => {
                 width={barWidth / 2}
                 height={barHeight}
                 fill="#1abc9c"
-                rx={4} // 모서리 둥글게
+                rx={4}
               />
               {/* 막대 위 텍스트 */}
               <SvgText
-                x={x + barWidth / 4} // 막대의 중앙
-                y={y - 10} // 막대 위로 약간 띄움
+                x={x + barWidth / 4}
+                y={y - 10}
                 fontSize="12"
                 fill="#333"
                 textAnchor="middle"
@@ -88,22 +96,13 @@ const MealStatsScreen = ({ navigation }) => {
               </SvgText>
               {/* 날짜 텍스트 */}
               <SvgText
-                x={x + barWidth / 4} // 막대의 중앙
-                y={maxHeight + boxPadding / 2 + 20} // 요일 위치
+                x={x + barWidth / 4}
+                y={maxHeight + boxPadding / 2 + 20}
                 fontSize="12"
                 fill="#333"
                 textAnchor="middle"
               >
-                {generateLabels()[index].split('\n')[0]} {/* 요일 */}
-              </SvgText>
-              <SvgText
-                x={x + barWidth / 4} // 막대의 중앙
-                y={maxHeight + boxPadding / 2 + 35} // 날짜를 조금 더 아래로 위치
-                fontSize="12"
-                fill="#333"
-                textAnchor="middle"
-              >
-                {generateLabels()[index].split('\n')[1]} {/* 날짜 */}
+                {['월', '화', '수', '목', '금', '토', '일'][index]}
               </SvgText>
             </React.Fragment>
           );
@@ -112,46 +111,103 @@ const MealStatsScreen = ({ navigation }) => {
     );
   };
 
+  const renderPieChart = (actual, target, color, label) => {
+    const { percentage, status } = calculatePercentage(actual, target);
+    const radius = 40; // 원형 그래프 크기 조정
+    const circumference = 2 * Math.PI * radius;
+    const strokeDashoffset = circumference - (percentage / 100) * circumference;
+
+    return (
+      <View style={{ alignItems: 'center', margin: 10, width: '30%' }}>
+        <Svg width={100} height={100}>
+          {/* 배경 원 */}
+          <Circle
+            cx="50"
+            cy="50"
+            r={radius}
+            stroke="#e0e0e0"
+            strokeWidth="10"
+            fill="none"
+          />
+          {/* 비율 원 */}
+          <Circle
+            cx="50"
+            cy="50"
+            r={radius}
+            stroke={color}
+            strokeWidth="10"
+            fill="none"
+            strokeDasharray={`${circumference} ${circumference}`}
+            strokeDashoffset={strokeDashoffset}
+          />
+          {/* 텍스트 */}
+          <SvgText
+            x="50"
+            y="50"
+            textAnchor="middle"
+            alignmentBaseline="middle"
+            fontSize="12"
+            fill={color}
+          >
+            {`${percentage}%`}
+          </SvgText>
+        </Svg>
+        <Text style={{ marginTop: 5, fontSize: 12, color: '#333', textAlign: 'center' }}>
+          {label}: <Text style={{ color }}>{status}</Text>
+        </Text>
+      </View>
+    );
+  };
+
   return (
     <View style={styles.container}>
       <Navbar />
       <TabNavigation activeTab="식단" onTabPress={handleTabPress} />
 
-      <ContentWrapper>
-        {/* 제목: 총 칼로리 섭취량 */}
-        <Text style={styles.sectionTitle}>총 칼로리 섭취량</Text>
-        <View style={styles.statsSection}>
-          <ScrollView horizontal>
-            <View style={{ flexDirection: 'row' }}>{renderCustomBarChart()}</View>
-          </ScrollView>
-        </View>
-
-        {/* 제목: 영양소 비율 */}
-        <Text style={styles.sectionTitle}>영양소 비율</Text>
-        <View style={styles.statsSection}>
-          {/* 여기에 영양소 비율 섹션 내용 추가 가능 */}
-        </View>
-
-        {/* 제목: 목표 대비 섭취량 */}
-        <Text style={styles.sectionTitle}>목표 대비 섭취량</Text>
-        <View style={styles.statsSection}>
-          <View style={styles.goalHeader}>
-            <Text style={{ fontSize: 18, color: '#FF4500' }}>🔥</Text>
-            <Text style={styles.goalSubtitle}>내 목표: {selectedGoal}</Text>
+      <ScrollView>
+        <ContentWrapper>
+          {/* 제목: 총 칼로리 섭취량 */}
+          <Text style={styles.sectionTitle}>총 칼로리 섭취량</Text>
+          <View style={styles.statsSection}>
+            <ScrollView horizontal>
+              <View style={{ flexDirection: 'row' }}>{renderCustomBarChart()}</View>
+            </ScrollView>
           </View>
-          <Text style={styles.goalStatus}>
-            {goalComparison.calorieComparison > 80
-              ? '잘 수행 중이십니다!'
-              : goalComparison.calorieComparison > 50
-              ? '조금 미흡합니다'
-              : '많이 미흡합니다'}
-          </Text>
-          <Text style={styles.averageText}>
-            일주일 평균 <Text style={styles.highlightText}>{(weeklyCalories.reduce((a, b) => a + b, 0) / weeklyCalories.length).toFixed(0)} kcal</Text>을 먹었습니다.
-          </Text>
-          <Text style={styles.smallText}>평균 목표: 2,105kcal</Text>
-        </View>
-      </ContentWrapper>
+
+          {/* 제목: 영양성분 비율 */}
+          <Text style={styles.sectionTitle}>영양성분 비율</Text>
+          <View style={[styles.statsSection, { flexDirection: 'row', justifyContent: 'space-evenly' }]}>
+            {renderPieChart(
+              nutritionData.carbs,
+              goalData.carbs,
+              '#1abc9c',
+              '탄수화물'
+            )}
+            {renderPieChart(
+              nutritionData.protein,
+              goalData.protein,
+              '#3498db',
+              '단백질'
+            )}
+            {renderPieChart(
+              nutritionData.fat,
+              goalData.fat,
+              '#e74c3c',
+              '지방'
+            )}
+          </View>
+
+          {/* 제목: 목표 대비 성장률 */}
+          <Text style={styles.sectionTitle}>목표 대비 성장률</Text>
+          <View style={styles.statsSection}>
+            {goalComparison.map((day, index) => (
+              <Text key={index} style={styles.averageText}>
+                {`${day.day}: ${day.status}`}
+              </Text>
+            ))}
+          </View>
+        </ContentWrapper>
+      </ScrollView>
     </View>
   );
 };
