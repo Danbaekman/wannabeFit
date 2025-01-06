@@ -16,6 +16,7 @@ const MealStatsScreen = ({ navigation }) => {
   const [nutritionData, setNutritionData] = useState({});
   const [goalData, setGoalData] = useState({});
   const [selectedGoal, setSelectedGoal] = useState('다이어트'); // 사용자 목표
+  const [daysToGoal, setDaysToGoal] = useState(null); // 목표까지 남은 일수
 
   // 하드코딩 데이터 설정
   useEffect(() => {
@@ -33,12 +34,17 @@ const MealStatsScreen = ({ navigation }) => {
       carbs: 200,
       protein: 150,
       fat: 50,
+      goalDays: 30, // 목표 달성까지 총 소요 예상 일수
     };
     const hardcodedNutritionData = {
       carbs: 174,
       protein: 140,
       fat: 40,
     };
+
+    const daysElapsed = 15; // 현재까지 경과된 일수 (하드코딩 값)
+    const daysLeft = hardcodedGoalData.goalDays - daysElapsed;
+    setDaysToGoal(daysLeft);
 
     setWeeklyCalories(hardcodedWeeklyCalories);
     setGoalComparison(hardcodedGoalComparison);
@@ -48,9 +54,11 @@ const MealStatsScreen = ({ navigation }) => {
 
   const handleTabPress = (tab) => {
     if (tab === '운동') {
-      navigation.navigate('StaticsMain');
+      navigation.navigate('StaticsMain'); // 운동 통계 화면으로 이동
     } else if (tab === '체중') {
-      navigation.navigate('WeightStats');
+      navigation.navigate('WeightStats'); // 체중 통계 화면으로 이동
+    } else if (tab === '식단') {
+      navigation.navigate('MealStatsScreen'); // 현재 화면
     }
   };
 
@@ -111,14 +119,67 @@ const MealStatsScreen = ({ navigation }) => {
     );
   };
 
-  const renderPieChart = (actual, target, color, label) => {
-    const { percentage, status } = calculatePercentage(actual, target);
-    const radius = 40; // 원형 그래프 크기 조정
-    const circumference = 2 * Math.PI * radius;
-    const strokeDashoffset = circumference - (percentage / 100) * circumference;
+  const renderGrowthBarChart = () => {
+    const barWidth = (screenWidth - 80) / goalComparison.length; // 좌우 여백 고려
+    const maxHeight = 100; // 그래프 높이
+    const statusMap = { '미흡': 1, '보통': 2, '만족': 3 }; // 상태를 숫자로 매핑
+    const colorMap = { '미흡': '#e74c3c', '보통': '#f1c40f', '만족': '#2ecc71' }; // 상태별 색상
 
     return (
-      <View style={{ alignItems: 'center', margin: 10, width: '30%' }}>
+      <Svg height={maxHeight + 40} width={screenWidth}>
+        {/* Y축 눈금 */}
+        {['만족', '보통', '미흡'].map((status, index) => (
+          <SvgText
+            key={status}
+            x="20"
+            y={(maxHeight / 3) * index + 20}
+            fontSize="12"
+            fill="#333"
+            textAnchor="end"
+          >
+            {status}
+          </SvgText>
+        ))}
+        {/* 상태 막대 */}
+        {goalComparison.map((item, index) => {
+          const barHeight = (statusMap[item.status] / 3) * maxHeight;
+          const x = index * barWidth + 60; // X축 위치
+          const y = maxHeight - barHeight + 20; // Y축 위치
+
+          return (
+            <React.Fragment key={index}>
+              <Rect
+                x={x}
+                y={y}
+                width={barWidth / 2}
+                height={barHeight}
+                fill={colorMap[item.status]}
+                rx={4}
+              />
+              <SvgText
+                x={x + barWidth / 4}
+                y={maxHeight + 30}
+                fontSize="12"
+                fill="#333"
+                textAnchor="middle"
+              >
+                {item.day}
+              </SvgText>
+            </React.Fragment>
+          );
+        })}
+      </Svg>
+    );
+  };
+
+  const renderPieChart = (actual, target, color, label) => {
+    const { percentage, status } = calculatePercentage(actual, target);
+    const radius = 40; // 원형 그래프 크기
+    const circumference = 2 * Math.PI * radius;
+    const strokeDashoffset = circumference - (percentage / 100) * circumference;
+  
+    return (
+      <View style={styles.pieChartWrapper}>
         <Svg width={100} height={100}>
           {/* 배경 원 */}
           <Circle
@@ -140,24 +201,27 @@ const MealStatsScreen = ({ navigation }) => {
             strokeDasharray={`${circumference} ${circumference}`}
             strokeDashoffset={strokeDashoffset}
           />
-          {/* 텍스트 */}
+          {/* 퍼센트 텍스트 */}
           <SvgText
             x="50"
             y="50"
             textAnchor="middle"
             alignmentBaseline="middle"
-            fontSize="12"
+            fontSize="14"
             fill={color}
           >
             {`${percentage}%`}
           </SvgText>
         </Svg>
-        <Text style={{ marginTop: 5, fontSize: 12, color: '#333', textAlign: 'center' }}>
-          {label}: <Text style={{ color }}>{status}</Text>
+        {/* 설명 텍스트 */}
+        <Text style={styles.pieChartText}>
+          {label}: <Text style={styles.pieChartTextHighlight}>{status}</Text>
         </Text>
       </View>
     );
   };
+  
+  
 
   return (
     <View style={styles.container}>
@@ -176,35 +240,50 @@ const MealStatsScreen = ({ navigation }) => {
 
           {/* 제목: 영양성분 비율 */}
           <Text style={styles.sectionTitle}>영양성분 비율</Text>
-          <View style={[styles.statsSection, { flexDirection: 'row', justifyContent: 'space-evenly' }]}>
-            {renderPieChart(
-              nutritionData.carbs,
-              goalData.carbs,
-              '#1abc9c',
-              '탄수화물'
-            )}
-            {renderPieChart(
-              nutritionData.protein,
-              goalData.protein,
-              '#3498db',
-              '단백질'
-            )}
-            {renderPieChart(
-              nutritionData.fat,
-              goalData.fat,
-              '#e74c3c',
-              '지방'
+          <View style={[styles.statsSection, styles.pieChartContainer]}>
+          <View style={styles.pieChartWrapper}>
+    {renderPieChart(
+      nutritionData.carbs,
+      goalData.carbs,
+      '#1abc9c',
+      '탄수화물'
+    )}
+  </View>
+  <View style={styles.pieChartWrapper}>
+    {renderPieChart(
+      nutritionData.protein,
+      goalData.protein,
+      '#3498db',
+      '단백질'
+    )}
+  </View>
+  <View style={styles.pieChartWrapper}>
+    {renderPieChart(
+      nutritionData.fat,
+      goalData.fat,
+      '#e74c3c',
+      '지방'
+    )}
+  </View>
+</View>
+
+          {/* 제목: 목표까지 남은 날짜 */}
+          <View style={styles.statsSection}>
+            {daysToGoal > 0 ? (
+              <Text style={[styles.goalStatus, { textAlign: 'center' }]}>
+                🔥 {selectedGoal}까지 약 {daysToGoal}일 남았습니다.
+              </Text>
+            ) : (
+              <Text style={[styles.goalStatus, { textAlign: 'center', color: '#FF4500' }]}>
+                🎉 {selectedGoal} 목표를 달성하셨습니다! 축하드립니다!
+              </Text>
             )}
           </View>
 
           {/* 제목: 목표 대비 성장률 */}
           <Text style={styles.sectionTitle}>목표 대비 성장률</Text>
           <View style={styles.statsSection}>
-            {goalComparison.map((day, index) => (
-              <Text key={index} style={styles.averageText}>
-                {`${day.day}: ${day.status}`}
-              </Text>
-            ))}
+            {renderGrowthBarChart()}
           </View>
         </ContentWrapper>
       </ScrollView>
