@@ -10,9 +10,10 @@ export default StyleSheet.create({
         backgroundColor: '#FFFFFF',
         borderRadius: 10,
         elevation: 2,
-        padding: 16,
+        padding: 20,
         position: 'relative',
         flexDirection: 'column', // 상하 배치
+        overflow: 'visible',
       },
       
     sectionTitle: {
@@ -47,33 +48,31 @@ export default StyleSheet.create({
       fontWeight: 'bold',
     },
     filterContainer: {
-        marginBottom: 10
-    },
-    filterButton: {
-        backgroundColor: '#1abc9c',
-        paddingVertical: 8,
-        paddingHorizontal: 12,
-        borderRadius: 4,
-        elevation: 2,
-        flexDirection: 'row',
-        alignItems: 'center',
+        marginBottom: 10,
+        zIndex: 2000, // 다른 요소보다 위로 표시
+        elevation: 10, // Android에서 우선 적용
+      },
+      filterButton: {
+        borderBottomWidth: 1, // 밑줄 추가
+        borderBottomColor: '#008080', // 밑줄 색
         alignSelf: 'flex-end', // 오른쪽 정렬
       },
-    filterButtonText: {
-      color: '#fff',
-      fontSize: 14,
-      fontWeight: 'bold',
-    },
+      filterButtonText: {
+        color: '#008080', // 텍스트 색상 (검정)
+        fontSize: 14,
+        fontWeight: 'bold',
+        textDecorationLine: 'none', // 텍스트 밑줄 제거
+      },
     filterDropdown: {
-      position: 'absolute',
-      top: 40,
-      right: 0, // 버튼과 정렬
-      backgroundColor: '#fff',
-      borderRadius: 4,
-      padding: 10,
-      elevation: 5,
-      zIndex: 1000,
-    },
+        position: 'absolute',
+        top: 30,
+        right: 0,
+        backgroundColor: '#fff',
+        borderRadius: 4,
+        
+        elevation: 10,
+        zIndex: 2000, // 항상 가장 앞쪽에 표시
+      },
     filterOption: {
       paddingVertical: 8,
       paddingHorizontal: 10,
@@ -83,13 +82,14 @@ export default StyleSheet.create({
       color: '#333',
     },
     dateRangeContainer: {
-        flexDirection: 'row',
+        flexDirection: 'row', // 이전/다음 버튼과 날짜 가로 배치
         alignItems: 'center',
         justifyContent: 'center',
-        marginVertical: 10,
+        marginBottom: 10, // 제목과 간격 추가
       },
       arrowButton: {
-        padding: 10,
+        paddingHorizontal: 10,
+        paddingVertical: 5,
         backgroundColor: '#f0f0f0',
         borderRadius: 5,
         marginHorizontal: 5,
@@ -99,9 +99,9 @@ export default StyleSheet.create({
         fontWeight: 'bold',
       },
       dateRangeText: {
-        fontSize: 16,
+        fontSize: 14,
         fontWeight: 'bold',
-        textAlign: 'center',
+        color: '#333',
       },
       
   });

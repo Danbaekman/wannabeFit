@@ -24,6 +24,7 @@ const MealStatsScreen = ({ navigation }) => {
   const [dailyCalories, setDailyCalories] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
   const [currentDate, setCurrentDate] = useState(new Date());
+  
 
   const getDateRange = (currentDate) => {
     const endDate = new Date(currentDate);
@@ -51,6 +52,10 @@ const MealStatsScreen = ({ navigation }) => {
       filterDataForLast30Days();
     }
   }, [dailyCalories, currentDate]);
+
+  useEffect(() => {
+    fetchNutritionDistribution(); // 영양성분 데이터 가져오기
+  }, []);
 
   const fetchFirstRecordedDate = async () => {
     try {
@@ -98,6 +103,37 @@ const MealStatsScreen = ({ navigation }) => {
     }
   };
 
+  // 영양성분 서버에서 받아오기
+ // 영양성분 데이터 서버에서 받아오기
+const fetchNutritionDistribution = async (selectedPeriod) => {
+    try {
+      const token = await AsyncStorage.getItem('jwtToken');
+      const response = await fetch(`${CONFIG.API_BASE_URL}/statistic/nutrition/distribution?period=${selectedPeriod}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+  
+      if (!response.ok) {
+        console.error('Failed to fetch nutrition distribution:', response.statusText);
+        return;
+      }
+  
+      const data = await response.json();
+      setNutritionData(data); // 받아온 데이터로 상태 업데이트
+    } catch (error) {
+      console.error('Failed to fetch nutrition distribution:', error.message);
+    }
+  };
+  
+  // 필터 버튼 선택 시 호출
+  const handleFilterChange = (selectedPeriod) => {
+    setFilterPeriod(selectedPeriod); // 선택된 기간을 상태에 저장 (UI 업데이트용)
+    fetchNutritionDistribution(selectedPeriod); // 서버에서 데이터 새로 가져오기
+  };
+  
+
   const filterDataForLast30Days = () => {
     const { startDate, endDate } = getDateRange(currentDate);
     const filtered = dailyCalories.filter((entry) => {
@@ -144,23 +180,28 @@ const MealStatsScreen = ({ navigation }) => {
     if (!filteredData || filteredData.length === 0) {
       return <Text style={{ textAlign: 'center', marginTop: 20 }}>데이터가 없습니다.</Text>;
     }
-
+  
     const barWidth = 30;
     const maxHeight = 140;
     const padding = 20;
     const maxCalories = Math.max(...filteredData.map((entry) => entry.totalCalories), 1);
-
+  
     return (
       <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-        <Svg height={maxHeight + 60} width={filteredData.length * (barWidth + padding)}>
+        <Svg height={maxHeight + 60} width={filteredData.length * (barWidth + padding)} style={{ marginTop: 60 }}>
           {filteredData.map((entry, index) => {
             const barHeight = (entry.totalCalories / maxCalories) * maxHeight;
             const x = index * (barWidth + padding);
             const y = maxHeight - barHeight;
-
+            const date = new Date(entry.date);
+            const day = date.toLocaleDateString('ko-KR', { weekday: 'short' }); // 요일 (월, 화, 수 등)
+            const dayAndMonth = date.toLocaleDateString('ko-KR', { day: 'numeric', month: 'numeric' }); // 월/일
+  
             return (
               <React.Fragment key={index}>
+                {/* 막대 */}
                 <Rect x={x} y={y} width={barWidth} height={barHeight} fill="#1abc9c" rx={4} />
+                {/* 칼로리 값 */}
                 <SvgText
                   x={x + barWidth / 2}
                   y={y - 10}
@@ -170,6 +211,7 @@ const MealStatsScreen = ({ navigation }) => {
                 >
                   {Math.floor(entry.totalCalories)}
                 </SvgText>
+                {/* 날짜 (요일 포함) */}
                 <SvgText
                   x={x + barWidth / 2}
                   y={maxHeight + 20}
@@ -177,10 +219,19 @@ const MealStatsScreen = ({ navigation }) => {
                   fill="#666"
                   textAnchor="middle"
                 >
-                  {new Date(entry.date).toLocaleDateString('ko-KR', {
-                    day: 'numeric',
-                    month: 'numeric',
-                  })}
+                  {day} {/* 요일 */}
+                </SvgText>
+                <SvgText
+                x={x + barWidth / 2}
+                y={maxHeight + 40} // 요일 아래에 위치
+                fontSize="12"
+                fill="#666"
+                textAnchor="middle"
+                >
+                {new Date(entry.date)
+                    .toLocaleDateString('ko-KR', { day: 'numeric', month: 'numeric' }) // 날짜 포맷
+                    .replace(/\. /g, '.') // 중간 공백 제거
+                    .replace(/\.$/, '')} {/* 마지막 . 제거 */}
                 </SvgText>
               </React.Fragment>
             );
@@ -189,8 +240,8 @@ const MealStatsScreen = ({ navigation }) => {
       </ScrollView>
     );
   };
-  const renderPieChart = (actual, target, color, label) => {
-    const { percentage, status } = calculatePercentage(actual, target);
+  
+  const renderPieChart = (percentage, color, label) => {
     const radius = 40;
     const circumference = 2 * Math.PI * radius;
     const strokeDashoffset = circumference - (percentage / 100) * circumference;
@@ -198,7 +249,9 @@ const MealStatsScreen = ({ navigation }) => {
     return (
       <View style={styles.pieChartWrapper}>
         <Svg width={100} height={100}>
+          {/* Background Circle */}
           <Circle cx="50" cy="50" r={radius} stroke="#e0e0e0" strokeWidth="10" fill="none" />
+          {/* Percentage Circle */}
           <Circle
             cx="50"
             cy="50"
@@ -209,16 +262,16 @@ const MealStatsScreen = ({ navigation }) => {
             strokeDasharray={`${circumference} ${circumference}`}
             strokeDashoffset={strokeDashoffset}
           />
+          {/* Percentage Text */}
           <SvgText x="50" y="50" textAnchor="middle" alignmentBaseline="middle" fontSize="14" fill={color}>
             {`${percentage}%`}
           </SvgText>
         </Svg>
-        <Text style={styles.pieChartText}>
-          {label}: <Text style={styles.pieChartTextHighlight}>{status}</Text>
-        </Text>
+        <Text style={styles.pieChartText}>{label}</Text>
       </View>
     );
   };
+
   // 성장률 그래프 추가
 const renderGrowthBarChart = () => {
     if (!goalComparison || goalComparison.length === 0) {
@@ -288,20 +341,19 @@ const renderGrowthBarChart = () => {
 
       <ScrollView>
         <ContentWrapper>
-          <View style={styles.dateRangeContainer}>
-            <TouchableOpacity onPress={handlePrevious30Days} style={styles.arrowButton}>
-              <Text style={styles.arrowText}>{'<'}</Text>
-            </TouchableOpacity>
-            <Text style={styles.dateRangeText}>
-              {startDate.toLocaleDateString('ko-KR')} ~ {endDate.toLocaleDateString('ko-KR')}
-            </Text>
-            <TouchableOpacity onPress={handleNext30Days} style={styles.arrowButton}>
-              <Text style={styles.arrowText}>{'>'}</Text>
-            </TouchableOpacity>
-          </View>
-
           <Text style={styles.sectionTitle}>총 칼로리 섭취량</Text>
           <View style={styles.statsSection}>
+            <View style={styles.dateRangeContainer}>
+                <TouchableOpacity onPress={handlePrevious30Days} style={styles.arrowButton}>
+                <Text style={styles.arrowText}>{'<'}</Text>
+                </TouchableOpacity>
+                <Text style={styles.dateRangeText}>
+                {startDate.toLocaleDateString('ko-KR')} ~ {endDate.toLocaleDateString('ko-KR')}
+                </Text>
+                <TouchableOpacity onPress={handleNext30Days} style={styles.arrowButton}>
+                <Text style={styles.arrowText}>{'>'}</Text>
+                </TouchableOpacity>
+            </View>
             <ScrollView horizontal>
               <View style={{ flexDirection: 'row' }}>{renderCustomBarChart()}</View>
             </ScrollView>
@@ -314,73 +366,51 @@ const renderGrowthBarChart = () => {
   {/* 흰색 박스 */}
   <View style={styles.statsSection}>
     {/* 필터 버튼 */}
-    <View style={styles.filterContainer}>
-      <TouchableOpacity
-        style={styles.filterButton}
-        onPress={() => setIsFilterVisible(!isFilterVisible)}
-      >
-        <Text style={styles.filterButtonText}>
-          {filterPeriod} <Text style={styles.filterArrow}>▼</Text>
-        </Text>
-      </TouchableOpacity>
-      {isFilterVisible && (
-        <View style={styles.filterDropdown}>
-          {['1주일', '1개월', '3개월', '6개월', '1년'].map((period) => (
-            <TouchableOpacity
-              key={period}
-              style={styles.filterOption}
-              onPress={() => handleFilterChange(period)}
-            >
-              <Text style={styles.filterOptionText}>{period}</Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-      )}
+   {/* 필터 버튼 */}
+<View style={styles.filterContainer}>
+  <TouchableOpacity
+    style={styles.filterButton}
+    onPress={() => setIsFilterVisible(!isFilterVisible)}
+  >
+    <Text style={styles.filterButtonText}>
+      {filterPeriod} <Text style={styles.filterArrow}>▼</Text>
+    </Text>
+  </TouchableOpacity>
+  {isFilterVisible && (
+    <View style={styles.filterDropdown}>
+      {['1주일', '1개월', '3개월', '6개월', '1년', '전체'].map((period) => (
+        <TouchableOpacity
+          key={period}
+          style={styles.filterOption}
+          onPress={() => {
+            handleFilterChange(period); // 선택된 기간을 서버에 전달하여 데이터를 가져옴
+            setIsFilterVisible(false); // 드롭다운 닫기
+          }}
+        >
+          <Text style={styles.filterOptionText}>{period}</Text>
+        </TouchableOpacity>
+      ))}
     </View>
+  )}
+</View>
+
     {/* 원형 그래프 */}
     <View style={styles.pieChartContainer}>
-      <View style={styles.pieChartWrapper}>
-        {renderPieChart(
-          nutritionData.carbs,
-          goalData.carbs,
-          '#1abc9c',
-          '탄수화물'
-        )}
-      </View>
-      <View style={styles.pieChartWrapper}>
-        {renderPieChart(
-          nutritionData.protein,
-          goalData.protein,
-          '#3498db',
-          '단백질'
-        )}
-      </View>
-      <View style={styles.pieChartWrapper}>
-        {renderPieChart(
-          nutritionData.fat,
-          goalData.fat,
-          '#e74c3c',
-          '지방'
-        )}
-      </View>
+    <View style={styles.pieChartWrapper}>
+        {renderPieChart(Math.round(parseFloat(nutritionData.carbs)), '#1abc9c', '탄수화물')}
     </View>
+    <View style={styles.pieChartWrapper}>
+        {renderPieChart(Math.round(parseFloat(nutritionData.protein)), '#3498db', '단백질')}
+    </View>
+    <View style={styles.pieChartWrapper}>
+        {renderPieChart(Math.round(parseFloat(nutritionData.fat)), '#e74c3c', '지방')}
+    </View>
+    </View>
+
   </View>
 </View>
 
 
-
-          {/* 제목: 목표까지 남은 날짜 */}
-          <View style={styles.statsSection}>
-            {daysToGoal > 0 ? (
-              <Text style={[styles.goalStatus, { textAlign: 'center' }]}>
-                🔥 {selectedGoal}까지 약 {daysToGoal}일 남았습니다.
-              </Text>
-            ) : (
-              <Text style={[styles.goalStatus, { textAlign: 'center', color: '#FF4500' }]}>
-                🎉 {selectedGoal} 목표를 달성하셨습니다! 축하드립니다!
-              </Text>
-            )}
-          </View>
 
           {/* 제목: 목표 대비 성장률 */}
           <Text style={styles.sectionTitle}>목표 대비 성장률</Text>
