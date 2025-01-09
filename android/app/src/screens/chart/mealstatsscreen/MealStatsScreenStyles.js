@@ -82,5 +82,27 @@ export default StyleSheet.create({
       fontSize: 14,
       color: '#333',
     },
+    dateRangeContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginVertical: 10,
+      },
+      arrowButton: {
+        padding: 10,
+        backgroundColor: '#f0f0f0',
+        borderRadius: 5,
+        marginHorizontal: 5,
+      },
+      arrowText: {
+        fontSize: 18,
+        fontWeight: 'bold',
+      },
+      dateRangeText: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        textAlign: 'center',
+      },
+      
   });
   

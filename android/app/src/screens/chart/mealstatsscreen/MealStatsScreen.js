@@ -9,106 +9,130 @@ import styles from './MealStatsScreenStyles';
 import CONFIG from '../../../config';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-
 const MealStatsScreen = ({ navigation }) => {
   const screenWidth = Dimensions.get('window').width;
 
   // State 관리
-  const [weeklyCalories, setWeeklyCalories] = useState([]);
   const [goalComparison, setGoalComparison] = useState([]);
   const [nutritionData, setNutritionData] = useState({});
   const [goalData, setGoalData] = useState({});
-  const [selectedGoal, setSelectedGoal] = useState('다이어트'); // 사용자 목표
-  const [daysToGoal, setDaysToGoal] = useState(null); // 목표까지 남은 일수
-  const [filterPeriod, setFilterPeriod] = useState('1주일'); // 기본 필터 값
-  const [isFilterVisible, setIsFilterVisible] = useState(false); // 필터 드롭다운 표시 여부
+  const [selectedGoal, setSelectedGoal] = useState('다이어트');
+  const [daysToGoal, setDaysToGoal] = useState(null);
+  const [filterPeriod, setFilterPeriod] = useState('1주일');
+  const [isFilterVisible, setIsFilterVisible] = useState(false);
   const [firstRecordedDate, setFirstRecordedDate] = useState(null);
   const [dailyCalories, setDailyCalories] = useState([]);
-  const [currentPage, setCurrentPage] = useState(0); // 현재 페이지 (7개 단위로 슬라이싱)
-  
+  const [filteredData, setFilteredData] = useState([]);
+  const [currentDate, setCurrentDate] = useState(new Date());
+
+  const getDateRange = (currentDate) => {
+    const endDate = new Date(currentDate);
+    const startDate = new Date(endDate);
+    startDate.setDate(startDate.getDate() - 29);
+    return { startDate, endDate };
+  };
 
   useEffect(() => {
-    fetchFirstRecordedDate();
-  }, []);
-
-  useEffect(() => {
-    if (firstRecordedDate) {
-      fetchCaloriesData(firstRecordedDate).then((data) => {
-        setWeeklyCalories(data); // 모든 데이터를 배열로 저장
-      });
-    }
+    const fetchData = async () => {
+      try {
+        await fetchFirstRecordedDate();
+        if (firstRecordedDate) {
+          await fetchCaloriesData(firstRecordedDate);
+        }
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
+    };
+    fetchData();
   }, [firstRecordedDate]);
-  
-  
-  // 첫 식단 기록한 날짜
+
+  useEffect(() => {
+    if (dailyCalories.length > 0) {
+      filterDataForLast30Days();
+    }
+  }, [dailyCalories, currentDate]);
+
   const fetchFirstRecordedDate = async () => {
     try {
       const token = await AsyncStorage.getItem('jwtToken');
-      const response = await fetch(`${CONFIG.API_BASE_URL}/statistic/meal/first-recorded-date`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      });
-        if (!response.ok) {
+      const response = await fetch(
+        `${CONFIG.API_BASE_URL}/statistic/meal/first-recorded-date`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+      if (!response.ok) {
         console.error('HTTP Error:', response.status, response.statusText);
         return;
       }
       const data = await response.json();
       setFirstRecordedDate(data.firstRecordedDate);
-      console.log('First recorded date:', data.firstRecordedDate);
     } catch (error) {
       console.error('Error fetching first recorded date:', error.message);
     }
   };
-  
-  // 일별 기록된 칼로리들 불러오기
+
   const fetchCaloriesData = async (startDate) => {
-    if (!startDate) return; // 첫 기록 날짜가 없으면 실행하지 않음
+    if (!startDate) return;
 
     const token = await AsyncStorage.getItem('jwtToken');
-    const endDate = new Date().toISOString().split('T')[0]; // 현재 날짜
-
+    const endDate = new Date().toISOString().split('T')[0];
     try {
-        console.log(
-            `Request URL: ${CONFIG.API_BASE_URL}/statistic/calories/daily?startDate=${startDate}&endDate=${endDate}`
-          );
-          
       const response = await fetch(
         `${CONFIG.API_BASE_URL}/statistic/calories/daily?startDate=${startDate}&endDate=${endDate}`,
         {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
         }
       );
-
       if (!response.ok) {
         console.error('HTTP Error:', response.status, response.statusText);
         return;
       }
-
       const data = await response.json();
-      setDailyCalories(data); // 상태에 일별 칼로리 데이터 저장
-      console.log('Fetched daily calories:', data);
+      setDailyCalories(data);
     } catch (error) {
       console.error('Error fetching daily calories:', error.message);
     }
   };
 
-  
-  
-  
+  const filterDataForLast30Days = () => {
+    const { startDate, endDate } = getDateRange(currentDate);
+    const filtered = dailyCalories.filter((entry) => {
+      const entryDate = new Date(entry.date);
+      return entryDate >= startDate && entryDate <= endDate;
+    });
+    setFilteredData(filtered);
+  };
+
   const handleTabPress = (tab) => {
     if (tab === '운동') {
-      navigation.navigate('StaticsMain'); // 운동 통계 화면으로 이동
+      navigation.navigate('StaticsMain');
     } else if (tab === '체중') {
-      navigation.navigate('WeightStats'); // 체중 통계 화면으로 이동
-    } else if (tab === '식단') {
-      navigation.navigate('MealStatsScreen'); // 현재 화면
+      navigation.navigate('WeightStats');
     }
   };
 
+  const handlePrevious30Days = () => {
+    setCurrentDate((prev) => {
+      const newDate = new Date(prev);
+      newDate.setDate(newDate.getDate() - 30);
+      return newDate;
+    });
+  };
+
+  const handleNext30Days = () => {
+    const today = new Date();
+    if (currentDate < today) {
+      setCurrentDate((prev) => {
+        const newDate = new Date(prev);
+        newDate.setDate(newDate.getDate() + 30);
+        return newDate;
+      });
+    }
+  };
   const calculatePercentage = (actual, target) => {
     const percentage = ((actual / target) * 100).toFixed(0);
     if (percentage >= 95) return { percentage, status: '과도' };
@@ -116,114 +140,96 @@ const MealStatsScreen = ({ navigation }) => {
     return { percentage, status: '미흡' };
   };
 
-  const handleFilterChange = (period) => {
-    setFilterPeriod(period);
-    setIsFilterVisible(false); // 드롭다운 닫기
-  };
-  
-
-
   const renderCustomBarChart = () => {
-    const barWidth = 30; // 각 막대의 너비
-    const maxHeight = 140; // 기본 막대 최대 높이
-    const padding = 20; // 막대 간격
-    const itemsPerPage = 7; // 한 페이지에 보여줄 데이터 개수
-    const currentData = dailyCalories.slice(
-      currentPage * itemsPerPage,
-      (currentPage + 1) * itemsPerPage
-    ); // 현재 페이지 데이터 슬라이싱
-  
-    // 최고 칼로리 계산
-    const maxCalories = Math.max(...currentData.map((entry) => entry.totalCalories), 1);
-  
-    // 흰색 박스 높이 설정 (최대 250px 기준, 최고 칼로리 비율 적용)
-    const dynamicHeight = Math.min(250, maxCalories / 10 + 150);
-  
-    const totalWidth = currentData.length * (barWidth + padding);
-  
-    const chartPaddingTop = 40; // 그래프 위쪽 패딩
-    const barAndTextPadding = 20; // 막대와 텍스트 사이 패딩
-    const textPaddingBetween = 17; // 요일과 날짜 간의 패딩
-    const bottomPadding = 30; // 하단 여백
+    if (!filteredData || filteredData.length === 0) {
+      return <Text style={{ textAlign: 'center', marginTop: 20 }}>데이터가 없습니다.</Text>;
+    }
 
-  
+    const barWidth = 30;
+    const maxHeight = 140;
+    const padding = 20;
+    const maxCalories = Math.max(...filteredData.map((entry) => entry.totalCalories), 1);
+
     return (
-      <View style={{ height: dynamicHeight - bottomPadding }}>
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={{ paddingHorizontal: 10 }}
-        >
-          <Svg height={dynamicHeight} width={totalWidth}>
-            {currentData.map((entry, index) => {
-              const barHeight = (entry.totalCalories / maxCalories) * maxHeight;
-              const x = index * (barWidth + padding);
-              const y = maxHeight - barHeight + chartPaddingTop;
-  
-              return (
-                <React.Fragment key={index}>
-                  {/* 막대 */}
-                  <Rect
-                    x={x}
-                    y={y}
-                    width={barWidth}
-                    height={barHeight}
-                    fill="#1abc9c"
-                    rx={4}
-                  />
-                  {/* 칼로리 값 */}
-                  <SvgText
-                    x={x + barWidth / 2}
-                    y={y - barAndTextPadding+10}
-                    fontSize="12"
-                    fill="#333"
-                    textAnchor="middle"
-                  >
-                    {Math.floor(entry.totalCalories)}
-                  </SvgText>
-                  {/* 요일 */}
-                  <SvgText
-                    x={x + barWidth / 2}
-                    y={maxHeight + chartPaddingTop + barAndTextPadding}
-                    fontSize="12"
-                    fill="#666"
-                    textAnchor="middle"
-                  >
-                    {new Date(entry.date).toLocaleDateString('ko-KR', {
-                      weekday: 'short',
-                    })}
-                  </SvgText>
-                  {/* 날짜 */}
-                  <SvgText
-                    x={x + barWidth / 2}
-                    y={
-                      maxHeight +
-                      chartPaddingTop +
-                      barAndTextPadding +
-                      textPaddingBetween
-                    }
-                    fontSize="12"
-                    fill="#333"
-                    textAnchor="middle"
-                  >
-                    {`${new Date(entry.date).getMonth() + 1}`.padStart(2, '0') + '.' + `${new Date(entry.date).getDate()}`.padStart(2, '0')}
-                  </SvgText>
-                </React.Fragment>
-              );
-            })}
-          </Svg>
-        </ScrollView>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+        <Svg height={maxHeight + 60} width={filteredData.length * (barWidth + padding)}>
+          {filteredData.map((entry, index) => {
+            const barHeight = (entry.totalCalories / maxCalories) * maxHeight;
+            const x = index * (barWidth + padding);
+            const y = maxHeight - barHeight;
+
+            return (
+              <React.Fragment key={index}>
+                <Rect x={x} y={y} width={barWidth} height={barHeight} fill="#1abc9c" rx={4} />
+                <SvgText
+                  x={x + barWidth / 2}
+                  y={y - 10}
+                  fontSize="12"
+                  fill="#333"
+                  textAnchor="middle"
+                >
+                  {Math.floor(entry.totalCalories)}
+                </SvgText>
+                <SvgText
+                  x={x + barWidth / 2}
+                  y={maxHeight + 20}
+                  fontSize="12"
+                  fill="#666"
+                  textAnchor="middle"
+                >
+                  {new Date(entry.date).toLocaleDateString('ko-KR', {
+                    day: 'numeric',
+                    month: 'numeric',
+                  })}
+                </SvgText>
+              </React.Fragment>
+            );
+          })}
+        </Svg>
+      </ScrollView>
+    );
+  };
+  const renderPieChart = (actual, target, color, label) => {
+    const { percentage, status } = calculatePercentage(actual, target);
+    const radius = 40;
+    const circumference = 2 * Math.PI * radius;
+    const strokeDashoffset = circumference - (percentage / 100) * circumference;
+
+    return (
+      <View style={styles.pieChartWrapper}>
+        <Svg width={100} height={100}>
+          <Circle cx="50" cy="50" r={radius} stroke="#e0e0e0" strokeWidth="10" fill="none" />
+          <Circle
+            cx="50"
+            cy="50"
+            r={radius}
+            stroke={color}
+            strokeWidth="10"
+            fill="none"
+            strokeDasharray={`${circumference} ${circumference}`}
+            strokeDashoffset={strokeDashoffset}
+          />
+          <SvgText x="50" y="50" textAnchor="middle" alignmentBaseline="middle" fontSize="14" fill={color}>
+            {`${percentage}%`}
+          </SvgText>
+        </Svg>
+        <Text style={styles.pieChartText}>
+          {label}: <Text style={styles.pieChartTextHighlight}>{status}</Text>
+        </Text>
       </View>
     );
   };
+  // 성장률 그래프 추가
+const renderGrowthBarChart = () => {
+    if (!goalComparison || goalComparison.length === 0) {
+      return <Text style={{ textAlign: 'center', marginTop: 20 }}>데이터가 없습니다.</Text>;
+    }
   
-
-  const renderGrowthBarChart = () => {
-    const barWidth = (screenWidth - 80) / goalComparison.length; // 좌우 여백 고려
-    const maxHeight = 100; // 그래프 높이
-    const statusMap = { '미흡': 1, '보통': 2, '만족': 3 }; // 상태를 숫자로 매핑
-    const colorMap = { '미흡': '#e74c3c', '보통': '#f1c40f', '만족': '#2ecc71' }; // 상태별 색상
-
+    const barWidth = (screenWidth - 80) / goalComparison.length;
+    const maxHeight = 100;
+    const statusMap = { 미흡: 1, 보통: 2, 만족: 3 }; // 상태를 숫자로 매핑
+    const colorMap = { 미흡: '#e74c3c', 보통: '#f1c40f', 만족: '#2ecc71' }; // 상태별 색상
+  
     return (
       <Svg height={maxHeight + 40} width={screenWidth}>
         {/* Y축 눈금 */}
@@ -244,7 +250,7 @@ const MealStatsScreen = ({ navigation }) => {
           const barHeight = (statusMap[item.status] / 3) * maxHeight;
           const x = index * barWidth + 60; // X축 위치
           const y = maxHeight - barHeight + 20; // Y축 위치
-
+  
           return (
             <React.Fragment key={index}>
               <Rect
@@ -270,57 +276,10 @@ const MealStatsScreen = ({ navigation }) => {
       </Svg>
     );
   };
+  
 
-  const renderPieChart = (actual, target, color, label) => {
-    const { percentage, status } = calculatePercentage(actual, target);
-    const radius = 40; // 원형 그래프 크기
-    const circumference = 2 * Math.PI * radius;
-    const strokeDashoffset = circumference - (percentage / 100) * circumference;
-  
-    return (
-      <View style={styles.pieChartWrapper}>
-        <Svg width={100} height={100}>
-          {/* 배경 원 */}
-          <Circle
-            cx="50"
-            cy="50"
-            r={radius}
-            stroke="#e0e0e0"
-            strokeWidth="10"
-            fill="none"
-          />
-          {/* 비율 원 */}
-          <Circle
-            cx="50"
-            cy="50"
-            r={radius}
-            stroke={color}
-            strokeWidth="10"
-            fill="none"
-            strokeDasharray={`${circumference} ${circumference}`}
-            strokeDashoffset={strokeDashoffset}
-          />
-          {/* 퍼센트 텍스트 */}
-          <SvgText
-            x="50"
-            y="50"
-            textAnchor="middle"
-            alignmentBaseline="middle"
-            fontSize="14"
-            fill={color}
-          >
-            {`${percentage}%`}
-          </SvgText>
-        </Svg>
-        {/* 설명 텍스트 */}
-        <Text style={styles.pieChartText}>
-          {label}: <Text style={styles.pieChartTextHighlight}>{status}</Text>
-        </Text>
-      </View>
-    );
-  };
-  
-  
+
+  const { startDate, endDate } = getDateRange(currentDate);
 
   return (
     <View style={styles.container}>
@@ -329,7 +288,18 @@ const MealStatsScreen = ({ navigation }) => {
 
       <ScrollView>
         <ContentWrapper>
-          {/* 제목: 총 칼로리 섭취량 */}
+          <View style={styles.dateRangeContainer}>
+            <TouchableOpacity onPress={handlePrevious30Days} style={styles.arrowButton}>
+              <Text style={styles.arrowText}>{'<'}</Text>
+            </TouchableOpacity>
+            <Text style={styles.dateRangeText}>
+              {startDate.toLocaleDateString('ko-KR')} ~ {endDate.toLocaleDateString('ko-KR')}
+            </Text>
+            <TouchableOpacity onPress={handleNext30Days} style={styles.arrowButton}>
+              <Text style={styles.arrowText}>{'>'}</Text>
+            </TouchableOpacity>
+          </View>
+
           <Text style={styles.sectionTitle}>총 칼로리 섭취량</Text>
           <View style={styles.statsSection}>
             <ScrollView horizontal>
@@ -337,7 +307,7 @@ const MealStatsScreen = ({ navigation }) => {
             </ScrollView>
           </View>
 
-  {/* 제목: 영양성분 비율 */}
+          {/* 제목: 영양성분 비율 */}
   <View>
   {/* 제목: 영양성분 비율 */}
   <Text style={styles.sectionTitle}>영양성분 비율</Text>
