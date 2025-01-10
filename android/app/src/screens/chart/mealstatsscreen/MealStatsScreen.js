@@ -24,6 +24,8 @@ const MealStatsScreen = ({ navigation }) => {
   const [dailyCalories, setDailyCalories] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
   const [currentDate, setCurrentDate] = useState(new Date());
+  const [goalComparisonData, setGoalComparisonData] = useState({});
+
   
 
   const getDateRange = (currentDate) => {
@@ -102,6 +104,7 @@ const MealStatsScreen = ({ navigation }) => {
       console.error('Error fetching daily calories:', error.message);
     }
   };
+  
 
   // 영양성분 서버에서 받아오기
  // 영양성분 데이터 서버에서 받아오기
@@ -126,6 +129,44 @@ const fetchNutritionDistribution = async (selectedPeriod) => {
       console.error('Failed to fetch nutrition distribution:', error.message);
     }
   };
+
+  // 목표대비 섭취량 api
+  const fetchGoalComparison = async (period = '전체') => {
+    try {
+      const token = await AsyncStorage.getItem('jwtToken');
+      const response = await fetch(
+        `${CONFIG.API_BASE_URL}/statistic/nutrition/goal-comparison?period=${period}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+  
+      if (!response.ok) {
+        console.error('Error fetching goal comparison:', response.statusText);
+        return;
+      }
+  
+      const data = await response.json();
+      console.log('Received goalComparisonData from server:', data);
+      setGoalComparison(data); // 상태에 저장
+    } catch (error) {
+      console.error('Error fetching goal comparison:', error.message);
+    } 
+  };
+  
+  // 호출 시
+  useEffect(() => {
+    fetchGoalComparison(); // 기본적으로 전체 기간 조회
+  }, []);
+  
+  
+  useEffect(() => {
+    fetchGoalComparison();
+  }, []);
+  
   
   // 필터 버튼 선택 시 호출
   const handleFilterChange = (selectedPeriod) => {
@@ -272,67 +313,31 @@ const fetchNutritionDistribution = async (selectedPeriod) => {
     );
   };
 
-  // 성장률 그래프 추가
-const renderGrowthBarChart = () => {
-    if (!goalComparison || goalComparison.length === 0) {
+  const { startDate, endDate } = getDateRange(currentDate);
+
+  const renderGoalComparison = () => {
+    if (!goalComparisonData || Object.keys(goalComparisonData).length === 0) {
       return <Text style={{ textAlign: 'center', marginTop: 20 }}>데이터가 없습니다.</Text>;
     }
   
-    const barWidth = (screenWidth - 80) / goalComparison.length;
-    const maxHeight = 100;
-    const statusMap = { 미흡: 1, 보통: 2, 만족: 3 }; // 상태를 숫자로 매핑
-    const colorMap = { 미흡: '#e74c3c', 보통: '#f1c40f', 만족: '#2ecc71' }; // 상태별 색상
-  
     return (
-      <Svg height={maxHeight + 40} width={screenWidth}>
-        {/* Y축 눈금 */}
-        {['만족', '보통', '미흡'].map((status, index) => (
-          <SvgText
-            key={status}
-            x="20"
-            y={(maxHeight / 3) * index + 20}
-            fontSize="12"
-            fill="#333"
-            textAnchor="end"
-          >
-            {status}
-          </SvgText>
-        ))}
-        {/* 상태 막대 */}
-        {goalComparison.map((item, index) => {
-          const barHeight = (statusMap[item.status] / 3) * maxHeight;
-          const x = index * barWidth + 60; // X축 위치
-          const y = maxHeight - barHeight + 20; // Y축 위치
-  
-          return (
-            <React.Fragment key={index}>
-              <Rect
-                x={x}
-                y={y}
-                width={barWidth / 2}
-                height={barHeight}
-                fill={colorMap[item.status]}
-                rx={4}
-              />
-              <SvgText
-                x={x + barWidth / 4}
-                y={maxHeight + 30}
-                fontSize="12"
-                fill="#333"
-                textAnchor="middle"
-              >
-                {item.day}
-              </SvgText>
-            </React.Fragment>
-          );
-        })}
-      </Svg>
+      <View style={styles.goalComparisonContainer}>
+        <Text style={styles.goalComparisonText}>
+          칼로리: {goalComparisonData.calorieComparison}
+        </Text>
+        <Text style={styles.goalComparisonText}>
+          단백질: {goalComparisonData.proteinComparison}
+        </Text>
+        <Text style={styles.goalComparisonText}>
+          지방: {goalComparisonData.fatComparison}
+        </Text>
+        <Text style={styles.goalComparisonText}>
+          탄수화물: {goalComparisonData.carbsComparison}
+        </Text>
+      </View>
     );
   };
   
-
-
-  const { startDate, endDate } = getDateRange(currentDate);
 
   return (
     <View style={styles.container}>
@@ -410,13 +415,11 @@ const renderGrowthBarChart = () => {
   </View>
 </View>
 
-
-
           {/* 제목: 목표 대비 성장률 */}
-          <Text style={styles.sectionTitle}>목표 대비 성장률</Text>
-          <View style={styles.statsSection}>
-            {renderGrowthBarChart()}
-          </View>
+        <Text style={styles.sectionTitle}>목표 대비 섭취율</Text>
+            <View style={styles.statsSection}>
+            {renderGoalComparison()}
+        </View>
         </ContentWrapper>
       </ScrollView>
     </View>

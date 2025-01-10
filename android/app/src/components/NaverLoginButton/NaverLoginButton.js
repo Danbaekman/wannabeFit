@@ -67,6 +67,7 @@ const NaverLoginButton = ({ navigation }) => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [failureResponse, setFailureResponse] = useState(null);
 
+  
   // 앱 시작 시 자동로그인을 위한 토큰 확인
   useEffect(() => {
     const checkLoginStatus = async () => {
@@ -78,6 +79,7 @@ const NaverLoginButton = ({ navigation }) => {
     };
     checkLoginStatus();
   }, []);
+
 
   // JWT 토큰을 가져오는 함수
   const getToken = async () => {
