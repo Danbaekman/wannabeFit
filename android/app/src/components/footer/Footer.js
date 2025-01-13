@@ -11,10 +11,6 @@ const Footer = () => {
 
     return (
         <View style={styles.footerContainer}>
-            <TouchableOpacity style={styles.iconContainer} onPress={() => navigation.navigate('Record')}>
-                <Icon name="clipboard-outline" size={24} color="#000" />
-                <Text style={styles.iconText}>기록</Text>
-            </TouchableOpacity>
             <TouchableOpacity
                 style={styles.iconContainer}
                 onPress={() => navigation.navigate('WorkoutSetup', { selectedDate })}
@@ -22,9 +18,9 @@ const Footer = () => {
                 <Icon name="barbell-outline" size={24} color="#000" />
                 <Text style={styles.iconText}>내 훈련</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.iconContainer} onPress={() => navigation.navigate('Profile')}>
-                <Icon name="person-outline" size={24} color="#000" />
-                <Text style={styles.iconText}>프로필</Text>
+            <TouchableOpacity style={styles.iconContainer} onPress={() => navigation.navigate('Main')}>
+                <Icon name="clipboard-outline" size={24} color="#000" />
+                <Text style={styles.iconText}>기록</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.iconContainer} onPress={() => navigation.navigate('StaticsMain')}>
                 <Icon name="stats-chart-outline" size={24} color="#000" />

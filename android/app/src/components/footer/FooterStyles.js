@@ -1,8 +1,8 @@
 import { StyleSheet } from 'react-native';
 
 const styles = StyleSheet.create({
-    footerContainer: { // 화면의 가장 아래에 고정
-        bottom: 0,             // 여백 없이 가장 아래에 배치
+    footerContainer: { 
+        bottom: 0,             
         left: 0,
         right: 0,
         flexDirection: 'row',
@@ -15,6 +15,16 @@ const styles = StyleSheet.create({
     },
     iconContainer: {
         alignItems: 'center',
+        flex: 1, // 각 아이콘의 터치 영역을 균등하게 분배
+        justifyContent: 'center',
+        borderRightWidth: 1, // 세로 막대기 추가
+        borderColor: '#ccc', // 막대기 색상
+    },
+    // 마지막 아이콘은 막대기가 없도록 조정
+    lastIconContainer: {
+        alignItems: 'center',
+        flex: 1,
+        justifyContent: 'center',
     },
     iconText: {
         marginTop: 4,

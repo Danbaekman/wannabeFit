@@ -1,14 +1,20 @@
-import React from 'react'
+import React from 'react';
+import { View, Text, TouchableOpacity } from 'react-native';
+import Icon from 'react-native-vector-icons/Ionicons';
 import styles from './NavbarStyles';
-import { View, Text, Button, StyleSheet, ScrollView } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 
 const Navbar = () => {
-    
-  return (
-    <View style={styles.navbar}>
-        <Text style={styles.navbarTitle}>Wannabe Fit</Text>
-    </View>
-  )
-}
+    const navigation = useNavigation();
 
-export default Navbar
+    return (
+        <View style={styles.navbar}>
+            <Text style={styles.navbarTitle}>Wannabe Fit</Text>
+            <TouchableOpacity onPress={() => navigation.navigate('Profile')} style={styles.profileIcon}>
+                <Icon name="person-outline" size={24} color="#000" />
+            </TouchableOpacity>
+        </View>
+    );
+};
+
+export default Navbar;

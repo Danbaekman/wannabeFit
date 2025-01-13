@@ -74,8 +74,8 @@ const styles = StyleSheet.create({
     padding: 15,
     marginBottom: 20,
   },
-  title: {
-    fontSize: 18,
+  sectionTitle: {
+    fontSize: 20,
     fontWeight: 'bold',
     color: '#008080',
     marginBottom: 10,
@@ -92,6 +92,9 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#666',
     marginTop: 5,
+  },
+  calorieGoalText: {
+    color: '#000', // 검정색
   },
   macroRow: {
     flexDirection: 'row',
@@ -117,30 +120,54 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginTop: 10,
   },
-  gridContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
   gridItem: {
-    width: '22%',
-    aspectRatio: 1,
+    width: '45%', // 가로 크기 키움 (줄당 2개 배치)
+    aspectRatio: 1, // 정사각형 유지
     backgroundColor: '#FFFFFF',
-    borderRadius: 10,
+    borderRadius: 15, // 둥근 모서리 강조
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
-    borderColor: '#E0E0E0',
-    marginBottom: 10, // 아이템 간 여백 추가
+    borderColor: '#E0E0E0', // 아래쪽 여백 키움
+    shadowColor: '#000', // 그림자 추가
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 1, // 안드로이드 그림자
+    position: 'relative', 
+  },
+  gridRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 20, // 줄 간 여백 키움
+  },
+  gridContainer: {
+    flexDirection: 'column',
+    justifyContent: 'space-between',
+    flexWrap: 'wrap',
   },
   gridItemText: {
-    marginTop: 5,
-    fontSize: 14,
+    position: 'absolute', // 하단에 고정
+    bottom: 10, // 하단 여백
+    fontSize: 18,
     color: '#333',
+    textAlign: 'center', // 텍스트 가운데 정렬
+  },
+  goalContainer: {
+    flexDirection: 'row', // 텍스트와 아이콘을 나란히 배치
+    alignItems: 'center', // 수직 정렬
+    marginBottom: 10,
+    backgroundColor: 'transparent', 
+  },
+  goalPrefix: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#666', // '내 목표:'의 색상
   },
   goalText: {
-    fontSize: 14,
-    color: '#666',
-    marginBottom: 10,
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#008080', 
   },
   centerHighlightBox: {
     position: 'absolute',
@@ -166,7 +193,23 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     textAlign: 'center',
   },
-  
+  mealCalories: {
+    position: 'absolute',
+    top: 5,
+    right: 5,
+    fontSize: 16, // 기본 칼로리 숫자 크기
+    color: '#808080',
+  },
+  kcalText: {
+    fontSize: 12, // kcal 텍스트 크기 작게
+    color: '#808080', // 색상 유지
+  },
+  plusIcon: {
+    position: 'absolute', // 부모 박스의 정가운데 위치
+    top: '50%', // 수직 중앙
+    left: '50%', // 수평 중앙
+    transform: [{ translateX: -25 }, { translateY: -25 }], // 아이콘 크기의 절반만큼 이동
+  },
 });
 
 export default styles;

@@ -30,6 +30,20 @@ const MainScreen = ({ navigation }) => {
     proteinGoal: 150, // 단백질 기본값
     fatGoal: 50, // 지방 기본값
   });
+  const [mealCalories, setMealCalories] = useState({
+    breakfast: 0,
+    lunch: 0,
+    dinner: 0,
+    snack: 0,
+  });
+  const goalTextMapping = {
+    bulk: '벌크업',
+    diet: '다이어트',
+    maintain: '유지',
+  };
+  const goalText = goalTextMapping[userGoal.goal] || '목표 없음';
+
+
   useEffect(() => {
     fetchUserGoal(); // 사용자 추천값 가져오기
   }, []);
@@ -107,12 +121,40 @@ const MainScreen = ({ navigation }) => {
         carbGoal: user.recommended_carbs,
         proteinGoal: user.recommended_protein,
         fatGoal: user.recommended_fat,
+        goal: user.goal,
       }); // 추천값 업데이트
     } catch (error) {
       console.error('Error fetching user goal:', error.message);
     }
   };
   
+
+  // const fetchDailySummary = async (date) => {
+  //   try {
+  //     const token = await AsyncStorage.getItem('jwtToken'); // 토큰 가져오기
+  //     if (!token) {
+  //       console.error('No JWT token found. Please log in.');
+  //       return;
+  //     }
+
+  //     const response = await fetch(`${CONFIG.API_BASE_URL}/meal/meals-daily-summary?date=${date}`, {
+  //       method: 'GET',
+  //       headers: {
+  //         Authorization: `Bearer ${token}`, // JWT 토큰 사용
+  //         'Content-Type': 'application/json',
+  //       },
+  //     });
+
+  //     if (!response.ok) {
+  //       throw new Error(`HTTP error! status: ${response.status}`);
+  //     }
+
+  //     const summary = await response.json();
+  //     setDailySummary(summary); // 상태 업데이트
+  //   } catch (error) {
+  //     console.error('Error fetching daily summary:', error.message);
+  //   }
+  // };
 
   const fetchDailySummary = async (date) => {
     try {
@@ -121,7 +163,7 @@ const MainScreen = ({ navigation }) => {
         console.error('No JWT token found. Please log in.');
         return;
       }
-
+  
       const response = await fetch(`${CONFIG.API_BASE_URL}/meal/meals-daily-summary?date=${date}`, {
         method: 'GET',
         headers: {
@@ -129,18 +171,26 @@ const MainScreen = ({ navigation }) => {
           'Content-Type': 'application/json',
         },
       });
-
+  
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-
+  
       const summary = await response.json();
-      setDailySummary(summary); // 상태 업데이트
+  
+      // 상태 업데이트
+      setDailySummary(summary); // 전체 요약 업데이트
+      setMealCalories({
+        breakfast: summary.breakfast?.totalCalories || 0,
+        lunch: summary.lunch?.totalCalories || 0,
+        dinner: summary.dinner?.totalCalories || 0,
+        snack: summary.snack?.totalCalories || 0,
+      });
     } catch (error) {
       console.error('Error fetching daily summary:', error.message);
     }
   };
-
+  
   
   return (
     <View style={styles.mainContainer}>
@@ -184,14 +234,12 @@ const MainScreen = ({ navigation }) => {
         </View>
       </PanGestureHandler>
 
-      {/* 콘텐츠 영역 */}
-      <View style={styles.contentContainer}>
-        <ScrollView contentContainerStyle={styles.scrollContent}>
-          {/* 오늘의 섭취량 */}
-          <View style={styles.summaryBox}>
-  <Text style={styles.title}>오늘의 총 섭취량</Text>
-  
-  {/* 총 칼로리 */}
+              {/* 콘텐츠 영역 */}
+              <View style={styles.contentContainer}>
+          <ScrollView contentContainerStyle={styles.scrollContent}>
+            {/* 오늘의 섭취량 */}
+            <Text style={styles.sectionTitle}>오늘의 총 섭취량</Text>
+            <View style={styles.summaryBox}>
   <View style={styles.calorieRow}>
     <Text style={styles.subTitle}>총 칼로리</Text>
     <ProgressBar
@@ -205,7 +253,8 @@ const MainScreen = ({ navigation }) => {
       }
     />
     <Text style={styles.calorieText}>
-      {`${dailySummary.totalCalories.toFixed(1)} / ${userGoal.calorieGoal} Kcal`}
+      {`${Math.round(dailySummary.totalCalories)} / `}
+      <Text style={styles.calorieGoalText}>{`${Math.round(userGoal.calorieGoal)} Kcal`}</Text>
     </Text>
   </View>
 
@@ -224,7 +273,8 @@ const MainScreen = ({ navigation }) => {
         }
       />
       <Text style={styles.macroText}>
-        {`${dailySummary.totalCarbohydrates.toFixed(1)} / ${userGoal.carbGoal}g`}
+        {`${Math.round(dailySummary.totalCarbohydrates)} / `}
+        <Text style={styles.calorieGoalText}>{`${Math.round(userGoal.carbGoal)}g`}</Text>
       </Text>
     </View>
 
@@ -242,7 +292,8 @@ const MainScreen = ({ navigation }) => {
         }
       />
       <Text style={styles.macroText}>
-        {`${dailySummary.totalProtein.toFixed(1)} / ${userGoal.proteinGoal}g`}
+        {`${Math.round(dailySummary.totalProtein)} / `}
+        <Text style={styles.calorieGoalText}>{`${Math.round(userGoal.proteinGoal)}g`}</Text>
       </Text>
     </View>
 
@@ -260,32 +311,59 @@ const MainScreen = ({ navigation }) => {
         }
       />
       <Text style={styles.macroText}>
-        {`${dailySummary.totalFat.toFixed(1)} / ${userGoal.fatGoal}g`}
+        {`${Math.round(dailySummary.totalFat)} / `}
+        <Text style={styles.calorieGoalText}>{`${Math.round(userGoal.fatGoal)}g`}</Text>
       </Text>
     </View>
   </View>
 </View>
 
 
-          {/* 식단 섹션 */}
-          <View style={styles.summaryBox}>
-            <Text style={styles.title}>식단</Text>
-            <Text style={styles.goalText}>내 목표: 벌크업 하기</Text>
-            <View style={styles.gridContainer}>
-              {['아침', '점심', '저녁', '간식'].map((meal, index) => (
-                <TouchableOpacity
-                  key={index}
-                  style={styles.gridItem}
-                  onPress={() => navigation.navigate('MealSetting', { mealType: meal, selectedDate })}
-                >
-                  <Ionicons name="add-outline" size={30} color="#008080" />
-                  <Text style={styles.gridItemText}>{meal}</Text>
-                </TouchableOpacity>
-              ))}
+            {/* 식단 */}
+            <Text style={styles.sectionTitle}>식단</Text>
+            <View style={styles.summaryBox}>
+            <Text style={styles.goalContainer}>
+              <Text style={styles.goalPrefix}>내 목표: </Text>
+              <Text style={styles.goalText}>{goalText}</Text>
+            </Text>
+
+
+              <View style={styles.gridContainer}>
+                {[['아침', '점심'], ['저녁', '간식']].map((row, rowIndex) => (
+                  <View key={rowIndex} style={styles.gridRow}>
+                    {row.map((meal, index) => {
+                      const mealType = ['breakfast', 'lunch', 'dinner', 'snack'][rowIndex * 2 + index];
+
+                      return (
+                        <TouchableOpacity
+                          key={index}
+                          style={styles.gridItem}
+                          onPress={() => navigation.navigate('MealSetting', { mealType: meal, selectedDate })}
+                        >
+                          {/* 우측 상단 칼로리 표시 */}
+                          <Text style={styles.mealCalories}>
+                            {Math.round(mealCalories[mealType] || 0)}
+                            <Text style={styles.kcalText}> kcal</Text>
+                          </Text>
+
+
+                          {/* 중앙 아이콘 */}
+                          <View style={styles.plusIcon}>
+                            <Ionicons name="add-outline" size={50} color="#008080" />
+                          </View>
+
+                          {/* 하단 텍스트 */}
+                          <Text style={styles.gridItemText}>{meal}</Text>
+                        </TouchableOpacity>
+                      );
+                    })}
+                  </View>
+                ))}
+              </View>
             </View>
-          </View>
-        </ScrollView>
-      </View>
+          </ScrollView>
+        </View>
+
       <Footer />
     </View>
   );
