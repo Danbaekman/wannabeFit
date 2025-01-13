@@ -26,7 +26,7 @@ const styles = StyleSheet.create({
     },
     header: {
       alignSelf: 'flex-start',
-      fontSize: 38,
+      fontSize: 40,
       color: '#000000',
       fontWeight: 'bold',
       marginBottom: 20,
@@ -34,7 +34,7 @@ const styles = StyleSheet.create({
     description: {
       alignSelf: 'flex-start',
       textAlign: 'left',
-      fontSize: 13,
+      fontSize: 15,
       color: '#888',
       marginBottom: 40,
     },

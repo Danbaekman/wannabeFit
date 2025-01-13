@@ -162,12 +162,6 @@ const fetchNutritionDistribution = async (selectedPeriod) => {
     fetchGoalComparison(); // 기본적으로 전체 기간 조회
   }, []);
   
-  
-  useEffect(() => {
-    fetchGoalComparison();
-  }, []);
-  
-  
   // 필터 버튼 선택 시 호출
   const handleFilterChange = (selectedPeriod) => {
     setFilterPeriod(selectedPeriod); // 선택된 기간을 상태에 저장 (UI 업데이트용)
@@ -316,27 +310,35 @@ const fetchNutritionDistribution = async (selectedPeriod) => {
   const { startDate, endDate } = getDateRange(currentDate);
 
   const renderGoalComparison = () => {
-    if (!goalComparisonData || Object.keys(goalComparisonData).length === 0) {
+    console.log('현재 goalComparison 데이터:', goalComparison);
+    if (!goalComparison || Object.keys(goalComparison).length === 0) {
       return <Text style={{ textAlign: 'center', marginTop: 20 }}>데이터가 없습니다.</Text>;
     }
   
+    const { calorieComparison = 'N/A', proteinComparison = 'N/A', fatComparison = 'N/A', carbsComparison = 'N/A' } = goalComparison;
+  
     return (
       <View style={styles.goalComparisonContainer}>
-        <Text style={styles.goalComparisonText}>
-          칼로리: {goalComparisonData.calorieComparison}
-        </Text>
-        <Text style={styles.goalComparisonText}>
-          단백질: {goalComparisonData.proteinComparison}
-        </Text>
-        <Text style={styles.goalComparisonText}>
-          지방: {goalComparisonData.fatComparison}
-        </Text>
-        <Text style={styles.goalComparisonText}>
-          탄수화물: {goalComparisonData.carbsComparison}
-        </Text>
+        <View style={styles.comparisonRow}>
+          <Text style={styles.comparisonLabel}>칼로리</Text>
+          <Text style={styles.comparisonValue}>{calorieComparison}</Text>
+        </View>
+        <View style={styles.comparisonRow}>
+          <Text style={styles.comparisonLabel}>단백질</Text>
+          <Text style={styles.comparisonValue}>{proteinComparison}</Text>
+        </View>
+        <View style={styles.comparisonRow}>
+          <Text style={styles.comparisonLabel}>지방</Text>
+          <Text style={styles.comparisonValue}>{fatComparison}</Text>
+        </View>
+        <View style={styles.comparisonRow}>
+          <Text style={styles.comparisonLabel}>탄수화물</Text>
+          <Text style={styles.comparisonValue}>{carbsComparison}</Text>
+        </View>
       </View>
     );
   };
+  
   
 
   return (

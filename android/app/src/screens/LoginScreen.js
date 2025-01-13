@@ -16,7 +16,7 @@ const LoginScreen = ({ navigation }) => {
 
       {/* 설명 텍스트 */}
       <Text style={styles.description}>
-        인바디 맞춤형 운동루틴을 무료로 경험해보세요!{'\n'}매일 식습관을 기록하며 나의 건강 상태 check
+        인바디 맞춤형 운동루틴을 무료로 경험해보세요.{'\n'}매일 식습관을 기록하며 원하는 핏이되는 그날까지!
       </Text>
 
       {/* 로고 이미지 */}

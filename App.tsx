@@ -26,6 +26,7 @@ import MealStatsScreen from './android/app/src/screens/chart/mealstatsscreen/Mea
 const Stack = createNativeStackNavigator();
 
 const App = () => {
+  
   return (
     <Provider store={store}>
     <GestureHandlerRootView style={{ flex: 1 }}>

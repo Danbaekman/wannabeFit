@@ -9,15 +9,42 @@ import styles from '../styles/MainStyles';
 import { ProgressBar } from '@react-native-community/progress-bar-android';
 import { useSelector, useDispatch }from 'react-redux';
 import { setSelectedDate } from '../store';
+import CONFIG from '../config';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useFocusEffect } from '@react-navigation/native';
+
 
 const MainScreen = ({ navigation }) => {
   const selectedDate = useSelector((state) => state.date.selectedDate);
   const dispatch = useDispatch(); // Redux 액션 호출
   const [weekDays, setWeekDays] = useState([]);
+  const [dailySummary, setDailySummary] = useState({
+    totalCalories: 0,
+    totalProtein: 0,
+    totalFat: 0,
+    totalCarbohydrates: 0,
+  });
+  const [userGoal, setUserGoal] = useState({
+    calorieGoal: 2100, // 기본값
+    carbGoal: 300, // 탄수화물 기본값
+    proteinGoal: 150, // 단백질 기본값
+    fatGoal: 50, // 지방 기본값
+  });
+  useEffect(() => {
+    fetchUserGoal(); // 사용자 추천값 가져오기
+  }, []);
 
   useEffect(() => {
     generateWeekDays(selectedDate);
+    fetchDailySummary(selectedDate); // 선택된 날짜의 요약 데이터 가져오기
   }, [selectedDate]);
+
+  // 화면이 포커스될 때마다 fetchDailySummary 호출
+  useFocusEffect(
+    React.useCallback(() => {
+      fetchDailySummary(selectedDate); // 데이터를 새로고침
+    }, [selectedDate])
+  );
 
   const generateWeekDays = (centerDate) => {
     const currentDate = dayjs(centerDate);
@@ -53,6 +80,67 @@ const MainScreen = ({ navigation }) => {
     const newDate = dayjs(selectedDate).add(direction, 'month').startOf('month').format('YYYY-MM-DD');
     dispatch(setSelectedDate(newDate)); // Redux 상태 업데이트
   };
+
+  const fetchUserGoal = async () => {
+    try {
+      const token = await AsyncStorage.getItem('jwtToken'); // JWT 토큰 가져오기
+      if (!token) {
+        console.error('No JWT token found. Please log in.');
+        return;
+      }
+  
+      const response = await fetch(`${CONFIG.API_BASE_URL}/user`, {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${token}`, // JWT 토큰 사용
+          'Content-Type': 'application/json',
+        },
+      });
+  
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+  
+      const user = await response.json();
+      setUserGoal({
+        calorieGoal: user.target_calories,
+        carbGoal: user.recommended_carbs,
+        proteinGoal: user.recommended_protein,
+        fatGoal: user.recommended_fat,
+      }); // 추천값 업데이트
+    } catch (error) {
+      console.error('Error fetching user goal:', error.message);
+    }
+  };
+  
+
+  const fetchDailySummary = async (date) => {
+    try {
+      const token = await AsyncStorage.getItem('jwtToken'); // 토큰 가져오기
+      if (!token) {
+        console.error('No JWT token found. Please log in.');
+        return;
+      }
+
+      const response = await fetch(`${CONFIG.API_BASE_URL}/meal/meals-daily-summary?date=${date}`, {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${token}`, // JWT 토큰 사용
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const summary = await response.json();
+      setDailySummary(summary); // 상태 업데이트
+    } catch (error) {
+      console.error('Error fetching daily summary:', error.message);
+    }
+  };
+
   
   return (
     <View style={styles.mainContainer}>
@@ -101,31 +189,83 @@ const MainScreen = ({ navigation }) => {
         <ScrollView contentContainerStyle={styles.scrollContent}>
           {/* 오늘의 섭취량 */}
           <View style={styles.summaryBox}>
-            <Text style={styles.title}>오늘의 총 섭취량</Text>
-            <View style={styles.calorieRow}>
-              <Text style={styles.subTitle}>총 칼로리</Text>
-              <ProgressBar styleAttr="Horizontal" indeterminate={false} progress={0.87} />
-              <Text style={styles.calorieText}>1822/2100 Kcal</Text>
-            </View>
-            <View style={styles.macroRow}>
-              <View style={styles.macroItem}>
-                <Text style={styles.macroTitle}>탄수화물</Text>
-                <ProgressBar styleAttr="Horizontal" indeterminate={false} progress={0.56} />
-                <Text style={styles.macroText}>675/1200g</Text>
-              </View>
-              <View style={styles.macroItem}>
-                <Text style={styles.macroTitle}>단백질</Text>
-                <ProgressBar styleAttr="Horizontal" indeterminate={false} progress={0.35} />
-                <Text style={styles.macroText}>80/225g</Text>
-              </View>
-              <View style={styles.macroItem}>
-                <Text style={styles.macroTitle}>지방</Text>
-                <ProgressBar styleAttr="Horizontal" indeterminate={false} progress={0.25} />
-                <Text style={styles.macroText}>20/80g</Text>
-              </View>
-            </View>
-            <Text style={styles.goalMessage}>오늘 목표 섭취량에 미달하였습니다.</Text>
-          </View>
+  <Text style={styles.title}>오늘의 총 섭취량</Text>
+  
+  {/* 총 칼로리 */}
+  <View style={styles.calorieRow}>
+    <Text style={styles.subTitle}>총 칼로리</Text>
+    <ProgressBar
+      styleAttr="Horizontal"
+      indeterminate={false}
+      progress={dailySummary.totalCalories / userGoal.calorieGoal}
+      color={
+        dailySummary.totalCalories > userGoal.calorieGoal
+          ? '#6603fc' // 초과하면 빨간색
+          : '#008080' // 기본 색상
+      }
+    />
+    <Text style={styles.calorieText}>
+      {`${dailySummary.totalCalories.toFixed(1)} / ${userGoal.calorieGoal} Kcal`}
+    </Text>
+  </View>
+
+  {/* 탄수화물 */}
+  <View style={styles.macroRow}>
+    <View style={styles.macroItem}>
+      <Text style={styles.macroTitle}>탄수화물</Text>
+      <ProgressBar
+        styleAttr="Horizontal"
+        indeterminate={false}
+        progress={dailySummary.totalCarbohydrates / userGoal.carbGoal}
+        color={
+          dailySummary.totalCarbohydrates > userGoal.carbGoal
+            ? '#6603fc'
+            : '#008080'
+        }
+      />
+      <Text style={styles.macroText}>
+        {`${dailySummary.totalCarbohydrates.toFixed(1)} / ${userGoal.carbGoal}g`}
+      </Text>
+    </View>
+
+    {/* 단백질 */}
+    <View style={styles.macroItem}>
+      <Text style={styles.macroTitle}>단백질</Text>
+      <ProgressBar
+        styleAttr="Horizontal"
+        indeterminate={false}
+        progress={dailySummary.totalProtein / userGoal.proteinGoal}
+        color={
+          dailySummary.totalProtein > userGoal.proteinGoal
+            ? '#6603fc'
+            : '#008080'
+        }
+      />
+      <Text style={styles.macroText}>
+        {`${dailySummary.totalProtein.toFixed(1)} / ${userGoal.proteinGoal}g`}
+      </Text>
+    </View>
+
+    {/* 지방 */}
+    <View style={styles.macroItem}>
+      <Text style={styles.macroTitle}>지방</Text>
+      <ProgressBar
+        styleAttr="Horizontal"
+        indeterminate={false}
+        progress={dailySummary.totalFat / userGoal.fatGoal}
+        color={
+          dailySummary.totalFat > userGoal.fatGoal
+            ? '#6603fc'
+            : '#008080'
+        }
+      />
+      <Text style={styles.macroText}>
+        {`${dailySummary.totalFat.toFixed(1)} / ${userGoal.fatGoal}g`}
+      </Text>
+    </View>
+  </View>
+</View>
+
 
           {/* 식단 섹션 */}
           <View style={styles.summaryBox}>
@@ -146,7 +286,7 @@ const MainScreen = ({ navigation }) => {
           </View>
         </ScrollView>
       </View>
-      <Footer/> 
+      <Footer />
     </View>
   );
 };
