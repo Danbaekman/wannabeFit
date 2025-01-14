@@ -9,7 +9,7 @@ const Navbar = () => {
 
     return (
         <View style={styles.navbar}>
-            <Text style={styles.navbarTitle}>Wannabe Fit</Text>
+            <Text style={styles.navbarTitle}>Wannabefit</Text>
             <TouchableOpacity onPress={() => navigation.navigate('Profile')} style={styles.profileIcon}>
                 <Icon name="person-outline" size={24} color="#000" />
             </TouchableOpacity>

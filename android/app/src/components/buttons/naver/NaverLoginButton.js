@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { TouchableOpacity, Text, View, StyleSheet, Alert } from 'react-native';
+import { TouchableOpacity, Text, View, Alert, Image, } from 'react-native';
 import NaverLogin from '@react-native-seoul/naver-login';
-import CONFIG from '../../config';
+import CONFIG from '../../../config';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import jwtDecode from 'jwt-decode';
+import styles from './NaverLoginButtonStyles';
 
 // 네이버 애플리케이션 키 정보
 const consumerKey = 'BWqwiKuQdZgMQExzACXH';
@@ -68,18 +69,6 @@ const NaverLoginButton = ({ navigation }) => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [failureResponse, setFailureResponse] = useState(null);
 
-  
-  // 앱 시작 시 자동로그인을 위한 토큰 확인
-  // useEffect(() => {
-  //   const checkLoginStatus = async () => {
-  //     const token = await getToken();
-  //     if (token) {
-  //       // 토큰이 있다면, 로그인 화면으로 이동한 후 자동으로 네비게이션 처리
-  //       navigation.navigate('Login');
-  //     }
-  //   };
-  //   checkLoginStatus();
-  // }, []);
   useEffect(() => {
     const checkLoginStatus = async () => {
       const token = await AsyncStorage.getItem('jwtToken');
@@ -206,8 +195,11 @@ const NaverLoginButton = ({ navigation }) => {
   return (
     <View>
       {!isLoggedIn ? (
-        <TouchableOpacity onPress={login} style={styles.button}>
-          <Text style={styles.buttonText}>네이버로 로그인</Text>
+        <TouchableOpacity onPress={login}>
+          <Image
+          source={require('../../../../assets/images/naver.png')}
+          style={styles.icon}  
+        />
         </TouchableOpacity>
       ) : (
         <>
@@ -224,42 +216,5 @@ const NaverLoginButton = ({ navigation }) => {
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  button: {
-    backgroundColor: '#03C75A',
-    padding: 15,
-    borderRadius: 8,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginVertical: 10,
-  },
-  buttonText: {
-    color: '#ffffff',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  logoutButton: {
-    backgroundColor: '#FF0000',
-    padding: 15,
-    borderRadius: 8,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginVertical: 10,
-  },
-  logoutButtonText: {
-    color: '#ffffff',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  errorText: {
-    color: 'red',
-    marginTop: 10,
-  },
-  successText: {
-    color: 'green',
-    marginTop: 10,
-  },
-});
 
 export default NaverLoginButton;

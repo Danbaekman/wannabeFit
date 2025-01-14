@@ -1,14 +1,20 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, Image, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity} from 'react-native';
 import styles from '../styles/LoginStyles';
-import NaverLoginButton from '../components/NaverLoginButton/NaverLoginButton';  // 네이버 로그인 버튼 컴포넌트 임포트
-
+import NaverLoginButton from '../components/buttons/naver/NaverLoginButton';
+import KakaoLoginButton from '../components/buttons/kakao/KakaoLoginButton';
+import GoogleLoginButton from '../components/buttons/google/GoogleLoginButton';
 
 const LoginScreen = ({ navigation }) => {
   return (
     <View style={styles.container}>
       {/* 뒤로가기 버튼 */}
-      <Text style={styles.backButton}>{'< 뒤로'}</Text>
+      <TouchableOpacity 
+        onPress={() => navigation.navigate('Launch')} 
+        style={styles.backButtonContainer}
+      >
+        <Text style={styles.backButton}>{'< 뒤로'}</Text>
+      </TouchableOpacity>
 
       {/* 환영 메시지 */}
       <Text style={styles.welcomeText}>환영합니다!</Text>
@@ -16,37 +22,29 @@ const LoginScreen = ({ navigation }) => {
 
       {/* 설명 텍스트 */}
       <Text style={styles.description}>
-        인바디 맞춤형 운동루틴을 무료로 경험해보세요.{'\n'}매일 식습관을 기록하며 원하는 핏이되는 그날까지!
+        인바디 맞춤형 운동루틴을 무료로 경험해보세요.{'\n'}매일 식습관을 기록하며 변화하는 모습을 확인해보세요!
       </Text>
 
       {/* 로고 이미지 */}
-      <View style={styles.LogoImageContainer}>
-        <Image
-          source={require('../../assets/images/wannabeFit-Logo.png')}  
-          style={styles.LogoImage}
-        />
-      </View>
-
       <View>
-        <Text style={styles.LogoText}>WannabeFit</Text>
+        <Text style={styles.LogoText}>Wannabefit</Text>
+        <Text style={styles.logoSubtitle}>원하는 핏이되는 그날까지</Text>
       </View>
 
-      {/* 카카오 로그인 버튼 */}
-      <TouchableOpacity style={styles.kakaoButton}>
-        <View style={styles.kakaoButtonContent}>
-            <Image 
-            source={require('../../assets/images/kakaotalk_sharing_btn_small.png')}  // Kakao 심볼 이미지
-            style={styles.kakaoSymbol}
-            />
-        </View>
-            <Text style={styles.kakaoText}>kakao로 시작하기</Text>
-      </TouchableOpacity>
+      {/* "소셜 계정으로 로그인" 섹션 */}
+      <View style={styles.dividerContainer}>
+        <View style={styles.line} />
+        <Text style={styles.dividerText}>소셜 계정으로 로그인</Text>
+        <View style={styles.line} />
+      </View>
 
-      {/* 네이버 로그인 버튼 */}
-      <NaverLoginButton navigation={navigation} />
+      {/* 버튼들 */}
+      <View style={styles.socialButtonContainer}>
+        <KakaoLoginButton />
+        <NaverLoginButton navigation={navigation} />
+        <GoogleLoginButton />
+      </View>
     </View>
   );
 };
-
-
 export default LoginScreen;
