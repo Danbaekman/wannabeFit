@@ -21,6 +21,7 @@ import MaxWeightScreen from './android/app/src/screens/chart/maxweightscreen/Max
 import TotalSetsScreen from './android/app/src/screens/chart/totalsetsscreen/TotalSetsScreen';
 import TotalRepsScreen from './android/app/src/screens/chart/toprepsscreen/TopRepsScreen';
 import MealStatsScreen from './android/app/src/screens/chart/mealstatsscreen/MealStatsScreen';
+import ProfileScreen from './android/app/src/screens/profilescreen/ProfileScreen';
 
 
 const Stack = createNativeStackNavigator();
@@ -49,6 +50,7 @@ const App = () => {
           <Stack.Screen name="TotalSets" component={TotalSetsScreen} />
           <Stack.Screen name="TopReps" component={TotalRepsScreen} />
           <Stack.Screen name="MealStats" component={MealStatsScreen} />
+          <Stack.Screen name="Profile" component={ProfileScreen} />
         </Stack.Navigator>
       </NavigationContainer>
     </GestureHandlerRootView>

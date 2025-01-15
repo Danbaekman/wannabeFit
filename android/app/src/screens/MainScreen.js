@@ -268,7 +268,7 @@ const MainScreen = ({ navigation }) => {
         progress={dailySummary.totalCarbohydrates / userGoal.carbGoal}
         color={
           dailySummary.totalCarbohydrates > userGoal.carbGoal
-            ? '#6603fc'
+            ? '#b119bf'
             : '#008080'
         }
       />

@@ -62,9 +62,9 @@ const styles = StyleSheet.create({
   contentContainer: {
     flex: 1,
     backgroundColor: '#F5F5F5',
-    borderTopLeftRadius: 15, // 위쪽 둥근 모서리
-    borderTopRightRadius: 15,
-    marginTop: -10, // 달력과 자연스러운 연결
+    borderTopLeftRadius: 20, // 위쪽 둥근 모서리
+    borderTopRightRadius: 20,
+    marginTop: -18, // 달력과 자연스러운 연결
     paddingTop: 20,
     paddingHorizontal: 20,
   },

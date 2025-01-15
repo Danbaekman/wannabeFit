@@ -9,7 +9,10 @@ const Navbar = () => {
 
     return (
         <View style={styles.navbar}>
+            {/* 중앙 로고 */}
             <Text style={styles.navbarTitle}>Wannabefit</Text>
+
+            {/* 우측 아이콘 */}
             <TouchableOpacity onPress={() => navigation.navigate('Profile')} style={styles.profileIcon}>
                 <Icon name="person-outline" size={24} color="#000" />
             </TouchableOpacity>
