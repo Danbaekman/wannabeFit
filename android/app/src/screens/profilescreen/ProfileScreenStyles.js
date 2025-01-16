@@ -6,6 +6,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     paddingHorizontal: 20,
     paddingTop: 30,
+    paddingBottom: 30,
   },
   greetingText: {
     fontSize: 20,
@@ -83,10 +84,10 @@ const styles = StyleSheet.create({
     padding: 10,
   },
   goalTitle: {
-    fontSize: 20,
+    fontSize: 24,
     fontWeight: 'bold',
-    marginBottom: 10,
-    color: '#008080',
+    paddingBottom: 20,
+    color: 'black',
   },
   goalBox: {
     backgroundColor: '#fff',
@@ -115,13 +116,20 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   goalLabel: {
-    fontSize: 16,
-    color: '#333',
+    fontSize: 18,
+    color: '#4F4F4F',
+    padding: 10,
+  },
+  goalValueContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
   },
   goalValue: {
-    fontSize: 16,
-    color: '#008080',
-    fontWeight: 'bold',
+    fontSize: 14,
+    color: '#333',
+    textAlign: 'right', // 우측 정렬
+    marginRight: 8, // 아이콘과 간격
   },
   
 });

@@ -58,6 +58,23 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
+  pickerContainer: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 8,
+    marginVertical: 10,
+    paddingHorizontal: 10,
+    backgroundColor: '#f9f9f9',
+  },
+  unitLabel: {
+    position: 'absolute',
+    right: 10,
+    top: '50%',
+    transform: [{ translateY: -10 }],
+    color: '#888',
+    fontSize: 14,
+  },
+  
 });
 
 export default styles;
