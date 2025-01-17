@@ -17,7 +17,6 @@ import RoutineDetailScreen from './android/app/src/screens/routinedetailscreen/R
 import WorkoutEntryScreen from './android/app/src/screens/workoutentryscreen/WorkoutEntryScreen';
 import StaticsMainScreen from './android/app/src/screens/chart/staticsmainscreen/StaticsMainScreen';
 import VolumeScreen from './android/app/src/screens/chart/volumescreen/VolumeScreen';
-import MaxWeightScreen from './android/app/src/screens/chart/maxweightscreen/MaxWeightScreen';
 import TotalSetsScreen from './android/app/src/screens/chart/totalsetsscreen/TotalSetsScreen';
 import TotalRepsScreen from './android/app/src/screens/chart/toprepsscreen/TopRepsScreen';
 import MealStatsScreen from './android/app/src/screens/chart/mealstatsscreen/MealStatsScreen';
@@ -46,7 +45,6 @@ const App = () => {
           <Stack.Screen name="WorkoutEntry" component={WorkoutEntryScreen} />
           <Stack.Screen name="StaticsMain" component={StaticsMainScreen} />
           <Stack.Screen name="Volume" component={VolumeScreen} />
-          <Stack.Screen name="MaxWeight" component={MaxWeightScreen} />
           <Stack.Screen name="TotalSets" component={TotalSetsScreen} />
           <Stack.Screen name="TopReps" component={TotalRepsScreen} />
           <Stack.Screen name="MealStats" component={MealStatsScreen} />

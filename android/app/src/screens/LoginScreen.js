@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, TouchableOpacity} from 'react-native';
+import { View, Text, TouchableOpacity, Image} from 'react-native';
 import styles from '../styles/LoginStyles';
 import NaverLoginButton from '../components/buttons/naver/NaverLoginButton';
 import KakaoLoginButton from '../components/buttons/kakao/KakaoLoginButton';
@@ -26,9 +26,11 @@ const LoginScreen = ({ navigation }) => {
       </Text>
 
       {/* 로고 이미지 */}
-      <View>
-        <Text style={styles.LogoText}>Wannabefit</Text>
-        <Text style={styles.logoSubtitle}>원하는 핏이되는 그날까지</Text>
+      <View style={styles.logoContainer}>
+        <Image
+          source={require('../../assets/images/WannabeFitLogo.png')} // Ai.png 이미지 불러오기
+          style={styles.image}
+        />
       </View>
 
       {/* "소셜 계정으로 로그인" 섹션 */}

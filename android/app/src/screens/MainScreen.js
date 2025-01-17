@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, Image} from 'react-native';
 import React, { useState, useEffect } from 'react';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import dayjs from 'dayjs';
@@ -122,39 +122,13 @@ const MainScreen = ({ navigation }) => {
         proteinGoal: user.recommended_protein,
         fatGoal: user.recommended_fat,
         goal: user.goal,
+        targetWeight: user.targetWeight,
       }); // 추천값 업데이트
     } catch (error) {
       console.error('Error fetching user goal:', error.message);
     }
   };
-  
 
-  // const fetchDailySummary = async (date) => {
-  //   try {
-  //     const token = await AsyncStorage.getItem('jwtToken'); // 토큰 가져오기
-  //     if (!token) {
-  //       console.error('No JWT token found. Please log in.');
-  //       return;
-  //     }
-
-  //     const response = await fetch(`${CONFIG.API_BASE_URL}/meal/meals-daily-summary?date=${date}`, {
-  //       method: 'GET',
-  //       headers: {
-  //         Authorization: `Bearer ${token}`, // JWT 토큰 사용
-  //         'Content-Type': 'application/json',
-  //       },
-  //     });
-
-  //     if (!response.ok) {
-  //       throw new Error(`HTTP error! status: ${response.status}`);
-  //     }
-
-  //     const summary = await response.json();
-  //     setDailySummary(summary); // 상태 업데이트
-  //   } catch (error) {
-  //     console.error('Error fetching daily summary:', error.message);
-  //   }
-  // };
 
   const fetchDailySummary = async (date) => {
     try {
@@ -361,6 +335,68 @@ const MainScreen = ({ navigation }) => {
                 ))}
               </View>
             </View>
+            <Text style={styles.sectionTitle}>체중</Text>
+            <View style={styles.summaryBox}>
+  {/* 목표 체중 텍스트 */}
+  {/* 목표 체중 텍스트 */}
+<Text style={styles.weightGoalText}>
+  <Text style={styles.goalPrefix}>내 목표: </Text>
+  <Text style={styles.goalText}>{userGoal.targetWeight || 0}kg</Text>
+</Text>
+
+{/* 체중계 디자인 */}
+{/* 체중계 디자인 */}
+<View style={styles.weightInputContainer}>
+  {/* 체중계 아이콘 박스 */}
+  <View style={styles.scaleBox}>
+    {/* 입력 박스 */}
+    <View style={styles.inputBoxContainer}>
+      {/* - 버튼 */}
+      <TouchableOpacity
+        style={styles.adjustButton}
+        onPress={() =>
+          setUserGoal((prev) => ({
+            ...prev,
+            targetWeight: Math.max(0, (prev.targetWeight || 0) - 1),
+          }))
+        }
+      >
+        <Text style={styles.adjustButtonText}>-</Text>
+      </TouchableOpacity>
+
+      {/* 체중 입력란 */}
+      <View style={styles.inputBox}>
+        <Text style={styles.inputText}>{userGoal.targetWeight || 0}</Text>
+        <Text style={styles.kgText}>kg</Text>
+      </View>
+
+      {/* + 버튼 */}
+      <TouchableOpacity
+        style={styles.adjustButton}
+        onPress={() =>
+          setUserGoal((prev) => ({
+            ...prev,
+            targetWeight: (prev.targetWeight || 0) + 1,
+          }))
+        }
+      >
+        <Text style={styles.adjustButtonText}>+</Text>
+      </TouchableOpacity>
+    </View>
+
+    {/* 양발 아이콘 */}
+      <Image
+          source={require('../../assets/images/foot.png')} // 발 이미지 경로
+          style={styles.footImage}
+        />
+  </View>
+</View>
+
+
+</View>
+
+
+
           </ScrollView>
         </View>
 

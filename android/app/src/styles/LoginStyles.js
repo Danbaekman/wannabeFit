@@ -11,6 +11,16 @@ const styles = StyleSheet.create({
   backButtonContainer: {
     alignSelf: 'flex-start', // 왼쪽에 고정
   },
+  logoContainer: {
+    alignItems: 'center',
+    marginBottom: 20,
+    paddingTop: 40,
+  },
+  image: {
+    width: 200, // 가로 크기 조정
+    height: 200, // 세로 크기 조정
+    resizeMode: 'contain', // 비율 유지하면서 조정
+  },
   backButton: {
     fontSize: 16,
     marginBottom: 20,
@@ -37,20 +47,6 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: '#888',
     lineHeight: 22,
-  },
-  LogoText: {
-    textAlign: 'center',
-    fontSize: 50,
-    color: '#008080',
-    fontWeight: 'bold',
-    paddingTop: 100,
-  },
-  logoSubtitle: {
-    textAlign: 'center',
-    fontSize: 20,
-    color: '#008080',
-    fontWeight: 'bold', 
-    paddingBottom: 100,
   },
   dividerContainer: {
     flexDirection: 'row',

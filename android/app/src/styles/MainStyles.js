@@ -77,7 +77,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#008080',
+    color: 'black',
     marginBottom: 10,
   },
   subTitle: {
@@ -209,6 +209,76 @@ const styles = StyleSheet.create({
     top: '50%', // 수직 중앙
     left: '50%', // 수평 중앙
     transform: [{ translateX: -25 }, { translateY: -25 }], // 아이콘 크기의 절반만큼 이동
+  },
+  weightInputContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 10,
+  },
+  scaleBox: {
+    width: 240, // 체중계 박스 크기 확대
+    height: 160, // 체중계 높이 확대
+    backgroundColor: '#FFFFFF',
+    borderRadius: 15,
+    borderWidth: 1,
+    borderColor: '#ddd',
+    alignItems: 'center',
+    justifyContent: 'space-between', // 발 모양을 위쪽으로 배치
+    position: 'relative',
+    elevation: 2,
+    paddingVertical: 10,
+  },
+  
+  inputBoxContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',// 발 모양과 간격
+  },
+  footImage: {
+    width: 140, // 기존보다 더 큰 너비
+    height: 70, // 기존보다 더 큰 높이
+    resizeMode: 'contain',
+    position: 'absolute',
+    top: '50%', // 체중계 상단에서 20% 위치로 조정
+    left: '50%',
+    transform: [{ translateX: -70 }], // 가로 중앙 보정 (width 절반 값)
+  },
+  
+  
+  inputBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#F5F5F5',
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#ddd',
+    paddingHorizontal: 10,
+    marginHorizontal: 10, // 버튼과 간격
+  },
+  inputText: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#333',
+    marginHorizontal: 10,
+  },
+  kgText: {
+    fontSize: 18,
+    color: '#555',
+  },
+  adjustButton: {
+    width: 30,
+    height: 30,
+    borderRadius: 20,
+    backgroundColor: '#008080',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginHorizontal: 5,
+  },
+  adjustButtonText: {
+    fontSize: 22,
+    color: '#FFF',
+    fontWeight: 'bold',
   },
 });
 
