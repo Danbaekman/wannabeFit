@@ -13,7 +13,7 @@ export default StyleSheet.create({
     elevation: 2,
   },
   sectionTitle: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: 'bold',
     marginBottom: 10,
     color: '#333',

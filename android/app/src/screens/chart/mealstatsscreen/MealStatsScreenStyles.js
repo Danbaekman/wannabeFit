@@ -17,7 +17,7 @@ export default StyleSheet.create({
       },
       
     sectionTitle: {
-      fontSize: 18,
+      fontSize: 20,
       fontWeight: 'bold',
       marginBottom: 10,
       color: '#333',

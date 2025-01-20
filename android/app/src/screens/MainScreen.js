@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, ScrollView, Image} from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, Image, Alert} from 'react-native';
 import React, { useState, useEffect } from 'react';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import dayjs from 'dayjs';
@@ -42,6 +42,9 @@ const MainScreen = ({ navigation }) => {
     maintain: '유지',
   };
   const goalText = goalTextMapping[userGoal.goal] || '목표 없음';
+  const [userWeight, setUserWeight] = useState(null); // 서버에서 가져온 실제 몸무게
+  const [tempWeight, setTempWeight] = useState(null); // UI에서 조정 중인 임시 몸무게
+
 
 
   useEffect(() => {
@@ -123,7 +126,9 @@ const MainScreen = ({ navigation }) => {
         fatGoal: user.recommended_fat,
         goal: user.goal,
         targetWeight: user.targetWeight,
-      }); // 추천값 업데이트
+      }); 
+      setUserWeight(user.weight); // 사용자의 현재 체중 설정
+      setTempWeight(user.weight);
     } catch (error) {
       console.error('Error fetching user goal:', error.message);
     }
@@ -164,6 +169,78 @@ const MainScreen = ({ navigation }) => {
       console.error('Error fetching daily summary:', error.message);
     }
   };
+
+
+  // 날짜별 몸무게 추가
+  const fetchWeights = async () => {
+    try {
+      const token = await AsyncStorage.getItem('jwtToken');
+      if (!token) {
+        console.error('No JWT token found. Please log in.');
+        return;
+      }
+  
+      const response = await fetch(`${CONFIG.API_BASE_URL}/weight?date=${selectedDate}`, {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+  
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+  
+      const weightData = await response.json();
+  
+      if (weightData) {
+        setTempWeight(weightData.weight); // 수정된 체중 값 설정
+      } else {
+        setTempWeight(userWeight); // 수정된 값이 없으면 초기값 사용
+      }
+    } catch (error) {
+      console.error('Error fetching weights:', error.message);
+    }
+  };
+  
+  useEffect(() => {
+    fetchWeights();
+  }, [selectedDate]);
+  
+  const saveWeight = async () => {
+    try {
+      const token = await AsyncStorage.getItem('jwtToken');
+      if (!token) {
+        Alert.alert('오류', '로그인이 필요합니다.');
+        return;
+      }
+  
+      const response = await fetch(`${CONFIG.API_BASE_URL}/weight/weight-update`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          weight: tempWeight,
+          date: selectedDate,
+        }),
+      });
+  
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+  
+      Alert.alert('성공', `${selectedDate}의 체중이 ${tempWeight}kg로 저장되었습니다.`);
+      setUserWeight(tempWeight);
+    } catch (error) {
+      console.error('Error saving weight:', error.message);
+      Alert.alert('오류', '체중을 저장하는 데 실패했습니다.');
+    }
+  };
+  
+  
   
   
   return (
@@ -337,7 +414,7 @@ const MainScreen = ({ navigation }) => {
             </View>
             <Text style={styles.sectionTitle}>체중</Text>
             <View style={styles.summaryBox}>
-  {/* 목표 체중 텍스트 */}
+ 
   {/* 목표 체중 텍스트 */}
 <Text style={styles.weightGoalText}>
   <Text style={styles.goalPrefix}>내 목표: </Text>
@@ -345,61 +422,66 @@ const MainScreen = ({ navigation }) => {
 </Text>
 
 {/* 체중계 디자인 */}
-{/* 체중계 디자인 */}
 <View style={styles.weightInputContainer}>
-  {/* 체중계 아이콘 박스 */}
   <View style={styles.scaleBox}>
-    {/* 입력 박스 */}
     <View style={styles.inputBoxContainer}>
       {/* - 버튼 */}
       <TouchableOpacity
         style={styles.adjustButton}
-        onPress={() =>
-          setUserGoal((prev) => ({
-            ...prev,
-            targetWeight: Math.max(0, (prev.targetWeight || 0) - 1),
-          }))
-        }
+        onPress={() => {
+          if (tempWeight !== null) {
+            setTempWeight(Math.max(0, tempWeight - 1));
+          } else if (userWeight !== null) {
+            setTempWeight(Math.max(0, userWeight - 1));
+          }
+        }}
       >
         <Text style={styles.adjustButtonText}>-</Text>
       </TouchableOpacity>
 
       {/* 체중 입력란 */}
       <View style={styles.inputBox}>
-        <Text style={styles.inputText}>{userGoal.targetWeight || 0}</Text>
+        <Text style={styles.inputText}>
+          {tempWeight !== null ? tempWeight : userWeight || '...'}
+        </Text>
         <Text style={styles.kgText}>kg</Text>
       </View>
 
       {/* + 버튼 */}
       <TouchableOpacity
         style={styles.adjustButton}
-        onPress={() =>
-          setUserGoal((prev) => ({
-            ...prev,
-            targetWeight: (prev.targetWeight || 0) + 1,
-          }))
-        }
+        onPress={() => {
+          if (tempWeight !== null) {
+            setTempWeight(tempWeight + 1);
+          } else if (userWeight !== null) {
+            setTempWeight(userWeight + 1);
+          }
+        }}
       >
         <Text style={styles.adjustButtonText}>+</Text>
       </TouchableOpacity>
     </View>
 
     {/* 양발 아이콘 */}
-      <Image
-          source={require('../../assets/images/foot.png')} // 발 이미지 경로
-          style={styles.footImage}
-        />
+    <Image
+      source={require('../../assets/images/foot.png')}
+      style={styles.footImage}
+    />
   </View>
+
+  {/* 변경하기 버튼 */}
+  <TouchableOpacity
+    style={styles.changeButton}
+    onPress={saveWeight} // saveWeight 함수 호출
+    disabled={tempWeight === null}
+  >
+    <Text style={styles.changeButtonText}>변경하기</Text>
+  </TouchableOpacity>
 </View>
-
-
 </View>
-
-
 
           </ScrollView>
         </View>
-
       <Footer />
     </View>
   );
