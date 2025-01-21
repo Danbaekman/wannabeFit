@@ -62,4 +62,9 @@ export default StyleSheet.create({
     color: '#333',
     fontWeight: '600',
   },
+  subTitle: {
+    color: 'black', 
+    fontSize: 16, 
+    paddingBottom: 40,
+  }
 });
