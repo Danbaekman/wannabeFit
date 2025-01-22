@@ -65,6 +65,6 @@ export default StyleSheet.create({
   subTitle: {
     color: 'black', 
     fontSize: 16, 
-    paddingBottom: 40,
+    paddingBottom: 60,
   }
 });

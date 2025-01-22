@@ -10,7 +10,7 @@ import ContentWrapper from '../../../components/contentwrapper/ContentWrapper';
 import dayjs from 'dayjs';
 import { LineChart } from 'react-native-chart-kit';
 import { BarChart } from 'react-native-gifted-charts';
-
+import Footer from '../../../components/footer/Footer';
 
 
 const StaticsMainScreen = ({ navigation }) => {
@@ -29,44 +29,47 @@ const StaticsMainScreen = ({ navigation }) => {
   const screenWidth = Dimensions.get('window').width;
 
   // 서버에서 총 운동 시간, 일수 및 총 볼륨 가져오기
-  const fetchTotalWorkoutStats = async () => {
-    try {
-      const token = await AsyncStorage.getItem('jwtToken'); // JWT 토큰 가져오기
-      if (!token) {
-        Alert.alert('Error', '로그인이 필요합니다.');
-        navigation.navigate('Login');
-        return;
-      }
-
-      const url = `${CONFIG.API_BASE_URL}/statistic/summary`;
-      console.log('요청 URL (Summary):', url);
-
-      const response = await fetch(url, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      console.log('응답 상태 코드 (Summary):', response.status);
-
-      if (!response.ok) {
-        console.error('서버 응답 상태 코드 (Summary):', response.status, response.statusText);
-        throw new Error('서버에서 데이터를 가져오는 데 실패했습니다.');
-      }
-
-      const data = await response.json();
-      console.log('서버 응답 데이터 (Summary):', JSON.stringify(data, null, 2));
-
-      setTotalWorkoutTime(data.totalWorkoutTime || 0);
-      setTotalDays(data.totalDays || 0);
-      setTotalVolume(data.totalVolume || 0);
-    } catch (error) {
-      console.error('운동 통계 가져오기 오류 (Summary):', error.message);
-      Alert.alert('Error', '운동 통계 데이터를 불러오지 못했습니다.');
+  // 서버에서 평균 운동 시간, 평균 볼륨 및 총 운동 일수 가져오기
+const fetchTotalWorkoutStats = async () => {
+  try {
+    const token = await AsyncStorage.getItem('jwtToken'); // JWT 토큰 가져오기
+    if (!token) {
+      Alert.alert('Error', '로그인이 필요합니다.');
+      navigation.navigate('Login');
+      return;
     }
-  };
+
+    const url = `${CONFIG.API_BASE_URL}/statistic/summary`;
+    console.log('요청 URL (Summary):', url);
+
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    console.log('응답 상태 코드 (Summary):', response.status);
+
+    if (!response.ok) {
+      console.error('서버 응답 상태 코드 (Summary):', response.status, response.statusText);
+      throw new Error('서버에서 데이터를 가져오는 데 실패했습니다.');
+    }
+
+    const data = await response.json();
+    console.log('서버 응답 데이터 (Summary):', JSON.stringify(data, null, 2));
+
+    // 서버 응답 데이터에 따라 상태 업데이트
+    setTotalWorkoutTime(Math.floor(data.averageWorkoutTime || 0)); // 소수점 제거
+    setTotalVolume(data.averageVolume || 0);
+    setTotalDays(data.totalDays || 0);
+  } catch (error) {
+    console.error('운동 통계 가져오기 오류 (Summary):', error.message);
+    Alert.alert('Error', '운동 통계 데이터를 불러오지 못했습니다.');
+  }
+};
+
   const handleTabPress = (tab) => {
     if (tab === '운동') {
       console.log('운동 탭 클릭됨');
@@ -191,7 +194,7 @@ const StaticsMainScreen = ({ navigation }) => {
 
   const renderDailyWorkoutChart = () => {
     if (weeklyWorkoutCounts.length === 0) {
-      return <Text style={{ textAlign: 'center', color: '#888', fontSize: 14 }}>운동 데이터가 없습니다.</Text>;
+      return <Text style={styles.noDataText}>운동 데이터가 없습니다.</Text>;
     }
   
     // 최근 7일 데이터 매핑
@@ -244,7 +247,8 @@ const StaticsMainScreen = ({ navigation }) => {
       return <Text style={styles.noDataText}>볼륨 데이터가 없습니다.</Text>;
     }
   
-    const labels = volumeData.map((entry) => dayjs(entry.date).format('YY-MM-DD')); // 날짜 형식
+    // const labels = volumeData.map((entry) => dayjs(entry.date).format('YY-MM-DD')); 
+    const labels = [];
     const volumes = volumeData.map((entry) => entry.volume); // 볼륨 값
   
     return (
@@ -281,7 +285,7 @@ const StaticsMainScreen = ({ navigation }) => {
             },
           }}
           style={{
-            marginVertical: 8,
+            marginVertical: 0, 
             borderRadius: 16,
           }}
         />
@@ -309,8 +313,8 @@ const StaticsMainScreen = ({ navigation }) => {
             </View>
             <View style={styles.divider} />
             <View style={styles.statCard}>
-              <Text style={styles.statValue}>{totalHours}</Text>
-              <Text style={styles.statLabel}>시간 (분)</Text>
+            <Text style={styles.statValue}>{totalWorkoutTime}</Text>
+              <Text style={styles.statLabel}>운동 시간(분)</Text>
             </View>
             <View style={styles.divider} />
             <View style={styles.statCard}>
@@ -332,8 +336,8 @@ const StaticsMainScreen = ({ navigation }) => {
         {/* 버튼 섹션 */}
         <Text style={styles.sectionTitle}>볼륨 변화 추이</Text>
         <View style={styles.statsSection}>
-        <Text style={{ textAlign: 'center', marginVertical: 10, fontSize: 14, color: '#555' }}>
-        {startDate} ~ {endDate} 까지의 기록입니다.
+        <Text style={styles.subTitle}>
+        {startDate} ~ 오늘 까지의 기록입니다.
       </Text>
   
 
@@ -341,7 +345,7 @@ const StaticsMainScreen = ({ navigation }) => {
         </View>
         </ScrollView>
       </ContentWrapper>
-    
+    <Footer />
     </View>
   );
 };
