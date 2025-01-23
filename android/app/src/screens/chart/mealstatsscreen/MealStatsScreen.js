@@ -8,6 +8,11 @@ import ContentWrapper from '../../../components/contentwrapper/ContentWrapper';
 import styles from './MealStatsScreenStyles';
 import CONFIG from '../../../config';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { BarChart } from 'react-native-gifted-charts';
+import dayjs from 'dayjs';
+import Footer from '../../../components/footer/Footer';
+
+
 
 const MealStatsScreen = ({ navigation }) => {
   const screenWidth = Dimensions.get('window').width;
@@ -204,77 +209,62 @@ const fetchNutritionDistribution = async (selectedPeriod) => {
       });
     }
   };
-  const calculatePercentage = (actual, target) => {
-    const percentage = ((actual / target) * 100).toFixed(0);
-    if (percentage >= 95) return { percentage, status: '과도' };
-    if (percentage >= 85) return { percentage, status: '근접' };
-    return { percentage, status: '미흡' };
-  };
 
   const renderCustomBarChart = () => {
     if (!filteredData || filteredData.length === 0) {
       return <Text style={{ textAlign: 'center', marginTop: 20 }}>데이터가 없습니다.</Text>;
     }
   
-    const barWidth = 30;
-    const maxHeight = 140;
-    const padding = 20;
+    // BarChart에 사용할 데이터 매핑
+    const barChartData = filteredData.map((entry) => ({
+      value: entry.totalCalories,
+      label: dayjs(entry.date).format('MM/DD'),
+      frontColor: '#008080', // 막대 색상
+      topLabelComponent: () => (
+        <Text style={{ 
+          fontSize: 12, // 글씨 크기
+          color: '#333',
+          marginBottom: 10, // 그래프와의 거리
+          textAlign: 'center',
+        }}>
+          {Math.floor(entry.totalCalories)}
+        </Text>
+      ),
+    }));
+  
+    // 그래프의 최대값에 여유 공간 추가 (최대값에 10% 여유)
     const maxCalories = Math.max(...filteredData.map((entry) => entry.totalCalories), 1);
+    const adjustedMaxValue = Math.ceil(maxCalories * 1.1);
   
     return (
-      <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-        <Svg height={maxHeight + 60} width={filteredData.length * (barWidth + padding)} style={{ marginTop: 60 }}>
-          {filteredData.map((entry, index) => {
-            const barHeight = (entry.totalCalories / maxCalories) * maxHeight;
-            const x = index * (barWidth + padding);
-            const y = maxHeight - barHeight;
-            const date = new Date(entry.date);
-            const day = date.toLocaleDateString('ko-KR', { weekday: 'short' }); // 요일 (월, 화, 수 등)
-            const dayAndMonth = date.toLocaleDateString('ko-KR', { day: 'numeric', month: 'numeric' }); // 월/일
-  
-            return (
-              <React.Fragment key={index}>
-                {/* 막대 */}
-                <Rect x={x} y={y} width={barWidth} height={barHeight} fill="#1abc9c" rx={4} />
-                {/* 칼로리 값 */}
-                <SvgText
-                  x={x + barWidth / 2}
-                  y={y - 10}
-                  fontSize="12"
-                  fill="#333"
-                  textAnchor="middle"
-                >
-                  {Math.floor(entry.totalCalories)}
-                </SvgText>
-                {/* 날짜 (요일 포함) */}
-                <SvgText
-                  x={x + barWidth / 2}
-                  y={maxHeight + 20}
-                  fontSize="12"
-                  fill="#666"
-                  textAnchor="middle"
-                >
-                  {day} {/* 요일 */}
-                </SvgText>
-                <SvgText
-                x={x + barWidth / 2}
-                y={maxHeight + 40} // 요일 아래에 위치
-                fontSize="12"
-                fill="#666"
-                textAnchor="middle"
-                >
-                {new Date(entry.date)
-                    .toLocaleDateString('ko-KR', { day: 'numeric', month: 'numeric' }) // 날짜 포맷
-                    .replace(/\. /g, '.') // 중간 공백 제거
-                    .replace(/\.$/, '')} {/* 마지막 . 제거 */}
-                </SvgText>
-              </React.Fragment>
-            );
-          })}
-        </Svg>
-      </ScrollView>
+      <View style={{ marginVertical: 20 }}>
+        <BarChart
+          data={barChartData}
+          barWidth={30} // 막대 너비
+          spacing={20} // 막대 간 간격
+          barBorderRadius={4}
+          maxValue={adjustedMaxValue} // 최대값 조정
+          noOfSections={4} // Y축 섹션 개수
+          yAxisLabelWidth={40} // Y축 라벨 너비
+          yAxisTextStyle={{ color: '#666', fontSize: 12 }} // Y축 라벨 스타일
+          xAxisLabelTextStyle={{ color: '#333', fontSize: 12, }} // X축 라벨 스타일
+          xAxisThickness={1} // X축 두께
+          xAxisColor="#D9D9D9" // X축 색상
+          yAxisThickness={0} // Y축 두께
+          yAxisColor="#D9D9D9" // Y축 색상
+          hideRules={0} // 규칙선 표시
+          rulesColor="#D9D9D9" // 규칙선 색상
+          rulesThickness={0.5} // 규칙선 두께
+          backgroundColor="#FFFFFF" // 차트 배경색
+          height={200} // 그래프 전체 높이 증가
+          stepValue={500} // Y축 간격
+          hideYAxisText={true} 
+        />
+      </View>
     );
   };
+  
+  
   
   const renderPieChart = (percentage, color, label) => {
     const radius = 40;
@@ -296,6 +286,7 @@ const fetchNutritionDistribution = async (selectedPeriod) => {
             fill="none"
             strokeDasharray={`${circumference} ${circumference}`}
             strokeDashoffset={strokeDashoffset}
+            transform={`rotate(-90, 50, 50)`} // 0도에서 시작하도록 회전
           />
           {/* Percentage Text */}
           <SvgText x="50" y="50" textAnchor="middle" alignmentBaseline="middle" fontSize="14" fill={color}>
@@ -310,31 +301,51 @@ const fetchNutritionDistribution = async (selectedPeriod) => {
   const { startDate, endDate } = getDateRange(currentDate);
 
   const renderGoalComparison = () => {
-    console.log('현재 goalComparison 데이터:', goalComparison);
     if (!goalComparison || Object.keys(goalComparison).length === 0) {
       return <Text style={{ textAlign: 'center', marginTop: 20 }}>데이터가 없습니다.</Text>;
     }
   
     const { calorieComparison = 'N/A', proteinComparison = 'N/A', fatComparison = 'N/A', carbsComparison = 'N/A' } = goalComparison;
   
+    const getStatus = (value) => {
+      const percentage = parseFloat(value);
+      if (isNaN(percentage)) return { status: 'N/A', color: '#aaa' };
+      if (percentage < 70) return { status: '미흡', color: '#e74c3c' }; // 빨간색
+      if (percentage >= 70 && percentage <= 100) return { status: '양호', color: '#3498db' }; // 파란색
+      return { status: '초과', color: '#2ecc71' }; // 녹색
+    };
+  
     return (
-      <View style={styles.goalComparisonContainer}>
-        <View style={styles.comparisonRow}>
-          <Text style={styles.comparisonLabel}>칼로리</Text>
-          <Text style={styles.comparisonValue}>{calorieComparison}</Text>
+      <View>
+        {/* 상단 안내 문구 */}
+        <View style={styles.infoContainer}>
+          <Text style={styles.infoText}>
+            <Text style={{ color: '#000' }}>0~70%:</Text> <Text style={{ color: '#e74c3c' }}>미흡</Text>,{' '}
+            <Text style={{ color: '#000' }}>70~100%:</Text> <Text style={{ color: '#3498db' }}>양호</Text>,{' '}
+            <Text style={{ color: '#000' }}>100% 이상:</Text> <Text style={{ color: '#2ecc71' }}>초과</Text>
+          </Text>
         </View>
-        <View style={styles.comparisonRow}>
-          <Text style={styles.comparisonLabel}>단백질</Text>
-          <Text style={styles.comparisonValue}>{proteinComparison}</Text>
-        </View>
-        <View style={styles.comparisonRow}>
-          <Text style={styles.comparisonLabel}>지방</Text>
-          <Text style={styles.comparisonValue}>{fatComparison}</Text>
-        </View>
-        <View style={styles.comparisonRow}>
-          <Text style={styles.comparisonLabel}>탄수화물</Text>
-          <Text style={styles.comparisonValue}>{carbsComparison}</Text>
-        </View>
+  
+        {/* 목표 대비 비교 */}
+        {[
+          { label: '칼로리', value: calorieComparison },
+          { label: '탄수화물', value: carbsComparison },
+          { label: '단백질', value: proteinComparison },
+          { label: '지방', value: fatComparison },
+        ].map(({ label, value }) => {
+          const { status, color } = getStatus(value);
+          return (
+            <View key={label} style={styles.comparisonRow}>
+              {/* 좌측: 라벨 */}
+              <Text style={styles.comparisonLabel}>{label}</Text>
+              {/* 우측: 퍼센트 및 상태 */}
+              <View style={styles.comparisonValueContainer}>
+                <Text style={[styles.comparisonValue, { color }]}>{value}</Text>
+                <Text style={[styles.comparisonStatus, { color }]}>{status}</Text>
+              </View>
+            </View>
+          );
+        })}
       </View>
     );
   };
@@ -345,9 +356,8 @@ const fetchNutritionDistribution = async (selectedPeriod) => {
     <View style={styles.container}>
       <Navbar />
       <TabNavigation activeTab="식단" onTabPress={handleTabPress} />
-
-      <ScrollView>
         <ContentWrapper>
+        <ScrollView>
           <Text style={styles.sectionTitle}>총 칼로리 섭취량</Text>
           <View style={styles.statsSection}>
             <View style={styles.dateRangeContainer}>
@@ -372,7 +382,6 @@ const fetchNutritionDistribution = async (selectedPeriod) => {
   <Text style={styles.sectionTitle}>영양성분 비율</Text>
   {/* 흰색 박스 */}
   <View style={styles.statsSection}>
-    {/* 필터 버튼 */}
    {/* 필터 버튼 */}
 <View style={styles.filterContainer}>
   <TouchableOpacity
@@ -385,7 +394,7 @@ const fetchNutritionDistribution = async (selectedPeriod) => {
   </TouchableOpacity>
   {isFilterVisible && (
     <View style={styles.filterDropdown}>
-      {['1주일', '1개월', '3개월', '6개월', '1년', '전체'].map((period) => (
+      {['1주일', '1개월', '3개월', '6개월', '1년',].map((period) => (
         <TouchableOpacity
           key={period}
           style={styles.filterOption}
@@ -418,12 +427,13 @@ const fetchNutritionDistribution = async (selectedPeriod) => {
 </View>
 
           {/* 제목: 목표 대비 성장률 */}
-        <Text style={styles.sectionTitle}>목표 대비 섭취율</Text>
+        <Text style={styles.sectionTitle}>목표 대비 평균 섭취율</Text>
             <View style={styles.statsSection}>
             {renderGoalComparison()}
         </View>
+        </ScrollView>
         </ContentWrapper>
-      </ScrollView>
+        <Footer />
     </View>
   );
 };

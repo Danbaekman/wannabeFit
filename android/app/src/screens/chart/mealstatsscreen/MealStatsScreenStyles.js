@@ -103,6 +103,36 @@ export default StyleSheet.create({
         fontWeight: 'bold',
         color: '#333',
       },
-      
+      comparisonRow: {
+        flexDirection: 'row', // 좌우 배치
+        justifyContent: 'space-between', // 좌우로 공간 분리
+        alignItems: 'center', // 수직 가운데 정렬
+        paddingVertical: 10, // 위아래 여백
+        borderBottomWidth: 1, // 구분선
+        borderBottomColor: '#ddd',
+      },
+      comparisonLabel: {
+        fontSize: 16, // 라벨 글씨 크기
+        color: '#333', // 글씨 색상
+        fontWeight: 'bold',
+      },
+      comparisonValueContainer: {
+        alignItems: 'flex-end', // 우측 정렬
+      },
+      comparisonValue: {
+        fontSize: 16, // 퍼센트 글씨 크기
+      },
+      comparisonStatus: {
+        fontSize: 14, // 상태 글씨 크기
+        fontWeight: '500', // 적당히 굵게
+        marginTop: 4, // 퍼센트와 상태 사이 간격
+      },
+      infoContainer: {
+        marginBottom: 20,
+      },
+      infoText: {
+        fontSize: 14,
+        color: '#333', // 기본 텍스트 색상
+      },
   });
   

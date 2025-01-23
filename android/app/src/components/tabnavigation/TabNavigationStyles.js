@@ -11,14 +11,14 @@ export default StyleSheet.create({
   },
   tabButton: {
     backgroundColor: '#004D4D', // 기본 버튼 배경색
-    paddingVertical: 8, // 버튼의 세로 여백
+    paddingVertical: 4, // 버튼의 세로 여백
     paddingHorizontal: 20, // 버튼의 가로 여백
     borderRadius: 20, // 둥근 버튼 모서리
     marginHorizontal: 5, // 버튼 간 간격
   },
   tabButtonActive: {
     backgroundColor: '#FFFFFF', // 활성화된 버튼 배경색
-    paddingVertical: 8,
+    paddingVertical: 4,
     paddingHorizontal: 20,
     borderRadius: 20,
     marginHorizontal: 5,
