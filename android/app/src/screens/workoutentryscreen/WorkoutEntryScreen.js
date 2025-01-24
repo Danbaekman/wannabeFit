@@ -12,6 +12,9 @@ import Navbar from '../../components/navbar/Navbar';
 import Footer from '../../components/footer/Footer';
 import styles from './WorkoutEntryScreenStyles';
 import CONFIG from '../../config';
+import Icon from 'react-native-vector-icons/Ionicons'; // 아이콘 라이브러리
+import TimeWatchModal from '../../components/modal/timewatch/TimeWatchModal';
+
 
 // 현재 시간을 가져와 선택된 날짜를 기준으로 초기화하는 함수
 const getCurrentTimeWithSelectedDate = (selectedDate) => {
@@ -52,6 +55,10 @@ const WorkoutEntryScreen = ({ route, navigation }) => {
   const [endTimeHours, setEndTimeHours] = useState('00'); // 끝나는 시간은 항상 초기값 00
   const [endTimeMinutes, setEndTimeMinutes] = useState('00');
   const [generalMemo, setGeneralMemo] = useState('');
+  const [isModalVisible, setModalVisible] = useState(false);
+  const toggleModal = () => {
+    setModalVisible(!isModalVisible);
+  };
 
   const handleComplete = async () => {
     const muscles = [
@@ -201,7 +208,18 @@ const WorkoutEntryScreen = ({ route, navigation }) => {
           </TouchableOpacity>
         </View>
         <View style={styles.mainBox}>
-          <Text style={styles.mainBoxTitle}>{routineName}</Text>
+          <View style={styles.routineRow}>
+            <Text style={styles.mainBoxTitle}>{routineName}</Text>
+            <TouchableOpacity onPress={toggleModal}>
+                <Icon name="alarm-outline" size={24} color="#008080" />
+              </TouchableOpacity>
+          </View>
+          {isModalVisible && (
+            <TimeWatchModal
+              visible={isModalVisible}
+              onClose={toggleModal} // 모달 닫기 핸들러
+            />
+          )}
           <View style={styles.timeRow}>
             <Text style={styles.timeLabel}>시작 시간</Text>
             <View style={styles.timeInputContainer}>

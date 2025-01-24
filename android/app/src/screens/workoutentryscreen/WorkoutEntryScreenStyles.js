@@ -44,6 +44,12 @@ const styles = StyleSheet.create({
     color: 'black',
     marginBottom: 10,
   },
+  routineRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 10,
+  },
   timeRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
