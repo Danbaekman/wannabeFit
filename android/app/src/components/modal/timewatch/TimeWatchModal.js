@@ -1,11 +1,69 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, Modal, TouchableOpacity, Alert, Vibration } from 'react-native';
+import React, { useState, useEffect, useRef,  } from 'react';
+import {
+  View,
+  Text,
+  Modal,
+  TouchableOpacity,
+  Alert,
+  Vibration,
+  Animated,
+  PanResponder,
+  Dimensions
+} from 'react-native';
 import styles from './TimeWatchModalStyles';
-import Ionicons from 'react-native-vector-icons/Ionicons'; // 아이콘 라이브러리
+import Ionicons from 'react-native-vector-icons/Ionicons';
 
 const TimeWatchModal = ({ visible, onClose }) => {
   const [time, setTime] = useState(60); // 기본 제공 60초
   const [isTimerRunning, setIsTimerRunning] = useState(false);
+
+  const screenHeight = Dimensions.get('screen').height; // 화면 높이
+  const panY = useRef(new Animated.Value(screenHeight)).current; // 모달의 Y축 위치
+  const translateY = panY.interpolate({
+    inputRange: [-1, 0, 1],
+    outputRange: [0, 0, 1],
+  });
+
+  const resetBottomSheet = Animated.timing(panY, {
+    toValue: 0, // 모달 초기 위치
+    duration: 300,
+    useNativeDriver: true,
+  });
+
+  const closeBottomSheet = Animated.timing(panY, {
+    toValue: screenHeight, // 화면 아래로 이동
+    duration: 300,
+    useNativeDriver: true,
+  });
+
+  const panResponder = useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => true,
+      onMoveShouldSetPanResponder: () => false,
+      onPanResponderMove: (event, gestureState) => {
+        panY.setValue(gestureState.dy); // 드래그 Y축 업데이트
+      },
+      onPanResponderRelease: (event, gestureState) => {
+        if (gestureState.dy > 0 && gestureState.vy > 1.5) {
+          closeModal(); // 아래로 빠르게 드래그하면 모달 닫기
+        } else {
+          resetBottomSheet.start(); // 원래 위치로 복귀
+        }
+      },
+    })
+  ).current;
+
+  useEffect(() => {
+    if (visible) {
+      resetBottomSheet.start(); // 모달 열기 애니메이션
+    }
+  }, [visible]);
+
+  const closeModal = () => {
+    closeBottomSheet.start(() => {
+      onClose(); // 모달 닫기 콜백 호출
+    });
+  };
 
   useEffect(() => {
     let timer;
@@ -36,16 +94,12 @@ const TimeWatchModal = ({ visible, onClose }) => {
     setTime(60);
   };
 
-  // 분 쪼개기
   const formatTime = (seconds) => {
     const minutes = Math.floor(seconds / 60);
     const secs = seconds % 60;
-
-    // padStart는 문자열 메서드로 기본값 2자리로 제한(2자리 초과 시에는 그대로 출력)
     return `${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
   };
 
-  // 최저값 제한
   const handleTimeAdjust = (amount) => {
     setTime((prev) => Math.max(0, prev + amount)); // 최저값 0으로 제한
   };
@@ -54,57 +108,40 @@ const TimeWatchModal = ({ visible, onClose }) => {
     <Modal
       visible={visible}
       transparent={true}
-      animationType="slide"
+      animationType="fade"
       onRequestClose={onClose}
     >
       <View style={styles.container}>
-        <View style={styles.modalContainer}>
+        <TouchableOpacity style={styles.background} onPress={closeModal} />
+        <Animated.View
+          style={[styles.modalContainer, { transform: [{ translateY }] }]}
+          {...panResponder.panHandlers} // PanResponder 연결
+        >
           <View style={styles.dragHandleContainer}>
             <View style={styles.dragHandle} />
           </View>
-          {/* 원형 안에 시간 */}
           <View style={styles.timerCircle}>
             <Text style={styles.timerText}>{formatTime(time)}</Text>
           </View>
-          {/* 재생/일시정지 버튼 */}
           <View style={styles.buttonContainer}>
-            <TouchableOpacity
-              style={styles.startPauseButton}
-              onPress={handleStartPause}
-            >
-              <Ionicons
-                name={isTimerRunning ? 'pause' : 'play'}
-                size={44}
-                color="black"
-              />
+            <TouchableOpacity style={styles.startPauseButton} onPress={handleStartPause}>
+              <Ionicons name={isTimerRunning ? 'pause' : 'play'} size={44} color="black" />
             </TouchableOpacity>
-            {/* 정지 버튼 */}
             {isTimerRunning && (
-              <TouchableOpacity
-                style={styles.stopButton}
-                onPress={handleReset}
-              >
+              <TouchableOpacity style={styles.stopButton} onPress={handleReset}>
                 <Ionicons name="stop" size={32} color="black" />
               </TouchableOpacity>
             )}
           </View>
           <View style={styles.adjustButtonContainer}>
-          {/* -15초 버튼 */}
-            <TouchableOpacity
-              style={styles.adjustButton}
-              onPress={() => handleTimeAdjust(-15)}
-            >
+            <TouchableOpacity style={styles.adjustButton} onPress={() => handleTimeAdjust(-15)}>
               <Text style={styles.adjustButtonText}>-15초</Text>
             </TouchableOpacity>
-            {/* +15초 버튼 */}
-            <TouchableOpacity
-              style={styles.adjustButton}
-              onPress={() => handleTimeAdjust(15)}
-            >
+            <TouchableOpacity style={styles.adjustButton} onPress={() => handleTimeAdjust(15)}>
               <Text style={styles.adjustButtonText}>+15초</Text>
             </TouchableOpacity>
-            </View>
-        </View>
+          </View>
+        </Animated.View>
       </View>
     </Modal>
   );
