@@ -1,21 +1,109 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, TouchableOpacity, FlatList, Alert } from 'react-native';
+import React, { useEffect, useState, useRef } from 'react';
+import { View, Text, TouchableOpacity, FlatList, Alert, Animated, PanResponder, Dimensions } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Icon from 'react-native-vector-icons/Ionicons';
 import styles from './RoutineDetailScreenStyles';
 import Navbar from '../../components/navbar/Navbar';
 import CONFIG from '../../config';
+import AddRoutineDetailModal from '../../components/modal/addroutinedetail/AddRoutineDetailModal';
+import ReanimatedSwipeable from 'react-native-gesture-handler/ReanimatedSwipeable';
+import Reanimated, { useAnimatedStyle, useSharedValue, interpolate} from 'react-native-reanimated';
+
+
+// 근육 ID 가져오기 함수 - 컴포넌트 외부에 정의하여 재사용 가능
+const fetchMusclesId = (muscleName, musclesData) => {
+  const musclesArray = musclesData[0]?.muscles || [];
+  const matchedMuscle = musclesArray.find(
+    (muscle) => muscle.name.trim().toLowerCase() === muscleName.trim().toLowerCase()
+  );
+  return matchedMuscle ? matchedMuscle._id : null;
+};
+
+// const renderRightActions = (progress, dragX, item) => {
+//   const animatedStyle = useAnimatedStyle(() => ({
+//     opacity: progress.value, // 스와이프 진행도에 따라 투명도 변경
+//     transform: [{ scale: progress.value }], // 삭제 아이콘 확대/축소 애니메이션
+//   }));
+
+//   return (
+//     <Reanimated.View style={[styles.deleteContainer, animatedStyle]}>
+//       <Icon name="trash-outline" size={24} color="#FF0000" />
+//     </Reanimated.View>
+//   );
+// };
+const renderRightActions = (progress, dragX, item) => {
+  const progressValue = useSharedValue(0);
+  const vibrated = useSharedValue(false); // 진동 상태 추적
+
+  // 배경색과 크기 변화 애니메이션
+  const animatedStyle = useAnimatedStyle(() => {
+    const backgroundColor = interpolate(
+      progressValue.value,
+      [0, 0.5, 1],
+      ['#FFFFFF', '#FFD700', '#FF3B30']
+    );
+    const scale = interpolate(progressValue.value, [0, 1], [1, 1.2]);
+    return { backgroundColor, transform: [{ scale }] };
+  });
+
+  // 스와이프 진행도 업데이트 및 진동 트리거
+  const handleSwipeProgress = (dragX) => {
+    const normalizedProgress = Math.min(1, Math.abs(dragX / 200));
+    progressValue.value = normalizedProgress;
+
+    if (!vibrated.value && normalizedProgress > 0.5) {
+      Vibration.vibrate(50); // 진동
+      vibrated.value = true;
+    }
+
+    if (normalizedProgress <= 0.5) {
+      vibrated.value = false;
+    }
+  };
+
+  return (
+    <Reanimated.View style={[styles.deleteContainer, animatedStyle]}>
+      <TouchableOpacity
+        style={styles.deleteButton}
+        onPress={() => handleWorkoutDelete(item._id)}
+      >
+        <Icon name="trash-outline" size={24} color="white" />
+      </TouchableOpacity>
+    </Reanimated.View>
+  );
+};
+
+
 
 const RoutineDetailScreen = ({ route, navigation }) => {
-  const { routineName, selectedDate } = route.params; // routineName만 사용
+  const { routineName, selectedDate } = route.params; // route로부터 데이터 받음
   const [selectedWorkouts, setSelectedWorkouts] = useState([]);
   const [workouts, setWorkouts] = useState([]);
+  const [isModalVisible, setModalVisible] = useState(false);
+  const [musclesData, setMusclesData] = useState([]);
+  const [isTrashVisible, setIsTrashVisible] = useState(false);
+  const trashZoneY = Dimensions.get('window').height * 0.1; // 휴지통 영역 높이
+  const positions = useRef([]);
 
   useEffect(() => {
     fetchWorkouts(); // 운동 데이터 가져오기
   }, []);
+  useEffect(() => {
+    console.log('useEffect 실행 - fetchWorkouts 호출');
+    fetchWorkouts(); // 운동 데이터 가져오기
+  }, []);
+  
+  useEffect(() => {
+    console.log('musclesData 상태 변경:', JSON.stringify(musclesData, null, 2));
+  }, [musclesData]);
+  useEffect(() => {
+    // `positions`를 `workouts` 길이에 맞게 업데이트
+    positions.current = workouts.map(
+      (_, index) => positions.current[index] || new Animated.ValueXY({ x: 0, y: 0 })
+    );
+  }, [workouts]);
+  
 
-  // 운동 목록 가져오기 및 필터링
   const fetchWorkouts = async () => {
     console.log('API 호출 시도');
     try {
@@ -27,92 +115,202 @@ const RoutineDetailScreen = ({ route, navigation }) => {
       }
 
       const response = await fetch(`${CONFIG.API_BASE_URL}/exercise/exercises`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       });
+
+      const musclesResponse = await fetch(`${CONFIG.API_BASE_URL}/exercise/muscles/grouped`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (!musclesResponse.ok) {
+        throw new Error('Failed to fetch muscle data');
+      }
+
+      const musclesData = await musclesResponse.json();
+      setMusclesData(musclesData); // musclesData를 상태로 저장
+      console.log('근육 데이터 구조:', JSON.stringify(musclesData, null, 2));
 
       if (!response.ok) {
         throw new Error(`Failed to fetch workouts: ${response.status}`);
       }
 
       const data = await response.json();
+      console.log('전체 운동 데이터:', JSON.stringify(data, null, 2));
 
-      // `routineName`으로 운동 필터링 및 유효한 muscles 데이터만 포함
-      const filteredWorkouts = data
-        .filter((exercise) =>
-          exercise.muscles.some((muscle) => muscle.name === routineName && muscle._id) // 유효한 _id 필터링
-        )
-        .map((exercise) => ({
-          ...exercise,
-          muscles: exercise.muscles.filter((muscle) => muscle._id), // 유효한 muscles만 포함
-        }));
-
-      // 중복 제거
-      const uniqueWorkouts = Array.from(new Set(filteredWorkouts.map((workout) => workout.name))).map(
-        (name) => filteredWorkouts.find((workout) => workout.name === name)
+      // routineName과 연결된 운동만 필터링
+      const filteredWorkouts = data.filter((exercise) =>
+        exercise.muscles.some((muscle) => muscle.name === routineName)
       );
 
-      setWorkouts(uniqueWorkouts); // 필터링된 운동 목록 저장
-      console.log('Filtered Workouts with Muscles:', JSON.stringify(uniqueWorkouts, null, 2));
+      setWorkouts(filteredWorkouts);
+      console.log('필터링된 운동 데이터:', JSON.stringify(filteredWorkouts, null, 2));
     } catch (error) {
       Alert.alert('Error', '운동 목록을 불러오지 못했습니다.');
       console.error('Fetch workouts error:', error);
     }
   };
 
-  // 운동 선택/해제 토글
-  const toggleWorkoutSelection = (workout) => {
-    if (!workout.muscles || workout.muscles.some((muscle) => !muscle._id)) {
-      Alert.alert('Error', '유효하지 않은 근육 정보가 포함된 운동입니다.');
-      return;
+  const handleWorkoutAdd = async (workoutName) => {
+    try {
+      console.log('운동 추가 시작:', workoutName);
+      console.log('현재 musclesData:', JSON.stringify(musclesData, null, 2));
+  
+      const muscleId = fetchMusclesId(routineName, musclesData);
+  
+      if (!muscleId) {
+        console.error(`Error: ${routineName}에 해당하는 근육 데이터를 찾을 수 없습니다.`);
+        Alert.alert('Error', '근육 데이터를 찾을 수 없습니다.');
+        return;
+      }
+  
+      console.log('찾은 근육 ID:', muscleId);
+  
+      // 서버 요청
+      const token = await AsyncStorage.getItem('jwtToken');
+      if (!token) {
+        Alert.alert('Error', '로그인이 필요합니다.');
+        navigation.navigate('Login');
+        return;
+      }
+  
+      const response = await fetch(`${CONFIG.API_BASE_URL}/exercise/add-exercises`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          name: workoutName,
+          muscles: [muscleId],
+        }),
+      });
+  
+      if (!response.ok) {
+        throw new Error('운동 추가 실패');
+      }
+  
+      fetchWorkouts();
+      setModalVisible(false);
+      Alert.alert('운동 추가', '새 운동이 성공적으로 추가되었습니다!');
+    } catch (error) {
+      console.error('운동 추가 중 오류 발생:', error);
+      Alert.alert('Error', '운동을 추가하는 데 실패했습니다.');
     }
+  };
 
+  const handleWorkoutDelete = async (workoutId) => {
+    try {
+        console.log('운동 삭제 시도:', workoutId);
+
+        const token = await AsyncStorage.getItem('jwtToken');
+        if (!token) {
+            Alert.alert('Error', '로그인이 필요합니다.');
+            navigation.navigate('Login');
+            return;
+        }
+
+        // ExerciseName 삭제를 위한 API 호출
+        const response = await fetch(`${CONFIG.API_BASE_URL}/exercise/exercises/${workoutId}`, {
+            method: 'DELETE',
+            headers: { Authorization: `Bearer ${token}` },
+        });
+
+        if (!response.ok) {
+            throw new Error('운동 삭제 실패');
+        }
+
+        fetchWorkouts(); // 운동 목록 갱신
+        Alert.alert('운동 삭제', '운동이 성공적으로 삭제되었습니다.');
+    } catch (error) {
+        console.error('운동 삭제 중 오류 발생:', error);
+        Alert.alert('Error', '운동을 삭제하는 데 실패했습니다.');
+    }
+};
+
+
+  const panResponders = workouts.map((workout, index) =>
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => true,
+      onPanResponderGrant: () => {
+        setIsTrashVisible(true);
+      },
+      onPanResponderMove: (_, gestureState) => {
+        positions.current[index].setValue({ x: gestureState.dx, y: gestureState.dy });
+      },
+      onPanResponderRelease: (_, gestureState) => {
+        setIsTrashVisible(false);
+        if (gestureState.moveY < trashZoneY) {
+          handleWorkoutDelete(workout._id);
+        } else {
+          Animated.spring(positions.current[index], {
+            toValue: { x: 0, y: 0 },
+            useNativeDriver: false,
+          }).start();
+        }
+      },
+    })
+  );
+  const toggleWorkoutSelection = (workout) => {
     setSelectedWorkouts((prevSelected) => {
       const exists = prevSelected.find((w) => w._id === workout._id);
       if (exists) {
-        // 선택 해제
         return prevSelected.filter((w) => w._id !== workout._id);
       } else {
-        // 선택 추가
         return [...prevSelected, workout];
       }
     });
   };
 
-  // 다음 단계로 이동
   const handleNextStep = () => {
     if (selectedWorkouts.length === 0) {
       Alert.alert('Error', '최소 하나의 운동을 선택해주세요.');
       return;
     }
 
-    // `selectedWorkouts`에 `muscles` 정보를 포함하여 전달
     navigation.navigate('WorkoutEntry', {
       selectedWorkouts,
       routineName,
       selectedDate,
     });
   };
-
-  // 운동 항목 렌더링
+  
   const renderWorkoutItem = ({ item }) => (
-    <TouchableOpacity
-      style={[
-        styles.workoutItem,
-        selectedWorkouts.some((w) => w._id === item._id) && styles.selectedWorkoutItem,
-      ]}
-      onPress={() => toggleWorkoutSelection(item)}
+    <ReanimatedSwipeable
+      friction={2} // 스와이프 속도 조절
+      rightThreshold={40} // 우측 스와이프 임계값
+      overshootRight={false} // 스와이프가 넘어가지 않도록 설정
+      overshootLeft={false} // 좌측 스와이프가 넘어가지 않도록 설정
+      onSwipeableOpen={() => handleWorkoutDelete(item._id)} // 스와이프 완료 시 삭제
+      renderRightActions={(progress, dragX) =>
+        renderRightActions(progress, dragX, item) // 삭제 아이콘 표시
+      }
     >
-      <Text style={styles.workoutName}>{item.name}</Text>
-      <Icon
-        name={selectedWorkouts.some((w) => w._id === item._id) ? 'checkbox-outline' : 'square-outline'}
-        size={24}
-        color={selectedWorkouts.some((w) => w._id === item._id) ? '#008080' : '#888'}
-      />
-    </TouchableOpacity>
+      <TouchableOpacity
+        style={[
+          styles.workoutItem,
+          selectedWorkouts.some((w) => w._id === item._id) && styles.selectedWorkoutItem,
+        ]}
+        onPress={() => toggleWorkoutSelection(item)}
+      >
+        <Text style={styles.workoutName}>{item.name}</Text>
+        <Icon
+          name={
+            selectedWorkouts.some((w) => w._id === item._id)
+              ? 'checkbox-outline'
+              : 'square-outline'
+          }
+          size={24}
+          color={
+            selectedWorkouts.some((w) => w._id === item._id) ? '#008080' : '#888'
+          }
+        />
+      </TouchableOpacity>
+    </ReanimatedSwipeable>
   );
-
+  
+  
+  
+  
   return (
     <View style={{ flex: 1 }}>
       <Navbar />
@@ -123,7 +321,7 @@ const RoutineDetailScreen = ({ route, navigation }) => {
             <Text style={styles.nextButtonText}>다음 단계로</Text>
           </TouchableOpacity>
         </View>
-
+  
         <FlatList
           data={workouts}
           keyExtractor={(item) => item._id}
@@ -131,9 +329,20 @@ const RoutineDetailScreen = ({ route, navigation }) => {
           ListEmptyComponent={<Text>운동 목록이 없습니다.</Text>}
           contentContainerStyle={styles.workoutList}
         />
+  
+        <TouchableOpacity style={styles.addButton} onPress={() => setModalVisible(true)}>
+          <Text style={styles.addButtonText}>+ 직접 추가하기</Text>
+        </TouchableOpacity>
+  
+        <AddRoutineDetailModal
+          visible={isModalVisible}
+          onClose={() => setModalVisible(false)}
+          onAddExercise={handleWorkoutAdd}
+        />
       </View>
     </View>
   );
+  
 };
 
 export default RoutineDetailScreen;

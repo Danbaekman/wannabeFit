@@ -6,12 +6,14 @@ import Navbar from '../../components/navbar/Navbar';
 import Footer from '../../components/footer/Footer';
 import styles from './RoutineSetupScreenStyles';
 import CONFIG from '../../config';
+import AddRoutineModal from '../../components/modal/addroutine/AddRoutineModal';
 
 const RoutineSetupScreen = ({ navigation, route }) => {
   const { selectedDate } = route.params;
   const [routines, setRoutines] = useState([]);
   const [newRoutine, setNewRoutine] = useState('');
   const [isAdding, setIsAdding] = useState(false);
+  const [isModalVisible, setModalVisible] = useState(false);
   
   
 
@@ -64,41 +66,43 @@ const RoutineSetupScreen = ({ navigation, route }) => {
   };
 
   const handleAddRoutine = () => {
-    setIsAdding(true);
+    setModalVisible(true);
   };
 
-  const handleAddComplete = async () => {
-    if (newRoutine.trim()) {
-      try {
-        const token = await AsyncStorage.getItem('jwtToken');
-        if (!token) {
-          Alert.alert('Error', '로그인이 필요합니다.');
-          navigation.navigate('Login');
-          return;
-        }
-
-        const response = await fetch(`${CONFIG.API_BASE_URL}/exercise/customMuscle`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({ name: newRoutine }),
-        });
-
-        if (response.ok) {
-          fetchRoutines(); // 새로 추가 후 목록 업데이트
-          setNewRoutine('');
-          setIsAdding(false);
-        } else {
-          throw new Error('Failed to add custom muscle');
-        }
-      } catch (error) {
-        Alert.alert('Error', '새로운 근육 목록을 추가하지 못했습니다.');
-        console.error(error);
+  const handleRoutineAdd = async (routineName) => {
+    try {
+      const token = await AsyncStorage.getItem('jwtToken');
+      if (!token) {
+        Alert.alert('Error', '로그인이 필요합니다.');
+        navigation.navigate('Login');
+        return;
       }
+  
+      // API 호출로 서버에 새 훈련 추가
+      const response = await fetch(`${CONFIG.API_BASE_URL}/exercise/customMuscle`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ name: routineName }),
+      });
+  
+      if (response.ok) {
+        console.log(`새로운 훈련 추가: ${routineName}`);
+        // 새로 추가된 훈련 반영을 위해 목록 다시 가져오기
+        fetchRoutines();
+      } else {
+        throw new Error('Failed to add custom muscle');
+      }
+    } catch (error) {
+      Alert.alert('Error', '새로운 훈련을 추가하지 못했습니다.');
+      console.error(error);
+    } finally {
+      setModalVisible(false); // 모달 닫기
     }
   };
+
 
   return (
     <View style={styles.container}>
@@ -118,28 +122,17 @@ const RoutineSetupScreen = ({ navigation, route }) => {
               <Icon name="chevron-forward-outline" size={20} color="#888" />
             </TouchableOpacity>
           ))}
-
-          {/* 새로운 운동 추가 */}
-          {isAdding && (
-            <View style={styles.newRoutineContainer}>
-              <TextInput
-                style={styles.newRoutineInput}
-                placeholder="훈련 이름 입력"
-                value={newRoutine}
-                onChangeText={setNewRoutine}
-                autoFocus
-              />
-              <TouchableOpacity onPress={handleAddComplete} style={styles.completeButton}>
-                <Text style={styles.completeButtonText}>완료</Text>
-              </TouchableOpacity>
-            </View>
-          )}
         </View>
 
         {/* 추가 버튼 */}
         <TouchableOpacity style={styles.addButton} onPress={handleAddRoutine}>
           <Text style={styles.addButtonText}>+ 훈련 추가</Text>
         </TouchableOpacity>
+        <AddRoutineModal
+          visible={isModalVisible}
+          onClose={() => setModalVisible(false)}
+          onAddRoutine={handleRoutineAdd} // 수정된 함수 연결
+        />
       </View>
       <Footer />
     </View>

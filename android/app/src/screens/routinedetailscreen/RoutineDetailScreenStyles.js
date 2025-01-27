@@ -15,7 +15,7 @@ const styles = StyleSheet.create({
   headerText: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#008080'
+    color: '#008080',
   },
   nextButtonText: {
     fontSize: 16,
@@ -42,6 +42,25 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: 'black',
   },
+  trashText: {
+    color: 'red',
+    fontSize: 16,
+  },
+  deleteContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'red', // 삭제 버튼 배경색
+    width: 80, // 삭제 버튼 너비
+    borderRadius: 8, // 모서리 둥글게
+    marginVertical: 5,
+  },
+  deleteButton: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    flex: 1,
+    padding: 10,
+  },
 });
+
 
 export default styles;
