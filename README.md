@@ -25,13 +25,22 @@ Wannabefit은 사용자의 신체 정보를 바탕으로 벌크업, 다이어트
 - 통계를 통해 성장 그래프 확인
 
 ## 기술 스택
-- **프론트엔드**: React Native
-- **백엔드**: Node.js, Express
-- **데이터베이스**: MongoDB
+### **프론트엔드**
+- 프레임워크: React Native
+- 상태 관리: React Hooks (useState, useEffect)
+- API 통신: Fetch API
+- 로컬 저장소: AsyncStorage
+- UI 스타일링: React Native StyleSheet
+- 애니메이션: React Native Animated, PanResponder
+- 로그인: @react-native-seoul/naver-login
+<br />
+### **백엔드** 
+- Node.js, Express
+- 데이터베이스: MongoDB
 
 ## 개발 환경
-- **기기**: Pixel 7 Pro
-- **API 레벨**: 31
+- **기기**: Pixel 4 XL
+- **API 레벨**: 35
 - **Android 버전**: Android 12.0 ("S")
 - **아키텍처**: ARM 64
 
@@ -39,16 +48,3 @@ Wannabefit은 사용자의 신체 정보를 바탕으로 벌크업, 다이어트
 - 프론트 엔드 : 이시헌
 - 백 엔드 : 송승민
 
-## 설치 및 실행
-1. 레포지토리를 클론합니다: `git clone https://github.com/your-org/wannabefit.git`
-2. 의존성을 설치합니다: `npm install`
-3. 개발 서버를 시작합니다: `npm start`
-
-## 기여 방법
-1. 이슈를 확인하고, 작업할 이슈를 선택합니다.
-2. 새로운 브랜치를 생성합니다: `git checkout -b feature/your-feature`
-3. 코드를 작성하고 커밋합니다.
-4. Pull Request를 생성하여 코드 리뷰를 요청합니다.
-
-## 라이선스
-이 프로젝트는 MIT 라이선스 하에 배포됩니다.
