@@ -5,9 +5,9 @@
 
 <div align="center">
   <img 
-    src="https://github.com/user-attachments/assets/ff415a99-43a6-4204-a0b8-7373bcc38109" 
+    src="https://github.com/user-attachments/assets/1bc8e573-5612-438a-a128-38d121dbeec0" 
     alt="Image" 
-    width="60%"
+    width="100%"
     />
 </div>
 
