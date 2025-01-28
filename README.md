@@ -3,11 +3,12 @@
 
 <br />
 
-<div style="text-align: center;">
+<div align="center">
   <img 
     src="https://github.com/user-attachments/assets/ff415a99-43a6-4204-a0b8-7373bcc38109" 
     alt="Image" 
-    style="border-radius: 12px; width: 60%; display: block; margin: 0 auto;" />
+    width="60%"
+    />
 </div>
 
 <br>
