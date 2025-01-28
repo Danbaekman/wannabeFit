@@ -66,28 +66,37 @@ const WorkoutEntryScreen = ({ route, navigation }) => {
         workoutData.flatMap((workout) => workout.muscles.map((muscle) => muscle._id))
       ),
     ].filter(Boolean);
-
+  
     if (muscles.length === 0) {
       Alert.alert('Error', '운동에 근육 정보가 포함되지 않았습니다.');
       return;
     }
-
+  
     const exercises = workoutData.map((workout) => ({
       exerciseName: workout.id,
-      sets: workout.sets
-        .filter((set) => set.weight && set.reps)
-        .map((set) => ({
-          weight: parseFloat(set.weight),
-          reps: parseInt(set.reps, 10),
-          memo: set.memo || '',
-        })),
+      sets: workout.sets.length > 0
+        ? workout.sets.map((set) => ({
+            weight: parseFloat(set.weight) || 0, // 기본값 설정
+            reps: parseInt(set.reps, 10) || 0,   // 기본값 설정
+            memo: set.memo || '',                // 기본값 설정
+          }))
+        : [
+            {
+              weight: 0,  // 기본값
+              reps: 0,    // 기본값
+              memo: '',   // 기본값
+            },
+          ],
     }));
-
+  
     const startTime = formatDateTime(selectedDate, startTimeHours, startTimeMinutes);
     const endTime = formatDateTime(selectedDate, endTimeHours, endTimeMinutes);
-    console.log('Start Time:', startTime);
-    console.log('End Time:', endTime);
-
+  
+    if (new Date(endTime) < new Date(startTime)) {
+      Alert.alert('WannabeFit', '종료 시간이 시작 시간보다 작습니다.');
+      return;
+    }
+  
     const formattedData = {
       muscles,
       exercises,
@@ -95,7 +104,9 @@ const WorkoutEntryScreen = ({ route, navigation }) => {
       endTime,
       memo: generalMemo,
     };
-
+  
+    console.log('📤 Sending workout data to server:', JSON.stringify(formattedData, null, 2));
+  
     try {
       const token = await AsyncStorage.getItem('jwtToken');
       if (!token) {
@@ -103,7 +114,7 @@ const WorkoutEntryScreen = ({ route, navigation }) => {
         navigation.navigate('Login');
         return;
       }
-
+  
       const response = await fetch(`${CONFIG.API_BASE_URL}/workout`, {
         method: 'POST',
         headers: {
@@ -112,7 +123,7 @@ const WorkoutEntryScreen = ({ route, navigation }) => {
         },
         body: JSON.stringify(formattedData),
       });
-
+  
       if (response.ok) {
         Alert.alert('Success', '운동 세션이 저장되었습니다!');
         navigation.navigate('WorkoutSetup', { selectedDate });
@@ -124,7 +135,7 @@ const WorkoutEntryScreen = ({ route, navigation }) => {
       Alert.alert('Error', '운동 세션 저장 중 오류가 발생했습니다.');
     }
   };
-
+  
   const addSet = (workoutId) => {
     setWorkoutData((prevData) =>
       prevData.map((workout) =>
@@ -187,9 +198,6 @@ const WorkoutEntryScreen = ({ route, navigation }) => {
   const renderWorkoutItem = (workout) => (
     <View key={workout.id} style={styles.workoutContainer}>
       <Text style={styles.workoutTitle}>{workout.name}</Text>
-      <Text style={styles.muscleInfo}>
-        부위: {workout.muscles.map((muscle) => muscle.name).join(', ')}
-      </Text>
       {workout.sets.map((set, index) => renderSetItem(set, workout.id, index))}
       <TouchableOpacity onPress={() => addSet(workout.id)}>
         <Text style={styles.addSetText}>세트 추가</Text>

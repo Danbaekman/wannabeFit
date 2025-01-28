@@ -15,7 +15,7 @@ const styles = StyleSheet.create({
   headerText: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#008080',
+    color: 'black',
   },
   nextButtonText: {
     fontSize: 16,
@@ -49,7 +49,7 @@ const styles = StyleSheet.create({
   deleteContainer: {
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'red', // 삭제 버튼 배경색
+    backgroundColor: '#008080', // 삭제 버튼 배경색
     width: 80, // 삭제 버튼 너비
     borderRadius: 8, // 모서리 둥글게
     marginVertical: 5,
@@ -59,7 +59,35 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     flex: 1,
     padding: 10,
+    backgroundColor: '#008080',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#ddd',
   },
+  addButton: {
+    backgroundColor: '#008080',
+    position: 'absolute',
+    bottom: 80,
+    right: 40,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 25,
+    alignItems: 'center', // 수평 중앙 정렬
+    justifyContent: 'center', // 수직 중앙 정렬
+},
+addButtonText: {
+    color: 'white',
+    fontSize: 20,
+    fontWeight: 'bold',
+    textAlign: 'center', // 텍스트 정렬
+    lineHeight: 30, // fontSize와 동일하게 설정
+},
+noText: {
+  fontSize: 18, 
+  textAlign: 'center', 
+  marginTop: 20
+}
+
 });
 
 

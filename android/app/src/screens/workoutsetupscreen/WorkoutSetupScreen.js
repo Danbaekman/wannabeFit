@@ -3,7 +3,6 @@ import {
   View,
   Text,
   TouchableOpacity,
-  Modal,
   ScrollView,
   Alert,
 } from 'react-native';
@@ -14,6 +13,7 @@ import Footer from '../../components/footer/Footer';
 import DateDisplay from '../../components/datedisplay/DateDisplay';
 import styles from './WorkoutSetupScreenStyles';
 import CONFIG from '../../config';
+import WorkoutDetailModal from '../../components/modal/workoutdetail/WorkoutDetailModal';
 
 const WorkoutSetupScreen = ({ navigation, route }) => {
   const { selectedDate } = route.params; // MainScreen에서 전달된 날짜 값
@@ -95,11 +95,15 @@ const WorkoutSetupScreen = ({ navigation, route }) => {
     navigation.navigate('RoutineSetup', { selectedDate }); // 선택한 날짜 전달
   };
 
-  const toggleModal = (record) => {
-    setSelectedRecord(record);
-    setModalVisible(!modalVisible);
+  const toggleModal = (record = null) => {
+    if (record) {
+      setSelectedRecord(record);
+      setModalVisible(true);
+    } else {
+      setSelectedRecord(null);
+      setModalVisible(false);
+    }
   };
-
   return (
     <View style={styles.container}>
       <Navbar />
@@ -149,8 +153,8 @@ const WorkoutSetupScreen = ({ navigation, route }) => {
                       </Text>
                     </View>
 
-                    {/* 상세보기 버튼 */}
-                    <TouchableOpacity onPress={() => toggleModal(record)} style={styles.chevronButton}>
+                     {/* 상세보기 버튼 */}
+                     <TouchableOpacity onPress={() => toggleModal(record)} style={styles.chevronButton}>
                       <Icon name="chevron-down-outline" size={20} color="#555" />
                     </TouchableOpacity>
                   </View>
@@ -163,44 +167,12 @@ const WorkoutSetupScreen = ({ navigation, route }) => {
         </View>
       </ScrollView>
 
-      {/* 상세보기 모달 */}
-      <Modal
+      {/* WorkoutDetailModal 연결 */}
+      <WorkoutDetailModal
         visible={modalVisible}
-        animationType="slide"
-        transparent={true}
-        onRequestClose={() => toggleModal(null)}
-      >
-        <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>
-              {selectedRecord?.muscles?.map((muscle) => muscle.name).join(', ') || '운동 기록'} 상세보기
-            </Text>
-            <ScrollView>
-              <Text style={styles.modalSubtitle}>총 시간: {selectedRecord?.totalTime || '00:00'}</Text>
-              <Text style={styles.modalSubtitle}>
-                총 세트 수: {selectedRecord?.totalSets || 0}
-              </Text>
-              {selectedRecord?.exercises?.map((exercise, index) => (
-                <View key={index} style={styles.exerciseContainer}>
-                  <Text style={styles.exerciseName}>{exercise.name}</Text>
-                  {exercise.sets.map((set, setIndex) => (
-                    <Text key={setIndex} style={styles.exerciseDetails}>
-                      세트 {setIndex + 1}: {set.weight}kg x {set.reps}회
-                    </Text>
-                  ))}
-                </View>
-              ))}
-              <Text style={styles.memoTitle}>메모</Text>
-              <Text style={styles.memoText}>
-                {selectedRecord?.memo || '메모가 없습니다.'}
-              </Text>
-            </ScrollView>
-            <TouchableOpacity onPress={() => toggleModal(null)} style={styles.closeButton}>
-              <Text style={styles.closeButtonText}>닫기</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
+        onClose={() => toggleModal(null)}
+        record={selectedRecord}
+      />
       <Footer />
     </View>
   );

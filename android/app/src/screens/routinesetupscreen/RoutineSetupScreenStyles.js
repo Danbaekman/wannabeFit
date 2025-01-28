@@ -43,16 +43,20 @@ const styles = StyleSheet.create({
   addButton: {
     backgroundColor: '#008080',
     position: 'absolute',
-    bottom: 20,
-    right: 20,
+    bottom: 80,
+    right: 40,
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 25,
+    alignItems: 'center', // 수평 중앙 정렬
+    justifyContent: 'center', // 수직 중앙 정렬
   },
   addButtonText: {
     color: 'white',
-    fontSize: 16,
+    fontSize: 20,
     fontWeight: 'bold',
+    textAlign: 'center', // 텍스트 정렬
+    lineHeight: 30, // fontSize와 동일하게 설정
   },
   newRoutineContainer: {
     flexDirection: 'row',

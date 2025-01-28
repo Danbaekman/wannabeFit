@@ -19,18 +19,6 @@ const fetchMusclesId = (muscleName, musclesData) => {
   return matchedMuscle ? matchedMuscle._id : null;
 };
 
-// const renderRightActions = (progress, dragX, item) => {
-//   const animatedStyle = useAnimatedStyle(() => ({
-//     opacity: progress.value, // 스와이프 진행도에 따라 투명도 변경
-//     transform: [{ scale: progress.value }], // 삭제 아이콘 확대/축소 애니메이션
-//   }));
-
-//   return (
-//     <Reanimated.View style={[styles.deleteContainer, animatedStyle]}>
-//       <Icon name="trash-outline" size={24} color="#FF0000" />
-//     </Reanimated.View>
-//   );
-// };
 const renderRightActions = (progress, dragX, item) => {
   const progressValue = useSharedValue(0);
   const vibrated = useSharedValue(false); // 진동 상태 추적
@@ -184,11 +172,17 @@ const RoutineDetailScreen = ({ route, navigation }) => {
           muscles: [muscleId],
         }),
       });
+      
   
       if (!response.ok) {
-        throw new Error('운동 추가 실패');
-      }
-  
+        if (response.status === 409) {
+            // 이미 존재하는 운동일 때
+            Alert.alert('안내', data.message);
+            return;
+        }
+        throw new Error(data.message || '운동 추가 실패');
+    }
+
       fetchWorkouts();
       setModalVisible(false);
       Alert.alert('운동 추가', '새 운동이 성공적으로 추가되었습니다!');
@@ -223,33 +217,10 @@ const RoutineDetailScreen = ({ route, navigation }) => {
         Alert.alert('운동 삭제', '운동이 성공적으로 삭제되었습니다.');
     } catch (error) {
         console.error('운동 삭제 중 오류 발생:', error);
-        Alert.alert('Error', '운동을 삭제하는 데 실패했습니다.');
+        Alert.alert('WannabeFit', '운동을 삭제하는 데 실패했습니다.');
     }
 };
 
-
-  const panResponders = workouts.map((workout, index) =>
-    PanResponder.create({
-      onStartShouldSetPanResponder: () => true,
-      onPanResponderGrant: () => {
-        setIsTrashVisible(true);
-      },
-      onPanResponderMove: (_, gestureState) => {
-        positions.current[index].setValue({ x: gestureState.dx, y: gestureState.dy });
-      },
-      onPanResponderRelease: (_, gestureState) => {
-        setIsTrashVisible(false);
-        if (gestureState.moveY < trashZoneY) {
-          handleWorkoutDelete(workout._id);
-        } else {
-          Animated.spring(positions.current[index], {
-            toValue: { x: 0, y: 0 },
-            useNativeDriver: false,
-          }).start();
-        }
-      },
-    })
-  );
   const toggleWorkoutSelection = (workout) => {
     setSelectedWorkouts((prevSelected) => {
       const exists = prevSelected.find((w) => w._id === workout._id);
@@ -326,12 +297,12 @@ const RoutineDetailScreen = ({ route, navigation }) => {
           data={workouts}
           keyExtractor={(item) => item._id}
           renderItem={renderWorkoutItem}
-          ListEmptyComponent={<Text>운동 목록이 없습니다.</Text>}
+          ListEmptyComponent={<Text style={styles.noText}>운동 목록이 없습니다.</Text>}
           contentContainerStyle={styles.workoutList}
         />
   
         <TouchableOpacity style={styles.addButton} onPress={() => setModalVisible(true)}>
-          <Text style={styles.addButtonText}>+ 직접 추가하기</Text>
+          <Text style={styles.addButtonText}>+ 직접 추가</Text>
         </TouchableOpacity>
   
         <AddRoutineDetailModal
