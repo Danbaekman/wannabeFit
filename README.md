@@ -1,9 +1,15 @@
-![Image](https://github.com/user-attachments/assets/1356d729-073d-4620-a5d0-52bfac9a1fbe)
 # 헬스 통합 앱 서비스 'Wannabefit'
 > 2024.11 ~ 2025.02, 2025.02 ~ (리팩토링 진행 중)
 
 <br />
-<img src='https://github.com/teamGrowing/growing-web/assets/97719273/47e45147-41eb-41ed-8fdd-ed7b3f621eb5' />
+
+<div style="text-align: center;">
+  <img 
+    src="https://github.com/user-attachments/assets/ff415a99-43a6-4204-a0b8-7373bcc38109" 
+    alt="Image" 
+    style="border-radius: 12px; width: 60%; display: block; margin: 0 auto;" />
+</div>
+
 <br>
 <br>
 
