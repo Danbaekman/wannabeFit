@@ -696,7 +696,15 @@ const handleDeleteFavorite = async (foodId) => {
           </View>
         )}
 
-        <TouchableOpacity onPress={() => console.log('Direct Add Button Pressed')} style={styles.directInputButton}>
+        <TouchableOpacity
+          onPress={() =>
+            navigation.navigate('MealDirectInput', {
+              selectedDate,
+              mealType,
+            })
+          }
+          style={styles.directInputButton}
+        >
           <Text style={styles.directInputText}>+ 직접 추가</Text>
         </TouchableOpacity>
 

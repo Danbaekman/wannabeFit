@@ -8,6 +8,10 @@ import CONFIG from '../../config';
 import AddRoutineDetailModal from '../../components/modal/addroutinedetail/AddRoutineDetailModal';
 import ReanimatedSwipeable from 'react-native-gesture-handler/ReanimatedSwipeable';
 import Reanimated, { useAnimatedStyle, useSharedValue, interpolate} from 'react-native-reanimated';
+import Footer from '../../components/footer/Footer';
+import DateDisplay from '../../components/datedisplay/DateDisplay';
+
+
 
 
 // 근육 ID 가져오기 함수 - 컴포넌트 외부에 정의하여 재사용 가능
@@ -246,12 +250,19 @@ const RoutineDetailScreen = ({ route, navigation }) => {
   };
   
   const renderWorkoutItem = ({ item }) => (
+    
     <ReanimatedSwipeable
       friction={2} // 스와이프 속도 조절
       rightThreshold={40} // 우측 스와이프 임계값
       overshootRight={false} // 스와이프가 넘어가지 않도록 설정
       overshootLeft={false} // 좌측 스와이프가 넘어가지 않도록 설정
-      onSwipeableOpen={() => handleWorkoutDelete(item._id)} // 스와이프 완료 시 삭제
+      onSwipeableOpen={() => {
+        if (item.isCustom) {
+          handleWorkoutDelete(item._id); // 커스텀 운동만 삭제
+        } else {
+          Alert.alert('안내', '기본 제공 운동은 삭제할 수 없습니다.');
+        }
+      }}
       renderRightActions={(progress, dragX) =>
         renderRightActions(progress, dragX, item) // 삭제 아이콘 표시
       }
@@ -277,15 +288,15 @@ const RoutineDetailScreen = ({ route, navigation }) => {
         />
       </TouchableOpacity>
     </ReanimatedSwipeable>
+    
   );
   
   
-  
-  
   return (
-    <View style={{ flex: 1 }}>
+    <View style={styles.container}>
       <Navbar />
-      <View style={styles.container}>
+      <DateDisplay date={selectedDate} />
+      <View style={styles.contentContainer}>
         <View style={styles.header}>
           <Text style={styles.headerText}>{routineName} 운동</Text>
           <TouchableOpacity onPress={handleNextStep}>
@@ -311,6 +322,7 @@ const RoutineDetailScreen = ({ route, navigation }) => {
           onAddExercise={handleWorkoutAdd}
         />
       </View>
+      <Footer/>
     </View>
   );
   

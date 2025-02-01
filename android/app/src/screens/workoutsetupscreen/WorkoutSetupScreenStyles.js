@@ -16,7 +16,7 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     color: '#008080',
-    marginBottom: 10,
+    marginBottom: 20,
   },
   warningText: {
     fontSize: 14,
@@ -27,7 +27,7 @@ const styles = StyleSheet.create({
   routineSection: {
     backgroundColor: '#FFFFFF',
     borderRadius: 12,
-    padding: 10,
+    padding: 20,
     marginBottom: 20,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },

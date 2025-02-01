@@ -8,9 +8,7 @@ const LaunchScreen = ({ navigation }) => {
     try {
       const token = await AsyncStorage.getItem('jwtToken');
       if (token) {
-        // 토큰이 있으면 자동 로그인 처리
         console.log('로그인 상태 확인: 토큰 있음');
-        navigation.navigate('Main'); // 이미 로그인된 상태라면 Main 화면으로 이동
       } else {
         console.log('로그인 상태 확인: 토큰 없음');
         Alert.alert(
@@ -46,7 +44,7 @@ const LaunchScreen = ({ navigation }) => {
       <Text style={styles.title}>이상적인 몸을 향해</Text>
       <Text style={styles.subtitle}>Wannabefit</Text>
       <Text style={styles.description}>
-        워너비 핏과 함께 멋진 몸을 가꾸어 보세요.
+        워너비 핏과 함께 멋진 몸을 얻어가세요
       </Text>
 
       {/* 기능 설명 섹션 */}
@@ -60,7 +58,22 @@ const LaunchScreen = ({ navigation }) => {
         <View style={styles.featureText}>
           <Text style={styles.featureTitle}>간단 명료한 UI</Text>
           <Text style={styles.featureDescription}>
-            간단한 UI를 제공함으로써 원하는 기능에 누구나 쉽게 접근할 수 있습니다.
+            간단한 UI를 제공하여 원하는 기능에 누구나 쉽게 접근할 수 있습니다.
+          </Text>
+        </View>
+      </View>
+
+      <View style={styles.feature}>
+        <View style={styles.circle}>
+        <Image
+          source={require('../../assets/images/target.png')} // 맞춤형 목표 설정
+          style={styles.image}
+        />
+        </View>
+        <View style={styles.featureText}>
+          <Text style={styles.featureTitle}>맞춤형 목표 설정</Text>
+          <Text style={styles.featureDescription}>
+            신체정보를 바탕으로 원하는 목적에 맞는 목표를 제공해 드립니다.
           </Text>
         </View>
       </View>
@@ -68,29 +81,14 @@ const LaunchScreen = ({ navigation }) => {
       <View style={styles.feature}>
         <View style={styles.circle}>
           <Image
-            source={require('../../assets/images/levelUp.png')} // 두 번째 이미지
+            source={require('../../assets/images/chart.png')} // 세 번째 이미지
             style={styles.image}
           />
         </View>
         <View style={styles.featureText}>
-          <Text style={styles.featureTitle}>확실한 동기부여</Text>
+          <Text style={styles.featureTitle}>통계 데이터 지원</Text>
           <Text style={styles.featureDescription}>
-            레벨업 시스템으로 경쟁하며 레벨에 맞는 권한을 경험해 보세요!
-          </Text>
-        </View>
-      </View>
-
-      <View style={styles.feature}>
-        <View style={styles.circle}>
-          <Image
-            source={require('../../assets/images/Ai.png')} // 세 번째 이미지
-            style={styles.image}
-          />
-        </View>
-        <View style={styles.featureText}>
-          <Text style={styles.featureTitle}>AI 기반의 시스템</Text>
-          <Text style={styles.featureDescription}>
-            AI 기반의 1:1 코칭 시스템으로 최적의 운동과 식단 루틴을 경험해 보세요.
+            목표를 위해 얼만큼 도달했는지 통계를 통해 확인해 보세요!
           </Text>
         </View>
       </View>

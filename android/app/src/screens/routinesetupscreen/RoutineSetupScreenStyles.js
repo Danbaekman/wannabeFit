@@ -3,23 +3,20 @@ import { StyleSheet } from 'react-native';
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F5F5F5',
+    backgroundColor: '#008080',
   },
   contentContainer: {
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    width: '100%',
-    alignSelf: 'center',
-    flex:1,
+    flexGrow: 1, 
+    padding: 20,
+    backgroundColor: '#F5F5F5',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
   },
   mytraining: {
     fontSize: 24,
     fontWeight: 'bold',
     color: '#008080',
-    marginBottom: 10,
-    marginTop: 30,
-    alignSelf: 'flex-start',
-    width: '100%',
+    marginBottom: 20,
   },
   buttonContainer: {
     width: '100%',
@@ -43,7 +40,7 @@ const styles = StyleSheet.create({
   addButton: {
     backgroundColor: '#008080',
     position: 'absolute',
-    bottom: 80,
+    bottom: 60,
     right: 40,
     paddingVertical: 10,
     paddingHorizontal: 20,
@@ -98,6 +95,25 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
   },
+  deleteContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#008080', // 삭제 버튼 배경색
+    width: 60, // 삭제 버튼의 너비
+    height: 56, // `routineButton`의 높이와 동일하게 설정
+    borderRadius: 8,
+    marginBottom: 0, // 추가 여백 제거
+    marginTop: 0, // 추가 여백 제거
+    marginVertical: 0, // 상하 여백 제거
+  },
+  deleteButton: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: '100%',
+    height: '100%',
+  },
+  
+  
 });
 
 export default styles;

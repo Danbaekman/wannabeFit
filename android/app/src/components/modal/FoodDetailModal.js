@@ -40,12 +40,6 @@ const FoodDetailModal = ({
       setQuantity(selectedFoodData.grams / 100); // grams 값에 따라 quantity 동기화
     }
   }, [selectedFoodData]);
-  // useEffect(() => {
-  //   if (entryPoint === 'favorites' && !selectedFoodData) {
-  //     console.warn("Favorites entry point without valid food data:", food);
-  //     setSelectedFoodData(food?.food || food); // 기본값 설정
-  //   }
-  // }, [entryPoint, selectedFoodData, food]);
 
   useEffect(() => {
     if (entryPoint === 'favorites' && !selectedFoodData) {
@@ -110,6 +104,7 @@ const FoodDetailModal = ({
         ...food,
         grams: totalQuantity,
         isFavorite,
+        isCustom: food.isCustom || false,
       };
   
       if (entryPoint === 'recent') {
@@ -118,6 +113,7 @@ const FoodDetailModal = ({
           meal_id: food.mealId,
           food_id: food.food._id,
           grams: totalQuantity,
+          isCustom: food.isCustom || false,
         };
         if (onSaveEdit) {
           onSaveEdit(serverData);
@@ -134,6 +130,7 @@ const FoodDetailModal = ({
       const formattedFoodData = {
         food: food._id,
         grams: totalQuantity,
+        isCustom: food.isCustom || false,
       };
       if (onAddFood) {
         onAddFood({
@@ -205,10 +202,6 @@ const FoodDetailModal = ({
     }
   
     const scaleFactor = grams / 100;
-  
-    // const foodData = entryPoint === 'favorites' && isEditMode
-    //   ? food.food
-    //   : selectedFoodData || food;
     const foodData = selectedFoodData?.food || selectedFoodData;
   
     if (!foodData || !foodData.calories) {
@@ -262,9 +255,6 @@ const FoodDetailModal = ({
   const handleFavoriteToggle = (food) => {
     console.log('즐겨찾기에 추가할 음식 정보 확인:', food);
     const isCurrentlyFavorite = favoritesList.some((fav) => fav._id === food._id);
-    // const updatedFavorites = favoritesList.some((fav) => fav._id === food._id)
-    //   ? favoritesList.filter((fav) => fav._id !== food._id) // 이미 즐겨찾기인 경우 제거
-    //   : [...favoritesList, food]; // 즐겨찾기에 추가
     const updatedFood = {
       ...food,
       isFavorite: !isCurrentlyFavorite, // `isFavorite` 값 반전

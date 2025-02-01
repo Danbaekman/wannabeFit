@@ -3,8 +3,14 @@ import { StyleSheet } from 'react-native';
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 16,
+    backgroundColor: '#008080',
+  },
+  contentContainer: {
+    flexGrow: 1, 
+    padding: 20,
     backgroundColor: '#F5F5F5',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
   },
   header: {
     flexDirection: 'row',
@@ -15,7 +21,7 @@ const styles = StyleSheet.create({
   headerText: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: 'black',
+    color: '#008080',
   },
   nextButtonText: {
     fontSize: 16,
@@ -67,7 +73,7 @@ const styles = StyleSheet.create({
   addButton: {
     backgroundColor: '#008080',
     position: 'absolute',
-    bottom: 80,
+    bottom: 60,
     right: 40,
     paddingVertical: 10,
     paddingHorizontal: 20,
