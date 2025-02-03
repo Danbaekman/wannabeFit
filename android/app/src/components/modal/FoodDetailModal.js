@@ -1,9 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, Modal, TouchableOpacity, TextInput } from 'react-native';
-import Animated, { useSharedValue, useAnimatedStyle, withSpring, runOnJS } from 'react-native-reanimated';
+import React, { useState, useEffect, useRef } from 'react';
+import { View, Text, Modal, TouchableOpacity, TextInput, Dimensions, Animated, PanResponder } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import styles from './FoodDetailModalStyles';
-import { PanResponder } from 'react-native';
 import NutrientPieChart from '../nutrientpiechart/NutrientPieChart';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -20,13 +18,30 @@ const FoodDetailModal = ({
   favoritesList = [],
   setFavoritesList,
 }) => {
-  const translateY = useSharedValue(0);
   const [quantity, setQuantity] = useState(1);
   const [inputValue, setInputValue] = useState('100g');
   const [isFavorite, setIsFavorite] = useState(initialFavorite);
   const [calculatedNutrients, setCalculatedNutrients] = useState({});
   const [nutrientRatios, setNutrientRatios] = useState({ carbs: 0, protein: 0, fat: 0 });
   const [selectedFoodData, setSelectedFoodData] = useState(null); // foodData 상태로 관리
+  const screenHeight = Dimensions.get('screen').height; // 화면 높이
+  const panY = useRef(new Animated.Value(screenHeight)).current; // 모달의 Y축 위치
+  const translateY = panY.interpolate({
+    inputRange: [-1, 0, 1],
+    outputRange: [0, 0, 1],
+  });
+
+  const resetBottomSheet = Animated.timing(panY, {
+    toValue: 0, 
+    duration: 300,
+    useNativeDriver: true,
+  });
+
+  const closeBottomSheet = Animated.timing(panY, {
+    toValue: screenHeight, // 화면 아래로 이동하여 숨김
+    duration: 300,
+    useNativeDriver: true,
+  });
 
   useEffect(() => {
     console.log("FoodDetailModal props:", {
@@ -55,13 +70,6 @@ const FoodDetailModal = ({
   useEffect(() => {
     if (visible && food) {
       console.log("Modal Opened with Food:", food);
-  
-      // entryPoint와 isEditMode에 따라 foodData 설정
-      // const foodData = isEditMode
-      //   ? entryPoint === 'favorites'
-      //     ? food?.food || food // favorites && editMode
-      //     : food?.food
-      //   : food?.food || food;
       
   const foodData = food.food || food; // food 내부에 food가 있는 경우 우선 참조
       // 방어적 코딩: food와 foodData 확인
@@ -169,12 +177,7 @@ const FoodDetailModal = ({
       setFavoritesList(updatedFavorites); // 상태 업데이트
       AsyncStorage.setItem("favorites", JSON.stringify(updatedFavorites)); // 저장
     } else if (entryPoint === "recent") {
-      // 최근 기록 데이터 업데이트
-      // updatedFoodData = {
-      //   meal_id: food.mealId,
-      //   food_id: food.food?._id || food._id,
-      //   grams: totalQuantity,
-      // };
+    
       updatedFoodData = {
         ...food, // 기존 food 객체 복제
         meal_id: food.mealId,
@@ -270,35 +273,49 @@ const FoodDetailModal = ({
     console.log('즐겨찾기에 업데이트 됬나 확인:', updatedFavorites);
 
   };
-  
 
+  const panResponder = useRef(
+      PanResponder.create({
+        onStartShouldSetPanResponder: () => true,
+        onMoveShouldSetPanResponder: () => false,
+        onPanResponderMove: (event, gestureState) => {
+          panY.setValue(gestureState.dy); // 드래그 Y축 업데이트
+        },
+        onPanResponderRelease: (event, gestureState) => {
+          if (gestureState.dy > 0 && gestureState.vy > 1.5) {
+            closeModal(); // 아래로 빠르게 드래그하면 모달 닫기
+          } else {
+            resetBottomSheet.start(); // 원래 위치로 복귀
+          }
+        },
+      })
+    ).current;
 
-  const animatedStyle = useAnimatedStyle(() => ({
-    transform: [{ translateY: translateY.value }],
-  }));
+  useEffect(() => {
+    if (visible) {
+      resetBottomSheet.start(); // 모달 열릴 때 애니메이션 실행
+    }
+  }, [visible]);
 
-  const panResponder = PanResponder.create({
-    onMoveShouldSetPanResponder: () => true,
-    onPanResponderMove: (_, gestureState) => {
-      if (gestureState.dy > 0) {
-        translateY.value = gestureState.dy;
-      }
-    },
-    onPanResponderRelease: (_, gestureState) => {
-      if (gestureState.dy > 200) {
-        translateY.value = withSpring(500, {}, () => {
-          runOnJS(onClose)();
-        });
-      } else {
-        translateY.value = withSpring(0);
-      }
-    },
-  });
+  const closeModal = () => {
+    closeBottomSheet.start(() => {
+      onClose(); // 닫기 콜백 실행
+    });
+  };
+
 
   return (
-    <Modal visible={visible} animationType="fade" transparent onRequestClose={onClose}>
+    <Modal
+          visible={visible}
+          transparent={true}
+          animationType="fade"
+          onRequestClose={onClose}
+        >
       <View style={styles.modalContainer}>
-        <Animated.View style={[styles.modalContent, animatedStyle]} {...panResponder.panHandlers}>
+      <Animated.View
+          style={[styles.modalContent, { transform: [{ translateY }] }]}
+          {...panResponder.panHandlers} // PanResponder 연결
+        >
           <View style={styles.dragHandleContainer}>
             <View style={styles.dragHandle} />
           </View>
