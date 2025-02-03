@@ -18,20 +18,26 @@ const MealDirectInputScreen = ({ navigation, route }) => {
   const [natrium, setNatrium] = useState('');
   const [sugar, setSugar] = useState('');
   const [dietaryFiber, setDietaryFiber] = useState('');
+  const mealTypeMap = {
+    '아침': 'breakfast',
+    '점심': 'lunch',
+    '저녁': 'dinner',
+    '간식': 'snack',
+  };
 
   const handleSubmit = async () => {
     if (!foodName || !calories || !carbohydrates || !protein || !fat) {
       Alert.alert('필수 입력', '음식명, 열량, 탄수화물, 단백질, 지방을 입력해주세요.');
       return;
     }
-
+  
     try {
       const token = await AsyncStorage.getItem('jwtToken');
       if (!token) {
         alert('로그인이 필요합니다.');
         return;
       }
-
+  
       const payload = {
         food_name: foodName,
         calories: parseFloat(calories),
@@ -43,10 +49,11 @@ const MealDirectInputScreen = ({ navigation, route }) => {
         natrium: parseFloat(natrium),
         sugar: parseFloat(sugar),
         dietary_fiber: parseFloat(dietaryFiber),
-        meal_type: mealType,
+        meal_type: mealTypeMap[mealType] || 'snack', // 한글 → 영어 변환
         created_at: selectedDate,
+        isCustom: true, // 직접 추가한 음식이므로 isCustom 설정
       };
-
+  
       const response = await fetch(`${CONFIG.API_BASE_URL}/meal/direct-add`, {
         method: 'POST',
         headers: {
@@ -55,11 +62,11 @@ const MealDirectInputScreen = ({ navigation, route }) => {
         },
         body: JSON.stringify(payload),
       });
-
+  
       if (response.ok) {
         Alert.alert(
           'WannabeFit',
-          '즐겨찾기에 추가하시면 다음에 쉽게 해당 음식을 식단에 등록하실 수 있습니다.\n등록하시겠습니까?',
+          '즐겨찾기에 추가하시겠습니까?',
           [
             { text: '아니오', onPress: () => navigation.goBack(), style: 'cancel' },
             { text: '예', onPress: () => handleAddToFavorites(payload) },
@@ -74,6 +81,23 @@ const MealDirectInputScreen = ({ navigation, route }) => {
       console.error(error);
     }
   };
+
+  const handleAddToFavorites = async (foodData) => {
+    try {
+      const savedFavorites = await AsyncStorage.getItem('favorites');
+      const favorites = savedFavorites ? JSON.parse(savedFavorites) : [];
+  
+      // 즐겨찾기에 추가
+      favorites.push(foodData);
+      await AsyncStorage.setItem('favorites', JSON.stringify(favorites));
+  
+      alert('즐겨찾기에 추가되었습니다.');
+      navigation.goBack();
+    } catch (error) {
+      console.error('Error adding to favorites:', error);
+    }
+  };
+  
 
   return (
     <View style={styles.container}>
