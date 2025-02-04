@@ -26,6 +26,7 @@ const MealDirectInputScreen = ({ navigation, route }) => {
   };
 
   const handleSubmit = async () => {
+    setIsEditMode(false);
     if (!foodName || !calories || !carbohydrates || !protein || !fat) {
       Alert.alert('필수 입력', '음식명, 열량, 탄수화물, 단백질, 지방을 입력해주세요.');
       return;

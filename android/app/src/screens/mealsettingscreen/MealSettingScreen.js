@@ -20,40 +20,86 @@ const MealSettingScreen = ({ route = {}, navigation }) => {
   const [mealList, setMealList] = useState([]);
   const [selectedTab, setSelectedTab] = useState('recent');
   const [favoritesList, setFavoritesList] = useState([]);
-  const [isEditMode, setIsEditMode] = useState(false); // 편집 모드
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [totalCalories, setTotalCalories] = useState(0);
 
 
+  const calculateTotalCalories = (meals) => {
+    return meals
+      .reduce((total, meal) => {
+        const mealCalories = meal.foods.reduce((mealTotal, food) => {
+          const calories = food.food?.calories || 0;
+          const grams = food.grams || 0;
+          return mealTotal + (calories * (grams / 100));
+        }, 0);
+        return total + mealCalories;
+      }, 0)
+      .toFixed(2);
+  };
+  
+
+  
+  useEffect(() => {
+    const updatedCalories = calculateTotalCalories(mealList);
+    setTotalCalories(updatedCalories);
+  }, [mealList]);
+  
   // useEffect(() => {
   //   const fetchFavorites = async () => {
   //     try {
   //       const savedFavorites = await AsyncStorage.getItem('favorites');
   //       const favorites = savedFavorites ? JSON.parse(savedFavorites) : [];
-  //       setFavoritesList(favorites);
+  
+  //       const syncedFavorites = favorites.map((favorite) => {
+  //         const matchingMeal = mealList.find((meal) =>
+  //           meal.foods.some((food) => food.food._id === favorite._id)
+  //         );
+        
+  //         if (matchingMeal) {
+  //           const matchingFood = matchingMeal.foods.find(
+  //             (food) => food.food._id === favorite._id
+  //           );
+        
+  //           return {
+  //             ...favorite,
+  //             food_name: matchingFood?.food.food_name || favorite.food_name,
+  //             calories:
+  //               (matchingFood?.food.calories || 0) * (matchingFood?.grams / 100 || 1),
+  //             grams: matchingFood?.grams || favorite.grams,
+  //             mealId: matchingMeal._id || favorite.mealId,
+  //           };
+  //         }
+  //         return favorite;
+  //       });
+        
+  
+  //       setFavoritesList(syncedFavorites);
+  //       await AsyncStorage.setItem('favorites', JSON.stringify(syncedFavorites));
   //     } catch (error) {
-  //       console.error('Error fetching favorites:', error);
+  //       console.error('Error syncing favorites:', error);
   //     }
   //   };
-
-  //   fetchFavorites();
-  // }, []);
   
+  //   fetchFavorites();
+  // }, [mealList]);
   useEffect(() => {
     const fetchFavorites = async () => {
       try {
         const savedFavorites = await AsyncStorage.getItem('favorites');
         const favorites = savedFavorites ? JSON.parse(savedFavorites) : [];
   
-        const syncedFavorites = favorites.map((favorite) => {
+        // mealList와 동기화하며 중복 제거
+        const updatedFavorites = favorites.reduce((acc, favorite) => {
           const matchingMeal = mealList.find((meal) =>
             meal.foods.some((food) => food.food._id === favorite._id)
           );
-        
+  
           if (matchingMeal) {
             const matchingFood = matchingMeal.foods.find(
               (food) => food.food._id === favorite._id
             );
-        
-            return {
+  
+            const newFavorite = {
               ...favorite,
               food_name: matchingFood?.food.food_name || favorite.food_name,
               calories:
@@ -61,13 +107,20 @@ const MealSettingScreen = ({ route = {}, navigation }) => {
               grams: matchingFood?.grams || favorite.grams,
               mealId: matchingMeal._id || favorite.mealId,
             };
-          }
-          return favorite;
-        });
-        
   
-        setFavoritesList(syncedFavorites);
-        await AsyncStorage.setItem('favorites', JSON.stringify(syncedFavorites));
+            // 중복 확인 후 추가
+            if (!acc.some((fav) => fav._id === newFavorite._id && fav.mealId === newFavorite.mealId)) {
+              acc.push(newFavorite);
+            }
+          } else {
+            acc.push(favorite);
+          }
+  
+          return acc;
+        }, []);
+  
+        setFavoritesList(updatedFavorites);
+        await AsyncStorage.setItem('favorites', JSON.stringify(updatedFavorites));
       } catch (error) {
         console.error('Error syncing favorites:', error);
       }
@@ -75,6 +128,7 @@ const MealSettingScreen = ({ route = {}, navigation }) => {
   
     fetchFavorites();
   }, [mealList]);
+  
   
   useEffect(() => {
     console.log("Favorites List:", favoritesList);
@@ -211,6 +265,7 @@ const MealSettingScreen = ({ route = {}, navigation }) => {
   
   const handleSearch = async (text) => {
     setSearchText(text);
+    setIsEditMode(false);
     if (text.length > 0) {
       try {
         const token = await AsyncStorage.getItem('jwtToken');
@@ -247,7 +302,7 @@ const MealSettingScreen = ({ route = {}, navigation }) => {
   };
 
   const handleAddFood = async (foodData) => {
-    console.log('handleAddFood called');
+    setIsEditMode(false);
   
     try {
       const { food, quantity, isFavorite } = foodData;
@@ -299,6 +354,7 @@ const MealSettingScreen = ({ route = {}, navigation }) => {
   const handleClearSearch = () => {
     setSearchText('');
     setFoodList([]);
+    setIsEditMode(false);
   };
 
   // 검색했을 때 식단목록 나열
@@ -310,15 +366,20 @@ const MealSettingScreen = ({ route = {}, navigation }) => {
   );
 
   const renderTabButton = (label, tabName) => (
-    <TouchableOpacity onPress={() => setSelectedTab(tabName)} style={styles.tabButton}>
+    <TouchableOpacity
+      onPress={() => {
+        setSelectedTab(tabName); // 선택된 탭 변경
+        setIsEditMode(false); // 편집 모드 비활성화
+      }}
+      style={styles.tabButton}
+    >
       <Text style={[styles.tabText, selectedTab === tabName && styles.activeTabText]}>{label}</Text>
       {selectedTab === tabName && <View style={styles.activeTabLine} />}
     </TouchableOpacity>
   );
+  
 
   const renderMealItem = ({ item, index }) => {
-    console.log("Item in Meal List:", item); // item 데이터 확인
-  console.log("Item.food:", item.food); // item.food가 유효한지 확인
 
   return selectedTab === 'favorites' ? (
     
@@ -326,8 +387,17 @@ const MealSettingScreen = ({ route = {}, navigation }) => {
     <View style={styles.foodRow} key={item._id || `favorite-${index}`}>
       <View style={styles.foodInfo}>
         <Text style={styles.foodName}>{item.food_name|| item.food?.food_name|| '음식이름 오류'}</Text>
-        <Text style={styles.foodCalories}> {item.calories ? `${item.calories} Kcal` : '0 Kcal'}</Text>
+        <Text style={styles.foodCalories}>{item.calories || (item.food?.calories * (item.grams / 100)) || 0} Kcal</Text>
+        {console.log('Rendering Calories:', item.calories)}
       </View>
+      {!isEditMode && (
+        <TouchableOpacity
+          style={styles.addButton}
+          onPress={() => handleAddToMeal(item)} // 즐겨찾기 음식을 식단에 추가
+        >
+          <Ionicons name="add" size={20} color="white" />
+        </TouchableOpacity>
+      )}
 
       {isEditMode && (
         <View style={styles.editControls}>
@@ -351,7 +421,7 @@ const MealSettingScreen = ({ route = {}, navigation }) => {
     // Recent Tab: mealList 렌더링
     <View style={styles.mealContainer} key={item._id}>
       <Text style={styles.mealType}>
-        {mealTypeMap[item.meal_type] || '총 칼로리'} ({item.total_calories?.toFixed(2) || 0} Kcal)
+        {mealTypeMap[item.meal_type] || '총 칼로리'} ({item.total_calories || 0} Kcal)
       </Text>
 
       <FlatList
@@ -363,9 +433,11 @@ const MealSettingScreen = ({ route = {}, navigation }) => {
             <View style={styles.foodRow} key={foodItem._id || `key-${index}`}>
               <View style={styles.foodInfo}>
                 <Text style={styles.foodName}>{foodItem.food?.food_name || '클라 변수 확인'}</Text>
-                <Text style={styles.foodCalories}>{foodItem.food?.calories
-    ? (foodItem.food.calories * (foodItem.grams / 100)).toFixed(2) + ' Kcal'
-    : '0 Kcal'}</Text>
+                <Text style={styles.foodCalories}>
+                  {foodItem.food?.calories
+                    ? `${Math.round(foodItem.food.calories * (foodItem.grams / 100))} Kcal`
+                    : '0 Kcal'}
+                </Text>
               </View>
 
               {isEditMode && (
@@ -403,7 +475,6 @@ const MealSettingScreen = ({ route = {}, navigation }) => {
   // 삭제 처리 함수 
   const handleDeleteMealItem = async (mealId, foodId) => {
     const url = `${CONFIG.API_BASE_URL}/meal/${mealId}/food/${foodId}`;
-    console.log('DELETE URL:', url); // URL 확인
     console.log('Deleting Meal:', mealId);
     console.log('Deleting Food:', foodId);
   
@@ -426,7 +497,7 @@ const MealSettingScreen = ({ route = {}, navigation }) => {
   
       if (response.ok) {
         await fetchMeals(); // 삭제 후 목록 갱신
-        Alert.alert('Success', 'Food item removed successfully.');
+        Alert.alert('Wannabefit', '삭제 완료');
       } else {
         const errorText = await response.text();
         console.error('Failed to delete food:', response.status, errorText);
@@ -437,17 +508,14 @@ const MealSettingScreen = ({ route = {}, navigation }) => {
       Alert.alert('Error', 'An unexpected error occurred while deleting food.');
     }
   };
+
+  
+  
   
   //편집버튼
   const handleEditFood = (food, mealId) => {
     console.log("편집할 식사:", food);
-    // 현재 음식을 선택하여 모달로 전달
-    // setSelectedFood({
-    //   ...food,
-    //   mealId, // Meal ID 전달
-    //   grams: food.grams, // 기존 그램수
-    //   isFavorite: favoritesList.some(fav => fav._id === food._id), // 즐겨찾기 여부
-    // });
+
     setSelectedFood({
       food: food.food || food, // `food` 객체가 존재하면 사용, 아니면 기본값 사용
       grams: food.grams || 100, // 기본값 100g 설정
@@ -529,88 +597,209 @@ const handleDeleteFavorite = async (foodId) => {
         onClose(); // 모달 닫기
       }
     } catch (error) {
-      console.error('Error updating favorites in AsyncStorage:', error);
+      console.error('Error updating favorites:', error);
     }
   };
   
-  
-  // 편집 후 서버로 저장 
-  // const handleSaveEdit = async (updatedFoodData) => {
-  //   console.log("Sending data to the server:", updatedFoodData); // 로그 추가
-
+  // const handleFavoriteToggle = async (food, entryPoint) => {
   //   try {
-  //     const token = await AsyncStorage.getItem('jwtToken');
-  //     if (!token) {
-  //       Alert.alert('Error', 'You must be logged in.');
-  //       return;
+  //     const savedFavorites = await AsyncStorage.getItem('favorites');
+  //     const favorites = savedFavorites ? JSON.parse(savedFavorites) : [];
+  //     const isAlreadyFavorite = favorites.some((item) => item._id === (food._id || food.food?._id));
+  
+  //     let updatedFavorites;
+  
+  //     if (isAlreadyFavorite) {
+  //       // 즐겨찾기 해제
+  //       updatedFavorites = favorites.filter((item) => item._id !== (food._id || food.food?._id));
+  //     } else {
+  //       // 즐겨찾기 추가
+  //       const calculatedCalories = food.calories || (food.food?.calories * (food.grams / 100)).toFixed(0);
+  //       updatedFavorites = [
+  //         ...favorites,
+  //         {
+  //           _id: food._id || food.food?._id, // 음식 ID
+  //           food_name: food.food_name || food.food?.food_name, // 음식 이름
+  //           calories: calculatedCalories, // 칼로리 계산 후 추가
+  //           grams: food.grams || 100, // 기본 섭취량
+  //           mealId: food.mealId || null, // mealId 저장
+  //         },
+  //       ];
   //     }
   
-  //     const response = await fetch(`${CONFIG.API_BASE_URL}/meal/meal/${updatedFoodData.meal_id}`, {  // food_id로 수정
-  //       method: 'PUT', // 수정이므로 PUT 메서드 사용
-  //       headers: {
-  //         'Content-Type': 'application/json',
-  //         Authorization: `Bearer ${token}`,
-  //       },
-  //       body: JSON.stringify(updatedFoodData),  // food_id와 grams를 포함한 업데이트 데이터
-  //     });
+  //     // AsyncStorage 및 상태 업데이트
+  //     await AsyncStorage.setItem('favorites', JSON.stringify(updatedFavorites));
+  //     setFavoritesList(updatedFavorites);
   
-  //     if (response.ok) {
-  //       console.log('Food updated successfully');
-  //       await fetchMeals(); // 업데이트된 데이터를 반영하기 위해 mealList를 가져옴
-  //       setModalVisible(false); // 모달 닫기
-  //     } else {
-  //       const errorText = await response.text();
-  //       console.error('Failed to update food:', response.status, errorText);
-  //       Alert.alert('Error', `Failed to update food: ${errorText}`);
+  //     console.log('Favorites updated:', updatedFavorites);
+  
+  //     // 즐겨찾기 해제 시 모달 닫기
+  //     if (isAlreadyFavorite && entryPoint === 'favorites') {
+  //       onClose(); // 모달 닫기
   //     }
   //   } catch (error) {
-  //     console.error('Error updating food:', error);
-  //     Alert.alert('Error', 'An unexpected error occurred while updating food.');
+  //     console.error('Error updating favorites in AsyncStorage:', error);
+  //   }
+  // };
+  
+
+  // const handleSaveEdit = async (updatedFoodData) => {
+  //   console.log('updatedFoodData:', updatedFoodData);
+  
+  //   if (selectedTab === 'favorites') {
+  //     // 즐겨찾기 로컬 데이터 수정
+  //     const updatedFavorites = favoritesList.map((fav) =>
+  //       fav._id === updatedFoodData.food_id
+  //         ? {
+  //             ...fav,
+  //             grams: updatedFoodData.grams,
+  //             calories: (fav.calories / fav.grams) * updatedFoodData.grams, // 칼로리 재계산
+  //           }
+  //         : fav
+  //     );
+  
+  //     console.log('Updated Favorites List (before deduplication):', updatedFavorites);
+
+  //     // 중복 제거
+  //     const uniqueFavorites = updatedFavorites.filter(
+  //       (item, index, self) =>
+  //         index === self.findIndex((t) => t._id === item._id) // _id 기준으로 중복 제거
+  //     );
+  
+  //     console.log('Filtered uniqueFavorites before save:', uniqueFavorites);
+  
+  //     try {
+  //       // AsyncStorage에 중복 제거된 데이터 저장
+  //       await AsyncStorage.setItem('favorites', JSON.stringify(uniqueFavorites));
+  //       console.log('Successfully saved uniqueFavorites to AsyncStorage');
+  
+  //       setFavoritesList(uniqueFavorites); // 상태 업데이트
+  //       console.log('Updated favoritesList:', uniqueFavorites);
+  //     } catch (error) {
+  //       console.error('Error saving to AsyncStorage:', error);
+  //     }
+  
+  //     setModalVisible(false);
+  //   } else if (selectedTab === 'recent') {
+  //     console.log('Editing food in Recent tab...');
+  //     // 최근기록 서버 업데이트
+  //     try {
+  //       const token = await AsyncStorage.getItem('jwtToken');
+  //       if (!token) {
+  //         Alert.alert('Error', 'You must be logged in.');
+  //         return;
+  //       }
+  //       console.log('Sending updated food data to server:', {
+  //         meal_id: updatedFoodData.meal_id,
+  //         food_id: updatedFoodData.food_id,
+  //         grams: updatedFoodData.grams,
+  //       });
+  
+  //       const response = await fetch(
+  //         `${CONFIG.API_BASE_URL}/meal/meal/${updatedFoodData.meal_id}`,
+  //         {
+  //           method: 'PUT',
+  //           headers: {
+  //             'Content-Type': 'application/json',
+  //             Authorization: `Bearer ${token}`,
+  //           },
+  //           body: JSON.stringify({
+  //             meal_id: updatedFoodData.meal_id,
+  //             food_id: updatedFoodData.food_id,
+  //             grams: updatedFoodData.grams,
+  //           }),
+  //         }
+  //       );
+  
+  //       if (response.ok) {
+  //         console.log('Food updated successfully');
+  //         await fetchMeals(); // 서버 데이터 갱신
+  //         setModalVisible(false);
+  //       } else {
+  //         const errorText = await response.text();
+  //         console.error('Failed to update food:', response.status, errorText);
+  //         Alert.alert('Error', `Failed to update food: ${errorText}`);
+  //       }
+  //     } catch (error) {
+  //       console.error('Error updating food:', error);
+  //       Alert.alert('Error', 'An unexpected error occurred while updating food.');
+  //     }
+  //   } else {
+  //     console.error('Invalid selectedTab:', selectedTab);
   //   }
   // };
   const handleSaveEdit = async (updatedFoodData) => {
-    console.log('updatedFoodData:', updatedFoodData);
+    console.log('🔹 [handleSaveEdit] received updatedFoodData:', updatedFoodData);
   
-    if (selectedTab === 'favorites') {
-      // 즐겨찾기 로컬 데이터 수정
-      const updatedFavorites = favoritesList.map((fav) =>
-        fav._id === updatedFoodData.food_id
-          ? {
-              ...fav,
-              grams: updatedFoodData.grams,
-              calories: (fav.calories / fav.grams) * updatedFoodData.grams, // 칼로리 재계산
-            }
-          : fav
+    const newFavorite = {
+      _id: updatedFoodData.food_id,
+      food: updatedFoodData.food,
+      grams: updatedFoodData.grams,
+      calories: updatedFoodData.food.calories * (updatedFoodData.grams / 100),
+      mealId: updatedFoodData.meal_id || null, // mealId 추가 (기본값 null)
+    };
+  
+    /** ✅ 1. 중복 데이터 확인 후 업데이트 */
+    setFavoritesList((prevFavorites) => {
+      console.log('🟢 [Before Update] Favorites List:', prevFavorites);
+  
+      // 중복 확인 (mealId와 food_id 기준)
+      const existingIndex = prevFavorites.findIndex(
+        (fav) => fav._id === updatedFoodData.food_id && fav.mealId === updatedFoodData.meal_id
       );
   
-      // 중복 제거
-      const uniqueFavorites = updatedFavorites.filter(
-        (item, index, self) =>
-          index === self.findIndex((t) => t._id === item._id) // _id 기준으로 중복 제거
-      );
+      let updatedFavorites = [...prevFavorites];
   
-      console.log('Filtered uniqueFavorites before save:', uniqueFavorites);
-  
-      try {
-        // AsyncStorage에 중복 제거된 데이터 저장
-        await AsyncStorage.setItem('favorites', JSON.stringify(uniqueFavorites));
-        console.log('Successfully saved uniqueFavorites to AsyncStorage');
-  
-        setFavoritesList(uniqueFavorites); // 상태 업데이트
-        console.log('Updated favoritesList:', uniqueFavorites);
-      } catch (error) {
-        console.error('Error saving to AsyncStorage:', error);
+      if (existingIndex !== -1) {
+        console.log('🔴 [Updating Existing Favorite]', updatedFavorites[existingIndex]);
+        updatedFavorites[existingIndex] = newFavorite; // 기존 항목 업데이트
+      } else {
+        console.log('🟣 [Adding New Favorite]', newFavorite);
+        updatedFavorites.push(newFavorite); // 새로운 항목 추가
       }
   
-      setModalVisible(false);
-    } else if (selectedTab === 'recent') {
-      // 최근기록 서버 업데이트
+      console.log('🟢 [After Update] Updated Favorites List:', updatedFavorites);
+      return updatedFavorites;
+    });
+  
+    /** ✅ 2. AsyncStorage 업데이트 */
+    try {
+      const currentFavorites = await AsyncStorage.getItem('favorites');
+      const favorites = currentFavorites ? JSON.parse(currentFavorites) : [];
+  
+      // 중복 제거
+      const existingIndex = favorites.findIndex(
+        (fav) => fav._id === updatedFoodData.food_id && fav.mealId === updatedFoodData.meal_id
+      );
+  
+      let updatedFavorites = [...favorites];
+  
+      if (existingIndex !== -1) {
+        updatedFavorites[existingIndex] = newFavorite;
+      } else {
+        updatedFavorites.push(newFavorite);
+      }
+  
+      await AsyncStorage.setItem('favorites', JSON.stringify(updatedFavorites));
+      console.log('✅ Favorites saved to AsyncStorage:', updatedFavorites);
+    } catch (error) {
+      console.error('❌ Error saving favorites to AsyncStorage:', error);
+    }
+  
+    /** ✅ 3. 서버 업데이트 (최근기록만 반영) */
+    if (selectedTab === 'recent') {
       try {
         const token = await AsyncStorage.getItem('jwtToken');
         if (!token) {
-          Alert.alert('Error', 'You must be logged in.');
+          Alert.alert('Error', '로그인이 필요합니다.');
           return;
         }
+  
+        console.log('🚀 Sending updated food data to server:', {
+          meal_id: updatedFoodData.meal_id,
+          food_id: updatedFoodData.food_id,
+          grams: updatedFoodData.grams,
+        });
   
         const response = await fetch(
           `${CONFIG.API_BASE_URL}/meal/meal/${updatedFoodData.meal_id}`,
@@ -629,22 +818,23 @@ const handleDeleteFavorite = async (foodId) => {
         );
   
         if (response.ok) {
-          console.log('Food updated successfully');
+          console.log('✅ Food updated successfully on server');
           await fetchMeals(); // 서버 데이터 갱신
-          setModalVisible(false);
         } else {
           const errorText = await response.text();
-          console.error('Failed to update food:', response.status, errorText);
-          Alert.alert('Error', `Failed to update food: ${errorText}`);
+          console.error('❌ Failed to update food on server:', response.status, errorText);
+          Alert.alert('Error', `식단 수정 실패: ${errorText}`);
         }
       } catch (error) {
-        console.error('Error updating food:', error);
-        Alert.alert('Error', 'An unexpected error occurred while updating food.');
+        console.error('❌ Error updating food on server:', error);
+        Alert.alert('Error', '식단 수정 중 오류가 발생했습니다.');
       }
-    } else {
-      console.error('Invalid selectedTab:', selectedTab);
     }
+  
+    /** ✅ 4. 모달 닫기 */
+    setModalVisible(false);
   };
+  
   
   useEffect(() => {
     AsyncStorage.getItem('favorites').then((data) =>
@@ -656,15 +846,53 @@ const handleDeleteFavorite = async (foodId) => {
   }, [favoritesList]);
   
   
-  
-  
   const handleModalClose = () => {
     setModalVisible(false); // 모달 닫기
     setSearchText('');      // 검색 텍스트 초기화
     setFoodList([]);        // 검색 결과 초기화
   };
+
+  const handleAddToMeal = async (food) => {
+    try {
+      const token = await AsyncStorage.getItem('jwtToken');
+      if (!token) {
+        Alert.alert('Error', '로그인이 필요합니다.');
+        return;
+      }
+
+      // 서버로 요청 보내기
+      const response = await fetch(`${CONFIG.API_BASE_URL}/meal/meal`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          meal_type: mealTypeMap[mealType], // 현재 선택된 식단 유형
+          foods: [
+            {
+              food: food._id, // 음식 ID
+              grams: food.grams || 100, // 기본 섭취량
+            },
+          ],
+          created_at: selectedDate, // 선택된 날짜
+        }),
+      });
+
+      if (response.ok) {
+        Alert.alert('Wannabefit', '식단에 추가되었습니다.');
+        await fetchMeals(); // 식단 데이터 갱신
+      } else {
+        const errorText = await response.text();
+        Alert.alert('Error', `식단 추가 실패: ${errorText}`);
+      }
+    } catch (error) {
+      console.error('Error adding to meal:', error);
+      Alert.alert('Error', '식단 추가 중 오류가 발생했습니다.');
+    }
+  };
   
-  
+
   return (
     <View style={styles.container}>
       <Navbar />
@@ -679,10 +907,11 @@ const handleDeleteFavorite = async (foodId) => {
               value={searchText}
               onChangeText={handleSearch}
             />
-          </View>
-          <TouchableOpacity onPress={handleClearSearch}>
+            <TouchableOpacity onPress={handleClearSearch}>
             <Text style={styles.cancelText}>닫기</Text>
           </TouchableOpacity>
+          </View>
+        
         </View>
 
         {foodList.length > 0 && (
@@ -697,12 +926,13 @@ const handleDeleteFavorite = async (foodId) => {
         )}
 
         <TouchableOpacity
-          onPress={() =>
+          onPress={() => {
+            setIsEditMode(false); // 편집 모드 비활성화
             navigation.navigate('MealDirectInput', {
               selectedDate,
               mealType,
-            })
-          }
+            });
+          }}
           style={styles.directInputButton}
         >
           <Text style={styles.directInputText}>+ 직접 추가</Text>
@@ -732,12 +962,33 @@ const handleDeleteFavorite = async (foodId) => {
         visible={modalVisible}
         onClose={handleModalClose}
         food={selectedFood}
+        // initialFavorite={
+        //   selectedTab === 'favorites' || 
+        //   (selectedTab === 'recent' && selectedFood && favoritesList.some((favorite) => favorite._id === selectedFood._id))
+        // }
         initialFavorite={
-          selectedTab === 'favorites' ||
-          (selectedFood && favoritesList.some((favorite) => favorite._id === selectedFood._id))
+          (() => {
+            const isInFavorites =
+              selectedFood &&
+              favoritesList.some((favorite) => {
+                const selectedFoodId = selectedFood.food?._id || selectedFood._id; // selectedFood의 ID 추출
+                const favoriteId = favorite.food?._id || favorite._id; // favorite의 ID 추출
+                console.log('Comparing selectedFoodId:', selectedFoodId, 'with favoriteId:', favoriteId);
+                return selectedFoodId === favoriteId;
+              });
+        
+            // 디버그 로그로 상태 확인
+            console.log('isInFavorites:', isInFavorites, 'selectedTab:', selectedTab);
+            console.log('selectedFood:', selectedFood);
+            console.log('favoritesList:', favoritesList);
+        
+            // 조건에 따라 초기 값 반환
+            return selectedTab === 'favorites' || (selectedTab === 'recent' && isInFavorites);
+          })()
         }
+        
+        
         entryPoint={selectedTab === 'favorites' ? 'favorites' : 'recent'}
-        // onAddFood={handleAddFood}
         onAddFood={(foodData) => {
           console.log('onAddFood called in MealSettingScreen:', foodData); // 전달된 foodData 확인
           handleAddFood(foodData);

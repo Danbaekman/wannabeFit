@@ -25,8 +25,8 @@ const styles = StyleSheet.create({
     marginRight: 5,
   },
   cancelText: {
-    fontSize: 16,
-    color: 'rgba(0, 128, 128, 0.6)',
+    fontSize: 14,
+    color: '#008080',
     marginLeft: 10,
   },
   header: {
@@ -38,7 +38,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#008080',
     marginBottom: 5,
-    marginTop:10,
+    marginTop: 30,
   },
   tabContainer: { 
     flexDirection: 'row',
@@ -124,6 +124,7 @@ const styles = StyleSheet.create({
     color: '#000', // 검정색
   },
   foodCalories: {
+    marginTop: 4,
     fontSize: 14,
     fontWeight: 'bold',
     color: '#555', // 회색
@@ -131,12 +132,12 @@ const styles = StyleSheet.create({
   editIcon: {
     marginLeft: 10,
   },
-
   editModeButton: {
     marginLeft: 'auto',
     padding: 5,
     borderRadius: 5,
     backgroundColor: '#008080',
+    marginTop: 30,
   },
   editButtonText: {
     color: '#fff'
@@ -157,6 +158,15 @@ const styles = StyleSheet.create({
     alignItems: 'center', // 세로 중앙 정렬
     justifyContent: 'space-between', // 좌우로 분리
   },
+  addButton: {
+    backgroundColor: '#008080', // 초록색 배경
+    width: 24,
+    height: 24,
+    borderRadius: 12, // 원형 버튼
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginLeft: 10, // 텍스트와의 간격
+  }
   
 });
 

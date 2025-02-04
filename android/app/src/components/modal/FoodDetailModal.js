@@ -42,14 +42,10 @@ const FoodDetailModal = ({
     duration: 300,
     useNativeDriver: true,
   });
-
   useEffect(() => {
-    console.log("FoodDetailModal props:", {
-      favoritesList,
-      setFavoritesList,
-      entryPoint,
-    });
-  }, []);
+    setIsFavorite(initialFavorite); // 초기 상태 설정
+  }, [initialFavorite]);
+  
   useEffect(() => {
     if (selectedFoodData) {
       setQuantity(selectedFoodData.grams / 100); // grams 값에 따라 quantity 동기화
@@ -152,49 +148,65 @@ const FoodDetailModal = ({
   };
   
 
+  // const handleSaveEdit = () => {
+  //   const totalQuantity = quantity * 100;
+  //   console.log('handleSaveEdit - Quantity:', quantity);
+  //   console.log('handleSaveEdit - Total Quantity (Grams):', totalQuantity);
+  
+  //   let updatedFoodData;
+  
+  //   if (entryPoint === "favorites") {
+  //     // 즐겨찾기 데이터 업데이트
+  //     const baseFood = food.food || food; // food 내부에 food가 있을 경우 처리
+  //     updatedFoodData = {
+  //       ...food,
+  //       grams: totalQuantity,
+  //       calories: (baseFood.calories / baseFood.grams) * totalQuantity, // baseFood에서 칼로리 계산
+  //     };
+  
+  //     console.log('즐겨찾기 탭에서의 업데이트된 음식:', updatedFoodData);  
+  //     // favoritesList 업데이트
+  //     const updatedFavorites = favoritesList.map((fav) =>
+  //       fav._id === (baseFood._id || food._id) ? updatedFoodData : fav
+  //     );
+  
+  //     setFavoritesList(updatedFavorites); // 상태 업데이트
+  //     AsyncStorage.setItem("favorites", JSON.stringify(updatedFavorites)); // 저장
+  //   } else if (entryPoint === "recent") {
+    
+  //     updatedFoodData = {
+  //       ...food, // 기존 food 객체 복제
+  //       meal_id: food.mealId,
+  //       food_id: food.food?._id || food._id,
+  //       grams: totalQuantity,
+  //     };
+  
+  //     console.log("최근기록에서의 업데이트된 음식:", updatedFoodData);
+  
+  //     if (onSaveEdit) {
+  //       onSaveEdit(updatedFoodData);
+  //     }
+  //   }
+  
+  //   console.log("Final Updated Food Data:", updatedFoodData);
+  //   onClose(); // 모달 닫기
+  // };
   const handleSaveEdit = () => {
     const totalQuantity = quantity * 100;
-    console.log('handleSaveEdit - Quantity:', quantity);
-    console.log('handleSaveEdit - Total Quantity (Grams):', totalQuantity);
+    console.log('handleSaveEdit - Total Quantity:', totalQuantity);
   
-    let updatedFoodData;
+    const updatedFoodData = {
+      food: food.food || food, // food 객체 유지
+      grams: totalQuantity,
+      meal_id: food.mealId || null, // mealId 추가
+      food_id: food.food?._id || food._id, // 음식 ID 추가
+    };
   
-    if (entryPoint === "favorites") {
-      // 즐겨찾기 데이터 업데이트
-      const baseFood = food.food || food; // food 내부에 food가 있을 경우 처리
-      updatedFoodData = {
-        ...food,
-        grams: totalQuantity,
-        calories: (baseFood.calories / baseFood.grams) * totalQuantity, // baseFood에서 칼로리 계산
-      };
-  
-      console.log('즐겨찾기 탭에서의 업데이트된 음식:', updatedFoodData);  
-      // favoritesList 업데이트
-      const updatedFavorites = favoritesList.map((fav) =>
-        fav._id === (baseFood._id || food._id) ? updatedFoodData : fav
-      );
-  
-      setFavoritesList(updatedFavorites); // 상태 업데이트
-      AsyncStorage.setItem("favorites", JSON.stringify(updatedFavorites)); // 저장
-    } else if (entryPoint === "recent") {
-    
-      updatedFoodData = {
-        ...food, // 기존 food 객체 복제
-        meal_id: food.mealId,
-        food_id: food.food?._id || food._id,
-        grams: totalQuantity,
-      };
-  
-      console.log("최근기록에서의 업데이트된 음식:", updatedFoodData);
-  
-      if (onSaveEdit) {
-        onSaveEdit(updatedFoodData);
-      }
-    }
-  
-    console.log("Final Updated Food Data:", updatedFoodData);
+    console.log("Updated Food Data from Modal:", updatedFoodData);
+    onSaveEdit(updatedFoodData); // 부모 컴포넌트(MealSettingScreen)로 전달
     onClose(); // 모달 닫기
   };
+  
   
 
 
@@ -255,24 +267,31 @@ const FoodDetailModal = ({
     }
 };
   
-  const handleFavoriteToggle = (food) => {
-    console.log('즐겨찾기에 추가할 음식 정보 확인:', food);
-    const isCurrentlyFavorite = favoritesList.some((fav) => fav._id === food._id);
-    const updatedFood = {
-      ...food,
-      isFavorite: !isCurrentlyFavorite, // `isFavorite` 값 반전
-    };
+  // const handleFavoriteToggle = (food) => {
+  //   console.log('즐겨찾기에 추가할 음식 정보 확인:', food);
+  //   const isCurrentlyFavorite = favoritesList.some((fav) => fav._id === food._id);
+  //   const updatedFood = {
+  //     ...food,
+  //     isFavorite: !isCurrentlyFavorite, // `isFavorite` 값 반전
+  //   };
   
-    // `favoritesList` 업데이트
-    const updatedFavorites = isCurrentlyFavorite
-      ? favoritesList.filter((fav) => fav._id !== food._id) // 이미 즐겨찾기인 경우 제거
-      : [...favoritesList, updatedFood]; // 새로운 객체 추가
+  //   // `favoritesList` 업데이트
+  //   const updatedFavorites = isCurrentlyFavorite
+  //     ? favoritesList.filter((fav) => fav._id !== food._id) // 이미 즐겨찾기인 경우 제거
+  //     : [...favoritesList, updatedFood]; // 새로운 객체 추가
 
-    setFavoritesList(updatedFavorites);
-    AsyncStorage.setItem('favorites', JSON.stringify(updatedFavorites)); // AsyncStorage에 저장
-    console.log('즐겨찾기에 업데이트 됬나 확인:', updatedFavorites);
+  //   setFavoritesList(updatedFavorites);
+  //   AsyncStorage.setItem('favorites', JSON.stringify(updatedFavorites)); // AsyncStorage에 저장
+  //   console.log('즐겨찾기에 업데이트 됬나 확인:', updatedFavorites);
 
+  // };
+  const handleFavoriteToggle = () => {
+    console.log('🔹 [handleFavoriteToggle] 밀세팅스크린으로 이동');
+    if (onFavoriteToggle) {
+      onFavoriteToggle(food); // ✅ 부모(`MealSettingScreen`)에 이벤트 전달
+    }
   };
+  
 
   const panResponder = useRef(
       PanResponder.create({
@@ -320,24 +339,35 @@ const FoodDetailModal = ({
             <View style={styles.dragHandle} />
           </View>
 
-          <TouchableOpacity
-            style={styles.favoriteButton}
-            // onPress={handleFavoriteToggle}
-            onPress={() => {
-              handleFavoriteToggle(food, entryPoint);
-              if (isFavorite && entryPoint === 'favorites') {
-                onClose(); // 모달 닫기
-              }
-            }}
-          >
-            <Ionicons
-              name={isFavorite ? 'star' : 'star-outline'}
-              size={32}
-              color={isFavorite ? 'gold' : 'gray'}
-            />
+
+          <View style={styles.titleRow}>
+            <Text style={styles.modalTitle} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>
+              {food?.food_name || food?.food?.food_name || '음식 정보'}
+            </Text>
+            <TouchableOpacity
+              style={styles.favoriteButton}
+              onPress={() => {
+                handleFavoriteToggle(food, entryPoint);
+                if (isFavorite && entryPoint === 'favorites') {
+                  onClose();
+                }
+              }}
+            >
+              <Ionicons
+                name={isFavorite ? 'star' : 'star-outline'}
+                size={24} // 아이콘 크기를 텍스트 크기에 맞추기
+                color={isFavorite ? 'gold' : 'gray'}
+              />
+            </TouchableOpacity>
+          </View>
+
+
+          <TouchableOpacity style={styles.closeButton} onPress={closeModal}>
+            <View style={styles.closeCircle}>
+              <Ionicons name="close" size={24} color="black" />
+            </View>
           </TouchableOpacity>
 
-          <Text style={styles.modalTitle}>{food?.food_name || food?.food?.food_name || '음식 정보'}</Text>
 
       
           <NutrientPieChart nutrients={calculatedNutrients} />
@@ -373,11 +403,11 @@ const FoodDetailModal = ({
           </View>
 
           <View style={styles.totalCaloriesContainer}>
-            <Text style={styles.caloriesText}>총 칼로리</Text>
-            <Text style={styles.totalCaloriesValue}>
-              {calculatedNutrients.calories ? calculatedNutrients.calories.toFixed(2) : 0} Kcal
+            <Text style={styles.caloriesText}>
+              총 칼로리: <Text style={styles.caloriesSubText}>{calculatedNutrients.calories ? calculatedNutrients.calories.toFixed(2) : 0}Kcal</Text>
             </Text>
           </View>
+
 
           <View style={styles.nutrientContainer}>
             <View style={styles.nutrientRowContainer}>
@@ -428,7 +458,7 @@ const FoodDetailModal = ({
             }}
           >
             <Text style={styles.addButtonText}>
-              {isEditMode ? '식단 변경' : '식단에 추가'} {/* 버튼 텍스트 변경 */}
+              {isEditMode ? '식단 변경' : '식단 추가'} {/* 버튼 텍스트 변경 */}
             </Text>
           </TouchableOpacity>
         </Animated.View>

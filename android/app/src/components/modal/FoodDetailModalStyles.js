@@ -1,6 +1,6 @@
 import { StyleSheet,  Dimensions } from 'react-native';
 const screenHeight = Dimensions.get('window').height;
-const MODAL_HEIGHT = screenHeight * 0.75;
+const MODAL_HEIGHT = screenHeight * 0.8;
 
 const styles = StyleSheet.create({
     modalContainer: {
@@ -15,14 +15,13 @@ const styles = StyleSheet.create({
       height: MODAL_HEIGHT,  // 모달 높이를 전체 화면의 85%로 설정
       borderTopLeftRadius: 20,
       borderTopRightRadius: 20,
-      paddingHorizontal: 15,
+      paddingHorizontal: 30,
       paddingVertical: 15,
     },
     inputContainer: {
       flexDirection: 'row',
       justifyContent: 'space-between',
       marginBottom: 20,
-      marginTop: 20,
     },
     inputBox: {
       width: '45%',
@@ -34,7 +33,8 @@ const styles = StyleSheet.create({
     boxTitle: {
       textAlign: 'center',
       color: 'white',
-      marginBottom: 10,
+      marginBottom: 5,
+      marginTop: 2,
       fontWeight: 'bold',
     },
     counter: {
@@ -77,8 +77,32 @@ const styles = StyleSheet.create({
     modalTitle: {
       fontSize: 24,
       fontWeight: 'bold',
-      marginBottom: 10,
+      color: 'black',
       textAlign: 'center',
+    },
+    titleRow: {
+      flexDirection: 'row',
+      justifyContent: 'center',
+      alignItems: 'center',
+      paddingVertical: 10,
+    },
+    inlineIcon: {
+      marginLeft: 10, // 아이콘과 글씨를 살짝 붙이는 정도로 조정
+      position: 'relative', // 정확한 위치 조정
+      top: 5, // 텍스트 라인과 아이콘이 더 매끄럽게 보이도록 수직 조정
+    },
+    closeButton: {
+      position: 'absolute',
+      top: 15,
+      right: 15,
+    },
+    closeCircle: {
+      width: 32,
+      height: 32,
+      borderRadius: 16,
+      backgroundColor: '#eee',
+      justifyContent: 'center',
+      alignItems: 'center',
     },
     macroDistribution: {
       flexDirection: 'row',
@@ -115,15 +139,25 @@ const styles = StyleSheet.create({
       marginBottom: 20,
     },
     caloriesText: {
-      fontSize: 20,
+      fontSize: 16,
+      marginBottom: 5,
+      color: 'black'
+    },
+    caloriesSubText: {
+      fontSize: 18,
       fontWeight: 'bold',
-      textAlign: 'right',
+      marginBottom: 5,
+      color: '#333',
+    },
+    totalCaloriesValue: {
+      fontSize: 16,
+      fontWeight: 'bold',
       marginBottom: 10,
     },
     nutrientContainer: {
       borderWidth: 2,
       borderColor: '#008080',
-      padding: 20,
+      padding: 10,
       borderRadius: 10,
     },
     nutrientRowContainer: {
@@ -149,8 +183,8 @@ const styles = StyleSheet.create({
     },
     addButton: {
       backgroundColor: '#008080',
-      paddingVertical: 12,
-      paddingHorizontal: 50,
+      paddingVertical: 10,
+      paddingHorizontal: 20,
       borderRadius: 25,
       marginTop: 20,
       position: 'absolute',
@@ -162,12 +196,6 @@ const styles = StyleSheet.create({
       fontSize: 18,
       fontWeight: 'bold',
       textAlign: 'center',
-    },
-    favoriteButton: {
-        position: 'absolute',
-        top: 20, // 제목과 같은 높이에 배치
-        right: 20, // 제목 오른쪽 끝에 배치
-      },
-      
+    },  
   });
   export default styles;

@@ -12,8 +12,6 @@ import Footer from '../../components/footer/Footer';
 import DateDisplay from '../../components/datedisplay/DateDisplay';
 
 
-
-
 // 근육 ID 가져오기 함수 - 컴포넌트 외부에 정의하여 재사용 가능
 const fetchMusclesId = (muscleName, musclesData) => {
   const musclesArray = musclesData[0]?.muscles || [];
