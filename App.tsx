@@ -36,7 +36,7 @@ const App = () => {
       <NavigationContainer>
         {/* <Stack.Navigator initialRouteName="Launch">*/}
         {/* <Stack.Navigator initialRouteName="Launch" screenOptions={{ headerShown: false }} >  */}
-        <Stack.Navigator initialRouteName="Launch" > 
+        <Stack.Navigator initialRouteName="InbodyInput" screenOptions={{ headerShown: false }}> 
           <Stack.Screen name="Launch" component={LaunchScreen} />
           <Stack.Screen name="Login" component={LoginScreen} />
           <Stack.Screen name="InbodyInput" component={InbodyInputScreen} />

@@ -8,12 +8,14 @@ import styles from './InbodyInputScreenStyles';
 import CONFIG from '../../config';
 import Modal from 'react-native-modal'; // 모달 컴포넌트 임포트
 import AsyncStorage from '@react-native-async-storage/async-storage'; // JWT 토큰 저장용
+import GoalSelectionModal from '../../components/modal/inbodyinput/GoalSelectionModal';
 
 const InbodyInputScreen = ({ navigation }) => {
   const [height, setHeight] = useState('');
   const [weight, setWeight] = useState('');
   const [gender, setGender] = useState('');
   const [birthdate, setBirthdate] = useState('');
+  const [birthdateValid, setBirthdateValid] = useState(true);
   const [targetWeight, setTargetWeight] = useState('');
   const [exerciseFrequency, setExerciseFrequency] = useState('');
   const [goal, setGoal] = useState(''); // 운동 목표
@@ -35,6 +37,29 @@ const InbodyInputScreen = ({ navigation }) => {
 
     getToken();
   }, []);
+
+  // 생년월일 입력 시 자동으로 "-" 추가하는 함수
+  const formatBirthdate = (text) => {
+    // 숫자만 입력받기
+    let cleaned = text.replace(/\D/g, '');
+
+    // 최대 8자리까지만 입력 가능 (YYYYMMDD)
+    if (cleaned.length > 8) {
+      cleaned = cleaned.slice(0, 8);
+    }
+
+    let formatted = '';
+    if (cleaned.length <= 4) {
+      formatted = cleaned;
+    } else if (cleaned.length <= 6) {
+      formatted = `${cleaned.slice(0, 4)}-${cleaned.slice(4)}`;
+    } else {
+      formatted = `${cleaned.slice(0, 4)}-${cleaned.slice(4, 6)}-${cleaned.slice(6)}`;
+    }
+
+    setBirthdate(formatted);
+    setBirthdateValid(cleaned.length === 8); // 정확한 8자리 입력 시 유효한 값으로 판단
+  };
 
   // "다음" 버튼을 눌렀을 때 모달창 열기
   const handleNextButton = () => {
@@ -114,7 +139,7 @@ const InbodyInputScreen = ({ navigation }) => {
           onPress={() => setGender('남자')}
         >
           <Icon name="male" size={20} color={gender === '남자' ? '#008080' : '#000'} />
-          <Text style={[styles.genderButtonText, gender === '남자' && styles.selectedGenderText]}>남자</Text>
+          <Text style={[styles.genderButtonText, gender === '남자' && styles.selectedGenderText]}> 남자</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -122,16 +147,18 @@ const InbodyInputScreen = ({ navigation }) => {
           onPress={() => setGender('여자')}
         >
           <Icon name="female" size={20} color={gender === '여자' ? '#008080' : '#000'} />
-          <Text style={[styles.genderButtonText, gender === '여자' && styles.selectedGenderText]}>여자</Text>
+          <Text style={[styles.genderButtonText, gender === '여자' && styles.selectedGenderText]}> 여자</Text>
         </TouchableOpacity>
       </View>
 
       <Text style={styles.label}>생년월일:</Text>
       <TextInput
-        style={styles.input}
+        style={[styles.input, !birthdateValid && styles.inputError]} // 유효성 검사 실패 시 스타일 변경
         value={birthdate}
-        onChangeText={(text) => setBirthdate(text)}
-        placeholder="생년월일을 입력하세요 (예: 1990-01-01)"
+        onChangeText={formatBirthdate} // 자동으로 "-" 삽입
+        placeholder="YYYY-MM-DD"
+        keyboardType="numeric"
+        maxLength={10} // YYYY-MM-DD 포함 최대 10자리 입력 가능
       />
 
       <Text style={styles.label}>목표 몸무게:</Text>
@@ -144,81 +171,38 @@ const InbodyInputScreen = ({ navigation }) => {
       />
 
       <Text style={styles.label}>운동 빈도:</Text>
-      <Picker
-        selectedValue={exerciseFrequency}
-        style={styles.picker}
-        onValueChange={(itemValue) => setExerciseFrequency(itemValue)}
-      >
-        <Picker.Item label="운동 빈도를 선택하세요" value="" />
-        <Picker.Item label="거의 안함" value="0" />
-        <Picker.Item label="가벼운 운동(1~3일/1주)" value="1" />
-        <Picker.Item label="보통(3~5일/1주)" value="2" />
-        <Picker.Item label="적극적인 운동(6~7일/1주)" value="3" />
-        <Picker.Item label="매우 적극적인 운동(운동선수)" value="4" />
-      </Picker>
+      <View style={styles.pickerContainer}>
+        {/* 기본값이 선택되지 않았을 때만 Placeholder 표시 */}
+        {exerciseFrequency === null && (
+          <Text style={styles.pickerPlaceholderText}>운동 빈도를 선택하세요</Text>
+        )}
+
+        <Picker
+          selectedValue={exerciseFrequency}
+          style={styles.picker}
+          onValueChange={(itemValue) => setExerciseFrequency(itemValue)}
+        >
+          <Picker.Item label="거의 안함" value="0" />
+          <Picker.Item label="가벼운 운동(1~3일/1주)" value="1" />
+          <Picker.Item label="보통(3~5일/1주)" value="2" />
+          <Picker.Item label="적극적인 운동(6~7일/1주)" value="3" />
+          <Picker.Item label="매우 적극적인 운동(운동선수)" value="4" />
+        </Picker>
+      </View>
 
       {/* 운동 목표 선택 버튼 */}
-      <Button title="다음" onPress={handleNextButton} />
+      <TouchableOpacity style={styles.nextButton} onPress={handleNextButton}>
+        <Text style={styles.nextButtonText}>다음</Text>
+      </TouchableOpacity>
 
       {/* 운동 목표 선택 모달 */}
-      <Modal 
-        isVisible={modalVisible} 
-        onBackdropPress={() => setModalVisible(false)} 
-        backdropColor="black"
-        backdropOpacity={0.5}
-        style={styles.modalContainer}
-      >
-        <View style={styles.modalContent}>
-          <Text style={styles.modalTitle}>나의 운동 목적은?</Text>
-          <Text style={styles.modalSubtitle}>목적에 맞춰 식단과 운동법을 추천드립니다.</Text>
-
-          {/* 벌크업 선택 */}
-          <TouchableOpacity onPress={() => selectGoal('bulk')}>
-            <View style={styles.modalOption}>
-              <View style={styles.iconCircle}>
-                <MaterialCommunityIcons name="weight-lifter" size={30} color="#008080" />
-              </View>
-              <View style={styles.textContainer}>
-                <Text style={styles.modalText}>벌크업</Text>
-                <Text style={styles.modalDescription}>단백질과 탄수화물의 비율</Text>
-              </View>
-              <View style={[styles.checkCircle, goal === 'bulk' ? styles.checkCircleSelected : null]} />
-            </View>
-          </TouchableOpacity>
-
-          {/* 다이어트 선택 */}
-          <TouchableOpacity onPress={() => selectGoal('diet')}>
-            <View style={styles.modalOption}>
-              <View style={styles.iconCircle}>
-                <FontAwesome5 name="running" size={30} color="#008080" />
-              </View>
-              <View style={styles.textContainer}>
-                <Text style={styles.modalText}>다이어트</Text>
-                <Text style={styles.modalDescription}>단백질은 높게, 탄수는 낮게</Text>
-              </View>
-              <View style={[styles.checkCircle, goal === 'diet' ? styles.checkCircleSelected : null]} />
-            </View>
-          </TouchableOpacity>
-
-          {/* 유지 선택 */}
-          <TouchableOpacity onPress={() => selectGoal('maintain')}>
-            <View style={styles.modalOption}>
-              <View style={styles.iconCircle}>
-                <MaterialCommunityIcons name="walk" size={30} color="#008080" />
-              </View>
-              <View style={styles.textContainer}>
-                <Text style={styles.modalText}>유지</Text>
-                <Text style={styles.modalDescription}>균형잡힌 구성</Text>
-              </View>
-              <View style={[styles.checkCircle, goal === 'maintain' ? styles.checkCircleSelected : null]} />
-            </View>
-          </TouchableOpacity>
-
-          <TouchableOpacity onPress={handleSubmit} style={styles.completeButton}>
-            <Text style={styles.completeButtonText}>완료</Text>
-          </TouchableOpacity>
-        </View>
-      </Modal>
+      <GoalSelectionModal
+        isVisible={modalVisible}
+        onClose={() => setModalVisible(false)}
+        selectGoal={setGoal}
+        goal={goal}
+        handleSubmit={handleSubmit}
+      />
     </View>
   );
 };

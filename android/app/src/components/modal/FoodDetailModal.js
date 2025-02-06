@@ -53,6 +53,7 @@ const FoodDetailModal = ({
   }, [selectedFoodData]);
 
   useEffect(() => {
+    console.log('food배열:',food);
     if (entryPoint === 'favorites' && !selectedFoodData) {
       if (food?.food) {
         setSelectedFoodData(food.food);
@@ -97,6 +98,8 @@ const FoodDetailModal = ({
       setIsFavorite(entryPoint === 'favorites' ? true : initialFavorite);
     }
   }, [visible, food, initialFavorite, entryPoint, isEditMode]);
+
+  
   
   
 
