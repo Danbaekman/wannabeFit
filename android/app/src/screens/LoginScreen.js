@@ -28,7 +28,7 @@ const LoginScreen = ({ navigation }) => {
       {/* 로고 이미지 */}
       <View style={styles.logoContainer}>
         <Image
-          source={require('../../assets/images/WannabeFitLogo.png')} // Ai.png 이미지 불러오기
+          source={require('../../assets/images/WannabefitLogo.png')} // Ai.png 이미지 불러오기
           style={styles.image}
         />
       </View>

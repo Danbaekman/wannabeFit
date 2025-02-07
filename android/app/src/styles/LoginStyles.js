@@ -13,13 +13,14 @@ const styles = StyleSheet.create({
   },
   logoContainer: {
     alignItems: 'center',
-    marginBottom: 20,
-    paddingTop: 40,
+    marginBottom: 40,
+    paddingTop: 60,
   },
   image: {
-    width: 200, // 가로 크기 조정
-    height: 200, // 세로 크기 조정
+    width: 160, // 가로 크기 조정
+    height: 160, // 세로 크기 조정
     resizeMode: 'contain', // 비율 유지하면서 조정
+    borderRadius: 40,
   },
   backButton: {
     fontSize: 16,

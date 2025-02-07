@@ -115,7 +115,7 @@ const NaverLoginButton = ({ navigation }) => {
           // 상태 코드에 따라 화면 이동 처리
           if (statusCode === 200) {
             console.log('이미 등록된 사용자, Main 화면으로 이동');
-            navigation.navigate('Main'); // 이미 등록된 사용자
+            navigation.navigate('Welcome'); // 이미 등록된 사용자
           } else if (statusCode === 201) {
             navigation.navigate('InbodyInput', { jwtToken }); // 등록되지 않은 사용자
           }
@@ -132,7 +132,6 @@ const NaverLoginButton = ({ navigation }) => {
     }
   };
 
-  // 로그아웃을 위한 함수
  // 로그아웃을 위한 함수
  const logout = async () => {
   try {
@@ -204,9 +203,6 @@ const NaverLoginButton = ({ navigation }) => {
       ) : (
         <>
           <Text style={styles.successText}>로그인 성공!</Text>
-          <TouchableOpacity onPress={logout} style={styles.logoutButton}>
-            <Text style={styles.logoutButtonText}>로그아웃</Text>
-          </TouchableOpacity>
         </>
       )}
 

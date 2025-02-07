@@ -24,6 +24,7 @@ import ProfileScreen from './android/app/src/screens/profilescreen/ProfileScreen
 import WeightStatsScreen from './android/app/src/screens/chart/weightstatsscreen/WeightStatsScreen';
 import './reanimatedConfig';
 import MealDirectInputScreen from './android/app/src/screens/mealdirectinputscreen/MealDirectInputScreen';
+import WelcomeScreen from './android/app/src/screens/welcomescreen/WelcomeScreen';
 
 
 const Stack = createNativeStackNavigator();
@@ -34,13 +35,13 @@ const App = () => {
     <Provider store={store}>
     <GestureHandlerRootView style={{ flex: 1 }}>
       <NavigationContainer>
-        {/* <Stack.Navigator initialRouteName="Launch">*/}
-        <Stack.Navigator initialRouteName="Launch" screenOptions={{ headerShown: false }} > 
-        {/* <Stack.Navigator initialRouteName="FitnessGoal" screenOptions={{ headerShown: false }}>  */}
+        <Stack.Navigator initialRouteName="Launch">
+        {/* <Stack.Navigator initialRouteName="Launch" screenOptions={{ headerShown: false }} >  */}
           <Stack.Screen name="Launch" component={LaunchScreen} />
           <Stack.Screen name="Login" component={LoginScreen} />
           <Stack.Screen name="InbodyInput" component={InbodyInputScreen} />
           <Stack.Screen name="FitnessGoal" component={FitnessGoalScreen} />
+          <Stack.Screen name="Welcome" component = {WelcomeScreen} />
           <Stack.Screen name="Main" component={MainScreen} />
           <Stack.Screen name="MealSetting" component={MealSettingScreen} />
           <Stack.Screen name="WorkoutSetup" component={WorkoutSetupScreen} />
