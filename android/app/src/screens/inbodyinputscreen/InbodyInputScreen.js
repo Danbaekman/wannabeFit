@@ -1,12 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, Button, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, TextInput, Button, TouchableOpacity, Alert, ScrollView } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import styles from './InbodyInputScreenStyles';
 import CONFIG from '../../config';
-import Modal from 'react-native-modal'; // 모달 컴포넌트 임포트
 import AsyncStorage from '@react-native-async-storage/async-storage'; // JWT 토큰 저장용
 import GoalSelectionModal from '../../components/modal/inbodyinput/GoalSelectionModal';
 
@@ -111,8 +108,8 @@ const InbodyInputScreen = ({ navigation }) => {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>인바디 정보 입력하기</Text>
+    <ScrollView style={styles.container}>
+      <Text style={styles.title}>인바디 정보 입력</Text>
 
       <Text style={styles.label}>키:</Text>
       <TextInput
@@ -202,8 +199,10 @@ const InbodyInputScreen = ({ navigation }) => {
         selectGoal={setGoal}
         goal={goal}
         handleSubmit={handleSubmit}
+        weight={weight} // 현재 몸무게 전달
+        targetWeight={targetWeight} // 목표 몸무게 전달
       />
-    </View>
+    </ScrollView>
   );
 };
 

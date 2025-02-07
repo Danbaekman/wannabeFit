@@ -1,11 +1,28 @@
 import React from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
+import { View, Text, TouchableOpacity, Alert } from 'react-native';
 import Modal from 'react-native-modal';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import styles from './GoalSelectionModalStyles';
 
-const GoalSelectionModal = ({ isVisible, onClose, selectGoal, goal, handleSubmit }) => {
+const GoalSelectionModal = ({ isVisible, onClose, selectGoal, goal, handleSubmit, weight, targetWeight }) => {
+
+  const handleGoalValidation = () => {
+    if (goal === 'bulk' && targetWeight <= weight) {
+      Alert.alert(
+        '목표 몸무게 확인',
+        '목표에 맞게 목표 몸무게 재설정이 필요합니다.'
+      );
+    } else if (goal === 'diet' && targetWeight >= weight) {
+      Alert.alert(
+        '목표 몸무게 확인',
+        '목표에 맞게 목표 몸무게 재설정이 필요합니다.'
+      );
+    } else {
+      handleSubmit(); // 목표와 몸무게가 맞을 경우 handleSubmit 실행
+    }
+  };
+
   return (
     <Modal 
       isVisible={isVisible} 
@@ -75,7 +92,7 @@ const GoalSelectionModal = ({ isVisible, onClose, selectGoal, goal, handleSubmit
         </TouchableOpacity>
 
         {/* 완료 버튼 */}
-        <TouchableOpacity onPress={handleSubmit} style={styles.completeButton}>
+        <TouchableOpacity onPress={handleGoalValidation} style={styles.completeButton}>
           <Text style={styles.completeButtonText}>완료</Text>
         </TouchableOpacity>
       </View>

@@ -11,7 +11,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: "#008080",
     textAlign: 'center',
-    marginBottom: 20,
+    marginBottom: 40,
     marginTop: 20,
   },
   label: {
@@ -84,14 +84,13 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#999',
   },
-
   // 다음 버튼 스타일
   nextButton: {
+    marginTop: 60,
+    alignItems: 'center',
     backgroundColor: '#008080',
     paddingVertical: 10,
     borderRadius: 10,
-    alignItems: 'center',
-    marginTop: 20,
   },
   nextButtonText: {
     color: '#fff',
