@@ -213,20 +213,19 @@ const styles = StyleSheet.create({
   weightInputContainer: {
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 10,
   },
   scaleBox: {
-    width: 240, // 체중계 박스 크기 확대
-    height: 160, // 체중계 높이 확대
+    width: 260,
+    height: 180,
     backgroundColor: '#FFFFFF',
     borderRadius: 15,
     borderWidth: 1,
     borderColor: '#ddd',
     alignItems: 'center',
-    justifyContent: 'space-between', // 발 모양을 위쪽으로 배치
+    justifyContent: 'space-between',
     position: 'relative',
     elevation: 2,
-    paddingVertical: 10,
+    paddingVertical: 10, // 상하 여백 키움
   },
   
   inputBoxContainer: {
@@ -235,16 +234,15 @@ const styles = StyleSheet.create({
     justifyContent: 'center',// 발 모양과 간격
   },
   footImage: {
-    width: 140, // 기존보다 더 큰 너비
-    height: 70, // 기존보다 더 큰 높이
+    width: 140,
+    height: 70,
     resizeMode: 'contain',
     position: 'absolute',
-    top: '50%', // 체중계 상단에서 20% 위치로 조정
+    color: '#ccc',
+    top: '60%', // 체중계 상단에서 20% 위치로 조정
     left: '50%',
     transform: [{ translateX: -70 }], // 가로 중앙 보정 (width 절반 값)
   },
-  
-  
   inputBox: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -253,11 +251,11 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     borderWidth: 1,
     borderColor: '#ddd',
-    paddingHorizontal: 10,
-    marginHorizontal: 10, // 버튼과 간격
+    paddingHorizontal: 8,
+    marginHorizontal: 10,
   },
   inputText: {
-    fontSize: 24,
+    fontSize: 12,
     fontWeight: 'bold',
     color: '#333',
     marginHorizontal: 10,
@@ -266,6 +264,33 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: '#555',
   },
+  goalRow: {
+    flexDirection: 'row', // 텍스트와 버튼을 가로로 배치
+    justifyContent: 'space-between', // 양 끝에 배치
+    alignItems: 'center', // 세로 중앙 정렬
+    marginBottom: 10, // 하단 여백
+  },
+  recordButton: {
+    flexDirection: 'row', // 아이콘과 텍스트 가로 정렬
+    alignItems: 'center', // 세로 중앙 정렬
+    paddingVertical: 8, // 상하 여백
+    paddingHorizontal: 12, // 좌우 여백
+  },
+  recordButtonText: {
+    fontSize: 14,
+    color: '#008080', // 버튼 텍스트 색상
+    fontWeight: 'bold',
+    marginLeft: 5, // 아이콘과 텍스트 간격
+  },
+  inputText: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#333',
+    marginHorizontal: 10,
+    textAlign: 'center', // 텍스트 가운데 정렬
+    width: 60, // 입력란 너비
+  },
+  
   adjustButton: {
     width: 30,
     height: 30,

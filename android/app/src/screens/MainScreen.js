@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, ScrollView, Image, Alert} from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, Image, Alert, TextInput} from 'react-native';
 import React, { useState, useEffect } from 'react';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import dayjs from 'dayjs';
@@ -232,7 +232,7 @@ const MainScreen = ({ navigation }) => {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
   
-      Alert.alert('성공', `${selectedDate}의 체중이 ${tempWeight}kg로 저장되었습니다.`);
+      Alert.alert('Wannabefit', `해당 날짜 ${selectedDate} 에 체중 ${tempWeight}kg 로 저장되었습니다.`);
       setUserWeight(tempWeight);
     } catch (error) {
       console.error('Error saving weight:', error.message);
@@ -416,10 +416,22 @@ const MainScreen = ({ navigation }) => {
             <View style={styles.summaryBox}>
  
   {/* 목표 체중 텍스트 */}
-<Text style={styles.weightGoalText}>
-  <Text style={styles.goalPrefix}>내 목표: </Text>
-  <Text style={styles.goalText}>{userGoal.targetWeight || 0}kg</Text>
-</Text>
+  {/* 목표 체중 텍스트 및 기록하기 버튼 */}
+  <View style={styles.goalRow}>
+    <Text style={styles.weightGoalText}>
+      <Text style={styles.goalPrefix}>내 목표: </Text>
+      <Text style={styles.goalText}>{userGoal.targetWeight || 0}kg</Text>
+    </Text>
+    <TouchableOpacity
+      style={styles.recordButton}
+      onPress={saveWeight} // 기록하기 함수 호출
+      disabled={tempWeight === null}
+    >
+      <Ionicons name="refresh-outline" size={16} color="#008080" />
+      <Text style={styles.recordButtonText}>기록하기</Text>
+    </TouchableOpacity>
+  </View>
+
 
 {/* 체중계 디자인 */}
 <View style={styles.weightInputContainer}>
@@ -436,14 +448,25 @@ const MainScreen = ({ navigation }) => {
           }
         }}
       >
-        <Text style={styles.adjustButtonText}>-</Text>
+        <Ionicons name="remove-outline" size={20} color="#FFF" />
       </TouchableOpacity>
 
       {/* 체중 입력란 */}
       <View style={styles.inputBox}>
-        <Text style={styles.inputText}>
-          {tempWeight !== null ? tempWeight : userWeight || '...'}
-        </Text>
+        <TextInput
+          style={styles.inputText}
+          value={tempWeight !== null ? String(tempWeight) : userWeight !== null ? String(userWeight) : ''}
+          onChangeText={(text) => {
+            const weight = parseFloat(text);
+            if (!isNaN(weight)) {
+              setTempWeight(weight);
+            }
+          }}
+          keyboardType="numeric" // 숫자 전용 키보드
+          maxLength={3} // 최대 5자리 (예: 999.99)
+          placeholder="0"
+          placeholderTextColor="#AAA"
+        />
         <Text style={styles.kgText}>kg</Text>
       </View>
 
@@ -458,25 +481,16 @@ const MainScreen = ({ navigation }) => {
           }
         }}
       >
-        <Text style={styles.adjustButtonText}>+</Text>
+        <Ionicons name="add-outline" size={20} color="#FFF" />
       </TouchableOpacity>
     </View>
 
     {/* 양발 아이콘 */}
     <Image
       source={require('../../assets/images/foot.png')}
-      style={styles.footImage}
+      style={[styles.footImage, { tintColor: '#ccc' }]}
     />
   </View>
-
-  {/* 변경하기 버튼 */}
-  <TouchableOpacity
-    style={styles.changeButton}
-    onPress={saveWeight} // saveWeight 함수 호출
-    disabled={tempWeight === null}
-  >
-    <Text style={styles.changeButtonText}>변경하기</Text>
-  </TouchableOpacity>
 </View>
 </View>
 

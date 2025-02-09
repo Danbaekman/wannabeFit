@@ -189,8 +189,6 @@ const NaverLoginButton = ({ navigation }) => {
   }
 };
 
-
-
   return (
     <View>
       {!isLoggedIn ? (
