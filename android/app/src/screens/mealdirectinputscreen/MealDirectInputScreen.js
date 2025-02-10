@@ -26,7 +26,6 @@ const MealDirectInputScreen = ({ navigation, route }) => {
   };
 
   const handleSubmit = async () => {
-    setIsEditMode(false);
     if (!foodName || !calories || !carbohydrates || !protein || !fat) {
       Alert.alert('필수 입력', '음식명, 열량, 탄수화물, 단백질, 지방을 입력해주세요.');
       return;
@@ -98,31 +97,127 @@ const MealDirectInputScreen = ({ navigation, route }) => {
       console.error('Error adding to favorites:', error);
     }
   };
+
+  const handleInputChange = (text, setter, unit) => {
+    const numericValue = text.replace(/[^0-9.]/g, ''); // 숫자만 허용
+    setter(numericValue ? `${numericValue}${unit}` : ''); // 숫자가 있을 때만 단위 추가
+  };
+  
   
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-        <Ionicons name="chevron-back" size={24} color="black" />
-      </TouchableOpacity>
-      <Text style={styles.header}>직접 입력</Text>
-      <Text style={styles.label}>음식명 <Text style={styles.required}>*</Text></Text>
-      <TextInput style={styles.input} value={foodName} onChangeText={setFoodName} placeholder="음식 이름 입력" />
-      
-      <View style={styles.row}><Text style={styles.label}>열량 <Text style={[styles.required, { color: '#008080' }]}>*</Text></Text><TextInput style={styles.input} value={calories} onChangeText={setCalories} placeholder="kcal" keyboardType="numeric" /></View>
-      <View style={styles.row}><Text style={styles.label}>탄수화물 <Text style={[styles.required, { color: '#008080' }]}>*</Text></Text><TextInput style={styles.input} value={carbohydrates} onChangeText={setCarbohydrates} placeholder="g" keyboardType="numeric" /></View>
-      <View style={styles.row}><Text style={styles.label}>단백질 <Text style={[styles.required, { color: '#008080' }]}>*</Text></Text><TextInput style={styles.input} value={protein} onChangeText={setProtein} placeholder="g" keyboardType="numeric" /></View>
-      <View style={styles.row}><Text style={styles.label}>지방 <Text style={[styles.required, { color: '#008080' }]}>*</Text></Text><TextInput style={styles.input} value={fat} onChangeText={setFat} placeholder="g" keyboardType="numeric" /></View>
-      <View style={styles.row}><Text style={styles.label}>포화지방</Text><TextInput style={styles.input} value={saturatedFat} onChangeText={setSaturatedFat} placeholder="g" keyboardType="numeric" /></View>
-      <View style={styles.row}><Text style={styles.label}>트랜스지방</Text><TextInput style={styles.input} value={transFat} onChangeText={setTransFat} placeholder="g" keyboardType="numeric" /></View>
-      <View style={styles.row}><Text style={styles.label}>나트륨</Text><TextInput style={styles.input} value={natrium} onChangeText={setNatrium} placeholder="mg" keyboardType="numeric" /></View>
-      <View style={styles.row}><Text style={styles.label}>당류</Text><TextInput style={styles.input} value={sugar} onChangeText={setSugar} placeholder="g" keyboardType="numeric" /></View>
-      <View style={styles.row}><Text style={styles.label}>식이섬유</Text><TextInput style={styles.input} value={dietaryFiber} onChangeText={setDietaryFiber} placeholder="g" keyboardType="numeric" /></View>
-      
-      <TouchableOpacity onPress={handleSubmit} style={styles.submitButton}>
-        <Text style={styles.submitButtonText}>완료</Text>
-      </TouchableOpacity>
-    </View>
+  <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+    <Ionicons name="chevron-back" size={24} color="black" />
+  </TouchableOpacity>
+  <Text style={styles.header}>직접 입력</Text>
+  <Text style={styles.label}>음식명 <Text style={styles.required}>*</Text></Text>
+  <TextInput style={styles.foodNameInput} value={foodName} onChangeText={setFoodName} placeholder="음식 이름 입력" />
+
+  <View style={styles.row}>
+    <Text style={styles.label}>열량 <Text style={[styles.required, { color: '#008080' }]}>*</Text></Text>
+    <TextInput 
+      style={styles.input} 
+      value={calories} 
+      onChangeText={(text) => handleInputChange(text, setCalories, 'kcal')} 
+      placeholder="kcal" 
+      keyboardType="numeric" 
+    />
+  </View>
+
+  <View style={styles.row}>
+    <Text style={styles.label}>탄수화물 <Text style={[styles.required, { color: '#008080' }]}>*</Text></Text>
+    <TextInput 
+      style={styles.input} 
+      value={carbohydrates} 
+      onChangeText={(text) => handleInputChange(text, setCarbohydrates, 'g')} 
+      placeholder="g" 
+      keyboardType="numeric" 
+    />
+  </View>
+
+  <View style={styles.row}>
+    <Text style={styles.label}>단백질 <Text style={[styles.required, { color: '#008080' }]}>*</Text></Text>
+    <TextInput 
+      style={styles.input} 
+      value={protein} 
+      onChangeText={(text) => handleInputChange(text, setProtein, 'g')} 
+      placeholder="g" 
+      keyboardType="numeric" 
+    />
+  </View>
+
+  <View style={styles.row}>
+    <Text style={styles.label}>지방 <Text style={[styles.required, { color: '#008080' }]}>*</Text></Text>
+    <TextInput 
+      style={styles.input} 
+      value={fat} 
+      onChangeText={(text) => handleInputChange(text, setFat, 'g')} 
+      placeholder="g" 
+      keyboardType="numeric" 
+    />
+  </View>
+
+  <View style={styles.row}>
+    <Text style={styles.label}>포화지방</Text>
+    <TextInput 
+      style={styles.input} 
+      value={saturatedFat} 
+      onChangeText={(text) => handleInputChange(text, setSaturatedFat, 'g')} 
+      placeholder="g" 
+      keyboardType="numeric" 
+    />
+  </View>
+
+  <View style={styles.row}>
+    <Text style={styles.label}>트랜스지방</Text>
+    <TextInput 
+      style={styles.input} 
+      value={transFat} 
+      onChangeText={(text) => handleInputChange(text, setTransFat, 'g')} 
+      placeholder="g" 
+      keyboardType="numeric" 
+    />
+  </View>
+
+  <View style={styles.row}>
+    <Text style={styles.label}>나트륨</Text>
+    <TextInput 
+      style={styles.input} 
+      value={natrium} 
+      onChangeText={(text) => handleInputChange(text, setNatrium, 'mg')} 
+      placeholder="mg" 
+      keyboardType="numeric" 
+    />
+  </View>
+
+  <View style={styles.row}>
+    <Text style={styles.label}>당류</Text>
+    <TextInput 
+      style={styles.input} 
+      value={sugar} 
+      onChangeText={(text) => handleInputChange(text, setSugar, 'g')} 
+      placeholder="g" 
+      keyboardType="numeric" 
+    />
+  </View>
+
+  <View style={styles.row}>
+    <Text style={styles.label}>식이섬유</Text>
+    <TextInput 
+      style={styles.input} 
+      value={dietaryFiber} 
+      onChangeText={(text) => handleInputChange(text, setDietaryFiber, 'g')} 
+      placeholder="g" 
+      keyboardType="numeric" 
+    />
+  </View>
+
+  <TouchableOpacity onPress={handleSubmit} style={styles.submitButton}>
+    <Text style={styles.submitButtonText}>완료</Text>
+  </TouchableOpacity>
+</View>
+
   );
 };
 
