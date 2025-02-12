@@ -3,22 +3,28 @@ import { StyleSheet } from 'react-native';
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
+    paddingHorizontal: 20,
+    paddingTop: 20,
     backgroundColor: '#fff',
+  },
+  headerContainer: {
+    flexDirection: 'row', // 같은 행에 배치
+    alignItems: 'center', // 세로 중앙 정렬
+    justifyContent: 'center', // 양쪽 정렬
+    paddingVertical: 10,
+    paddingHorizontal: 20, // ✅ 좌우 여백을 전체 레이아웃과 동일하게 설정
   },
   backButton: {
     position: 'absolute',
-    paddingHorizontal: 25, // 좌우 터치 영역 확장
-    paddingVertical: 10,
-    top: 20,
-    left: 20,
+    left: 0,
+    zIndex: 10, // 다른 요소 위에 위치
   },
   header: {
-    textAlign: 'center',
     fontSize: 20,
     fontWeight: 'bold',
-    marginBottom: 20,
-    color: '#008080'
+    color: '#008080',
+    textAlign: 'center',
+    flex: 1, // ✅ 제목을 중앙 정렬 (양쪽 버튼이 있을 경우 유연한 배치)
   },
   label: {
     fontSize: 16,
@@ -54,7 +60,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginTop: 10,
+    marginTop: 20,
   },
   submitButton: {
     marginTop: 60,
