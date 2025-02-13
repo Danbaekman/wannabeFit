@@ -1,59 +1,55 @@
 import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  Modal,
-  TextInput,
-  TouchableOpacity,
-} from 'react-native';
-import Ionicons from 'react-native-vector-icons/Ionicons'; // 아이콘 라이브러리
-import styles from './AddRoutineDetailModalStyles'; // 스타일 파일 연결
+import { View, Text, TextInput, TouchableOpacity } from 'react-native';
+import Ionicons from 'react-native-vector-icons/Ionicons';
+import Modal from 'react-native-modal';
+import styles from './AddRoutineDetailModalStyles';
 
 const AddRoutineDetailModal = ({ visible, onClose, onAddExercise }) => {
   const [exerciseName, setExerciseName] = useState('');
 
   const handleAdd = () => {
     if (exerciseName.trim()) {
-      onAddExercise(exerciseName.trim()); // 상위 컴포넌트로 값 전달
+      onAddExercise(exerciseName.trim());
       setExerciseName('');
-      onClose(); // 모달 닫기
+      onClose();
     }
   };
 
   return (
     <Modal
-      visible={visible}
-      transparent={true}
-      animationType="slide"
-      onRequestClose={onClose}
+      isVisible={visible}
+      onBackdropPress={onClose}
+      swipeDirection="down" // ✅ 아래로 스와이프하면 모달 닫힘
+      onSwipeComplete={onClose}
+      backdropOpacity={0.5}
+      style={styles.modalContainer}
     >
-      <View style={styles.container}>
-        <View style={styles.modalContainer}>
-          {/* X 아이콘 */}
+      <View style={styles.modalContent}>
+        {/* 드래그 핸들 */}
+        <View style={styles.dragHandleContainer}>
+          <View style={styles.dragHandle} />
+        </View>
+
+        {/* 제목 & 닫기 버튼 */}
+        <View style={styles.headerContainer}>
+          <Text style={styles.modalTitle}>새 운동 종목 추가</Text>
           <TouchableOpacity style={styles.closeButtonContainer} onPress={onClose}>
             <Ionicons name="close" size={24} color="#333" />
           </TouchableOpacity>
-
-          <View style={styles.dragHandleContainer}>
-            <View style={styles.dragHandle} />
-          </View>
-
-          {/* 제목 */}
-          <Text style={styles.modalTitle}>새 운동 종목 추가</Text>
-
-          {/* 입력 필드 */}
-          <TextInput
-            style={styles.input}
-            placeholder="운동 종목 이름 입력"
-            value={exerciseName}
-            onChangeText={setExerciseName}
-          />
-
-          {/* 추가 버튼 */}
-          <TouchableOpacity style={styles.addButton} onPress={handleAdd}>
-            <Text style={styles.addButtonText}>추가</Text>
-          </TouchableOpacity>
         </View>
+
+        {/* 입력 필드 */}
+        <TextInput
+          style={styles.input}
+          placeholder="운동 종목 이름 입력"
+          value={exerciseName}
+          onChangeText={setExerciseName}
+        />
+
+        {/* 추가 버튼 */}
+        <TouchableOpacity style={styles.addButton} onPress={handleAdd}>
+          <Text style={styles.addButtonText}>추가</Text>
+        </TouchableOpacity>
       </View>
     </Modal>
   );

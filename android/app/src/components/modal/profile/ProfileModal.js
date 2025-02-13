@@ -3,6 +3,7 @@ import { View, Text, TextInput, TouchableOpacity, Alert } from 'react-native';
 import Modal from 'react-native-modal';
 import { Picker } from '@react-native-picker/picker'; // Picker 가져오기
 import styles from './ProfileModalStyles';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 
 const ProfileModal = ({ isVisible, field, value, onClose, onChangeValue, onSave, userData }) => {
   const fieldTitleMap = {
@@ -73,7 +74,7 @@ const ProfileModal = ({ isVisible, field, value, onClose, onChangeValue, onSave,
     // 체중 변경 시 추가 확인
     if (field === 'weight') {
       Alert.alert(
-        '확인',
+        'Wannabefit',
         '시작 체중을 변경하면 목표 칼로리가 변경됩니다. 계속하시겠습니까?',
         [
           { text: '아니오', style: 'cancel' },
@@ -89,16 +90,34 @@ const ProfileModal = ({ isVisible, field, value, onClose, onChangeValue, onSave,
 
   return (
     <Modal
-      isVisible={isVisible}
-      onBackdropPress={onClose}
-      backdropColor="black"
-      backdropOpacity={0.5}
-      style={styles.modalContainer}
-      animationIn="slideInUp"
-      animationOut="slideOutDown"
+        isVisible={isVisible}
+        onBackdropPress={onClose}
+        swipeDirection="down"  // ✅ 아래로 스와이프해서 닫기
+        onSwipeComplete={onClose}
+        backdropOpacity={0.5}
+        style={styles.modalContainer}
+        animationIn="slideInUp"
+        animationOut="slideOutDown"
     >
       <View style={styles.modalContent}>
-        <Text style={styles.modalTitle}>{fieldTitleMap[field] || '정보 변경'}</Text>
+        <View style={styles.headerContainer}>
+          <Text style={styles.modalTitle}>{fieldTitleMap[field] || '정보 변경'}</Text>
+          <TouchableOpacity style={styles.closeButtonContainer} onPress={onClose}>
+            <Ionicons name="close" size={24} color="#333" />
+          </TouchableOpacity>
+        </View>
+
+         {/* 닉네임 입력 필드 추가 ✅ */}
+         {field === 'name' && (
+          <View style={styles.inputContainer}>
+            <TextInput
+              style={styles.modalInput}
+              value={value}
+              onChangeText={onChangeValue}
+              placeholder="새 닉네임 입력"
+            />
+          </View>
+        )}
 
         {/* 목적 필드: 드롭다운 메뉴 */}
         {field === 'goal' && (
@@ -132,9 +151,6 @@ const ProfileModal = ({ isVisible, field, value, onClose, onChangeValue, onSave,
 
         <TouchableOpacity style={styles.modalButton} onPress={handleSave}>
           <Text style={styles.modalButtonText}>완료</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.modalCloseButton} onPress={onClose}>
-          <Text style={styles.modalCloseButtonText}>취소</Text>
         </TouchableOpacity>
       </View>
     </Modal>

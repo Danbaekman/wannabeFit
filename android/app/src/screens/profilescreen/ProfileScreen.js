@@ -5,6 +5,9 @@ import styles from './ProfileScreenStyles';
 import ProfileModal from '../../components/modal/profile/ProfileModal';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import CONFIG from '../../config';
+import * as ImagePicker from 'react-native-image-picker';
+import Ionicons from 'react-native-vector-icons/Ionicons';
+
 
 const ProfileScreen = ({ navigation }) => {
   const [userData, setUserData] = useState(null);
@@ -12,6 +15,7 @@ const ProfileScreen = ({ navigation }) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [editableField, setEditableField] = useState('');
   const [inputValue, setInputValue] = useState('');
+  const [profileImage, setProfileImage] = useState(null);
 
   const translateGoal = (goal) => {
     const goalMap = {
@@ -41,6 +45,7 @@ const ProfileScreen = ({ navigation }) => {
         if (response.ok) {
           const data = await response.json();
           setUserData(data);
+          setProfileImage(data.profileImage || null); 
         } else {
           console.error('Failed to fetch user data:', response.status);
         }
@@ -53,6 +58,8 @@ const ProfileScreen = ({ navigation }) => {
 
     fetchUserData();
   }, []);
+
+  
 
   const handleUpdateField = async (dataToSave) => {
     try {
@@ -90,7 +97,7 @@ const ProfileScreen = ({ navigation }) => {
         if (editableField === 'exerciseFrequency') {
           successMessage = `운동 빈도가 주 ${dataToSave}회로 변경되었습니다.`;
         }
-        Alert.alert('성공', successMessage);
+        Alert.alert('Wannabefit', successMessage);
       } else {
         const responseJson = await response.json();
         const errorMessage = responseJson.error || '정보 변경에 실패했습니다.';
@@ -119,11 +126,81 @@ const ProfileScreen = ({ navigation }) => {
     );
   }
 
+  // ✅ 갤러리에서 이미지 선택 함수
+  const handleImagePick = () => {
+    ImagePicker.launchImageLibrary(
+      {
+        mediaType: 'photo',
+        maxWidth: 500,
+        maxHeight: 500,
+        quality: 0.8,
+      },
+      async (response) => {
+        if (response.didCancel) {
+          console.log('사용자가 이미지 선택을 취소함');
+          return;
+        }
+        if (response.errorCode) {
+          console.log('ImagePicker 오류:', response.errorMessage);
+          return;
+        }
+        if (response.assets && response.assets.length > 0) {
+          const selectedImage = response.assets[0].uri;
+          setProfileImage(selectedImage); // ✅ UI에서 즉시 반영
+          await uploadProfileImage(selectedImage); // ✅ 서버 및 AsyncStorage에 저장
+        }
+      }
+    );
+  };
+  
+
+  // ✅ 서버로 프로필 이미지 업로드
+  const uploadProfileImage = async (imageUri) => {
+    try {
+      const token = await AsyncStorage.getItem('jwtToken');
+      if (!token) {
+        Alert.alert('오류', '로그인이 필요합니다.');
+        return;
+      }
+  
+      const formData = new FormData();
+      formData.append('profileImage', {
+        uri: imageUri,
+        type: 'image/jpeg',
+        name: 'profile.jpg',
+      });
+  
+      const response = await fetch(`${CONFIG.API_BASE_URL}/profile/upload-image`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'multipart/form-data',
+        },
+        body: formData,
+      });
+  
+      if (response.ok) {
+        const data = await response.json();
+        setProfileImage(data.profileImage); // ✅ UI 업데이트
+        setUserData((prev) => ({ ...prev, profileImage: data.profileImage })); // ✅ 유저 데이터 업데이트
+        await AsyncStorage.setItem('profileImage', data.profileImage); // ✅ 로컬 저장
+        Alert.alert('성공', '프로필 이미지가 변경되었습니다.');
+      } else {
+        Alert.alert('실패', '이미지 업로드에 실패했습니다.');
+      }
+    } catch (error) {
+      console.error('이미지 업로드 오류:', error);
+      Alert.alert('오류', '이미지 업로드 중 문제가 발생했습니다.');
+    }
+  };
+  
+  
+
   return (
     <ScrollView contentContainerStyle={styles.scrollContainer}>
       <View style={styles.container}>
         <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-          <Icon name="arrow-back-outline" size={32} color="#000" />
+          <Ionicons name="chevron-back" size={32} color="black" />
         </TouchableOpacity>
 
         <Text style={styles.greetingText}>
@@ -131,14 +208,22 @@ const ProfileScreen = ({ navigation }) => {
         </Text>
 
         <View style={styles.imageContainer}>
-          <Image
-            source={require('../../../assets/images/default-profile.png')}
-            style={styles.profileImage}
-          />
-          <TouchableOpacity style={styles.cameraIcon}>
-            <Icon name="camera-outline" size={18} color="#fff" />
-          </TouchableOpacity>
-        </View>
+            {profileImage ? (
+                <Image
+                source={{ uri: profileImage }}
+                style={styles.profileImage}
+                resizeMode="cover"
+                />
+            ) : (
+                <View style={styles.defaultProfileIcon}>
+                <Icon name="person-circle-outline" size={140} color="#ccc" />
+                </View>
+            )}
+
+            <TouchableOpacity style={styles.cameraIcon} onPress={handleImagePick}>
+                <Icon name="camera-outline" size={24} color="#fff" />
+            </TouchableOpacity>
+            </View>
 
         <View style={styles.infoContainer}>
           <Text style={styles.infoLabel}>닉네임</Text>

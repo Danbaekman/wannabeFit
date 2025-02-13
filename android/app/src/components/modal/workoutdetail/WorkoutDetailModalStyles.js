@@ -14,7 +14,7 @@ const styles = StyleSheet.create({
     height: '80%',
   },
   modalTitle: {
-    fontSize: 22,
+    fontSize: 24,
     fontWeight: 'bold',
     color: '#008080',
     marginBottom: 10,
@@ -37,7 +37,7 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
   },
   memoText: {
-    fontSize: 14,
+    fontSize: 18,
     color: '#555',
   },
   exerciseContainer: {
@@ -47,7 +47,7 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
     color: '#333',
-    marginBottom: 5,
+    marginBottom: 10,
     marginTop: 5,
   },
   exerciseDetailsBox: {
@@ -73,13 +73,13 @@ const styles = StyleSheet.create({
   },
   dragHandleContainer: {
     alignItems: 'center',
-    marginVertical: 10,
+    marginBottom: 15,
   },
   dragHandle: {
     width: 40,
     height: 5,
     backgroundColor: '#ccc',
-    borderRadius: 2.5,
+    borderRadius: 10,
   },
   closeIcon: {
     position: 'absolute',

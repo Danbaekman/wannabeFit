@@ -20,10 +20,16 @@ const styles = StyleSheet.create({
     shadowRadius: 3.84,
     elevation: 5,
   },
+  headerContainer: {
+    flexDirection: 'row',  // ✅ 가로 정렬
+    justifyContent: 'space-between', // ✅ 제목 좌측, X 버튼 우측
+    alignItems: 'center', // 수직 정렬
+    width: '100%',
+    marginBottom: 15,
+  },
   modalTitle: {
     fontSize: 24,
     fontWeight: 'bold',
-    marginBottom: 20,
     color: '#008080',
   },
   modalInput: {
@@ -32,6 +38,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     padding: 10,
     marginBottom: 20,
+    fontSize: 18,
   },
   modalButton: {
     backgroundColor: '#008080',
@@ -44,19 +51,13 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
-  modalCloseButton: {
-    marginTop: 10,
-    padding: 12,
-    alignItems: 'center',
-    borderWidth: 2, // 테두리 추가
-    borderColor: '#008080', // 테두리 색상
-    borderRadius: 8, // 둥근 테두리
-    backgroundColor: 'white', // 배경색 흰색
+  closeButton: {
+    alignSelf: 'flex-end',
+    padding: 10,
   },
-  modalCloseButtonText: {
-    color: '#008080',
-    fontSize: 16,
-    fontWeight: 'bold',
+  closeButtonText: {
+    fontSize: 22,
+    color: '#888',
   },
   pickerContainer: {
     borderWidth: 1,

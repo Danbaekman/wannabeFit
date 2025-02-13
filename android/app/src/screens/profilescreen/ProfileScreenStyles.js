@@ -25,18 +25,29 @@ const styles = StyleSheet.create({
     position: 'relative',
   },
   profileImage: {
-    width: 150,
-    height: 150,
-    borderRadius: 50,
+    width: 140,
+    height: 140,
+    borderRadius: 70,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  defaultProfileIcon: {
+    width: 140,
+    height: 140,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 70, // 원형 유지
+    backgroundColor: '#f0f0f0', // 배경색 추가 (필요하면)
+    overflow: 'hidden', // 내부 아이콘이 넘치지 않도록 설정
   },
   cameraIcon: {
     position: 'absolute',
-    bottom: 30,
-    right: 30,
+    bottom: 2,
+    right: 2,
     backgroundColor: '#008080',
-    width: 30,
-    height: 30,
-    borderRadius: 15,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     justifyContent: 'center',
     alignItems: 'center',
   },

@@ -43,7 +43,7 @@ const styles = StyleSheet.create({
     bottom: 60,
     right: 40,
     paddingVertical: 10,
-    paddingHorizontal: 20,
+    paddingHorizontal: 10,
     borderRadius: 25,
     alignItems: 'center', // 수평 중앙 정렬
     justifyContent: 'center', // 수직 중앙 정렬

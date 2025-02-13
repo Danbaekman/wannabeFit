@@ -94,11 +94,13 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   recordCard: {
-    backgroundColor: '#E8F5F5',
-    borderRadius: 8,
+    borderBottomWidth: 1,  // ✅ 밑줄 추가
+    borderBottomColor: '#ccc',  // ✅ 회색 줄 색상 설정
+    borderRadius: 0,  // ✅ 둥근 모서리 제거 (불필요)
     padding: 5,
     marginBottom: 20,
-  },
+    backgroundColor: 'transparent',  // ✅ 배경색 제거
+},
   recordHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',

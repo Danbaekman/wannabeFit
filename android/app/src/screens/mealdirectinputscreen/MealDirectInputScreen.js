@@ -138,7 +138,7 @@ const MealDirectInputScreen = ({ navigation, route }) => {
     <View style={styles.container}>
       <View style={styles.headerContainer}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-          <Ionicons name="chevron-back" size={24} color="black" />
+          <Ionicons name="chevron-back" size={32} color="black" />
         </TouchableOpacity>
         <Text style={styles.header}>직접 입력</Text>
       </View>

@@ -187,7 +187,7 @@ const RoutineDetailScreen = ({ route, navigation }) => {
 
       fetchWorkouts();
       setModalVisible(false);
-      Alert.alert('운동 추가', '새 운동이 성공적으로 추가되었습니다!');
+      Alert.alert('Wannabefit', '새 운동이 성공적으로 추가되었습니다!');
     } catch (error) {
       console.error('운동 추가 중 오류 발생:', error);
       Alert.alert('Error', '운동을 추가하는 데 실패했습니다.');
@@ -236,7 +236,7 @@ const RoutineDetailScreen = ({ route, navigation }) => {
 
   const handleNextStep = () => {
     if (selectedWorkouts.length === 0) {
-      Alert.alert('Error', '최소 하나의 운동을 선택해주세요.');
+      Alert.alert('Wannabefit', '최소 하나의 운동을 선택해주세요.');
       return;
     }
 

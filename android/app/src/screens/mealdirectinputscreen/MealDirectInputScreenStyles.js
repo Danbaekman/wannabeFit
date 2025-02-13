@@ -20,7 +20,7 @@ const styles = StyleSheet.create({
     zIndex: 10, // 다른 요소 위에 위치
   },
   header: {
-    fontSize: 20,
+    fontSize: 24,
     fontWeight: 'bold',
     color: '#008080',
     textAlign: 'center',
@@ -29,7 +29,7 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 16,
     fontWeight: 'bold',
-    marginTop: 10,
+    marginTop: 20,
   },
   unitText: {
     fontSize: 16,
@@ -63,7 +63,7 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   submitButton: {
-    marginTop: 60,
+    marginTop: 40,
     backgroundColor: '#008080',
     paddingVertical: 12,
     alignItems: 'center',
