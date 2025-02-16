@@ -32,7 +32,7 @@ Wannabefit은 사용자의 신체 정보를 바탕으로 벌크업, 다이어트
   <img 
     src="https://i.ibb.co/ZRKDGPf6/1.gif" 
     alt="운동 목적 방향성 추천" 
-    width="80%"
+    width="20%"
   />
 </div>
 
