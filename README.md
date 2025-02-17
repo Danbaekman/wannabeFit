@@ -35,6 +35,14 @@ Wannabefit은 사용자의 신체 정보를 바탕으로 벌크업, 다이어트
   align="center"
 />
 
+<h3>실시간으로 운동 세트 기록!!</h3>
+<p>실시간으로 운동하면서 무게와 횟수를 기록해보세요</p>
+<p>최고 무게를 기록하셨다면 메모도 남겨 보세요</p>
+<img 
+  src="https://github.com/user-attachments/assets/4530a897-3262-46c6-b64c-07c7e44e9b12" 
+  width="20%"
+  align="center"
+/>
 
 ### ⏱️ 스톱워치
 ### 🎯 방향성에 맞는 목표 추천
