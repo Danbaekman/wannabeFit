@@ -24,10 +24,8 @@ Wannabefit은 사용자의 신체 정보를 바탕으로 벌크업, 다이어트
 - 통계를 통해 성장 그래프 확인
 
 
-## 제공하는 서비스들은 이런게 있습니다!
-### 운동목적 방향성 추천
-- 입력된 인바디 정보와 원하는 운동목적에 따라 추천 칼로리와 영양성분을 알려줍니다. 이 때 사용자가 직접 수정을 할 수도 있습니다.
-<h3>운동목적 방향성 추천</h3>
+## 워너비핏이 제공하는 서비스 지금 소개합니다!
+### 🎯 운동목적 방향성 추천
 <p>입력된 인바디 정보와 원하는 운동목적에 따라 추천 칼로리와 영양성분을 알려줍니다.</p>
 <img 
   src="https://github.com/user-attachments/assets/b781c7ad-68d5-4b48-8c05-6dd4ba77634d" 
@@ -35,24 +33,68 @@ Wannabefit은 사용자의 신체 정보를 바탕으로 벌크업, 다이어트
   align="center"
 />
 
-<h3>실시간으로 운동 세트 기록!!</h3>
+### 한 번 로그인하면 계속 편리하게!
+#### 같은 기기를 사용하는 한, 번거로운 로그인 없이 자동으로 워너비핏을 이용할 수 있습니다.
+<p align="center">
+  <img 
+    src="https://github.com/user-attachments/assets/573422a6-eab4-458b-a653-8d8a142f7f8d" 
+    width="30%"
+    align="center"
+  />
+</p>
+  
+### 🏋️ 실시간 운동 세트 기록
 <p>실시간으로 운동하면서 무게와 횟수를 기록해보세요</p>
 <p>최고 무게를 기록하셨다면 메모도 남겨 보세요</p>
 
 <p align="center">
    <img src="https://github.com/user-attachments/assets/465adfe9-64ef-4d0f-bae2-db88246b0a66" width="30%" />
-   &nbsp;&nbsp;&nbsp;&nbsp;
+   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
    <img src="https://github.com/user-attachments/assets/4530a897-3262-46c6-b64c-07c7e44e9b12" width="30%" />
-   &nbsp;&nbsp;&nbsp;&nbsp;
+   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
    <img src="https://github.com/user-attachments/assets/a17d360c-aced-413d-a2a7-a3a8ce73d557" width="30%" />
 </p>
 
+<br />
+
+### 🥗 오늘 먹은 음식 기록하기
+<p>매일 식단을 기록하며 추천 칼로리와 영양소 비율에 맞게 식사했는지 점검해보세요!</p>
+<p align="center">
+   <img src="https://github.com/user-attachments/assets/8d1df22c-630e-4e23-966e-eeca734fea63" width="30%" />
+   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+   <img src="https://github.com/user-attachments/assets/93a3090b-ea6c-4362-a86a-a2f615fdc18f" width="30%" />
+   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  <img src="https://github.com/user-attachments/assets/85a7ae80-bb25-4ef6-b0ec-83e5c9a67303" width="30%" />
+</p>
+
+<br />
+
+### 📊 얼만큼 성장했는지, 통계를 통해 확인해보세요
 
 ### ⏱️ 스톱워치
 ### 🎯 방향성에 맞는 목표 추천
 ### 🏋️ 운동 기록 관리
-### 🥗 식단 관리
-### 📊 통계를 통해 성장 그래프 확인
+
+
+
+## 🌼 사용한 기술은 다음과 같아요.
+
+### 💚 Front-end
+
+- React, Typescript, Styled-component
+- React-query, MobX
+- React-hook-form & Yup
+- Storybook, MSW
+- AWS S3, Cloud Front
+
+### 💚 Back-end
+
+- Nest.Js, TypeScript
+- MySQL (RDS), Prisma
+- AWS EC2
+
+<br />
+<br />
 
 ## 기술 스택
 ### **프론트엔드**
