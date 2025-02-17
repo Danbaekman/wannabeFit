@@ -3,14 +3,13 @@
 
 <br />
 
-<h3>운동목적 방향성 추천</h3>
-<p>입력된 인바디 정보와 원하는 운동목적에 따라 추천 칼로리와 영양성분을 알려줍니다.</p>
-<img 
-  src="https://github.com/user-attachments/assets/b781c7ad-68d5-4b48-8c05-6dd4ba77634d" 
-  width="30%"
-  align="center"
-/>
-
+<div align="center">
+  <img 
+    src="https://github.com/user-attachments/assets/1bc8e573-5612-438a-a128-38d121dbeec0" 
+    alt="Image" 
+    width="100%"
+    />
+</div>
 <br>
 <br>
 
@@ -28,13 +27,14 @@ Wannabefit은 사용자의 신체 정보를 바탕으로 벌크업, 다이어트
 ## 제공하는 서비스들은 이런게 있습니다!
 ### 운동목적 방향성 추천
 - 입력된 인바디 정보와 원하는 운동목적에 따라 추천 칼로리와 영양성분을 알려줍니다. 이 때 사용자가 직접 수정을 할 수도 있습니다.
-<div align="center">
-  <img 
-    src="![Image](https://github.com/user-attachments/assets/b781c7ad-68d5-4b48-8c05-6dd4ba77634d)" 
-    alt="운동 목적 방향성 추천" 
-    width="20%"
-  />
-</div>
+<h3>운동목적 방향성 추천</h3>
+<p>입력된 인바디 정보와 원하는 운동목적에 따라 추천 칼로리와 영양성분을 알려줍니다.</p>
+<img 
+  src="https://github.com/user-attachments/assets/b781c7ad-68d5-4b48-8c05-6dd4ba77634d" 
+  width="20%"
+  align="center"
+/>
+
 
 ### ⏱️ 스톱워치
 ### 🎯 방향성에 맞는 목표 추천
