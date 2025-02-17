@@ -30,7 +30,7 @@ Wannabefit은 사용자의 신체 정보를 바탕으로 벌크업, 다이어트
 - 입력된 인바디 정보와 원하는 운동목적에 따라 추천 칼로리와 영양성분을 알려줍니다. 이 때 사용자가 직접 수정을 할 수도 있습니다.
 <div align="center">
   <img 
-    src="https://i.ibb.co/spQYbGgv/1.gif" 
+    src="![Image](https://github.com/user-attachments/assets/b781c7ad-68d5-4b48-8c05-6dd4ba77634d)" 
     alt="운동 목적 방향성 추천" 
     width="20%"
   />
