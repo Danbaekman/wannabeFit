@@ -13,15 +13,18 @@
 <br>
 <br>
 
-## Wannabefit은 어떤 앱인가요?
-Wannabefit은 사용자의 신체 정보를 바탕으로 벌크업, 다이어트 등 원하는 목적에 맞춰 운동과 식단을 관리할 수 있는 모바일 앱입니다.
+## 워너비핏은 어떤 앱인가요?
+워너비핏은 사용자의 신체 정보를 바탕으로 벌크업, 다이어트 등 원하는 목적에 맞춰 운동과 식단을 기록하며 관리할 수 있는 모바일 앱입니다.
 <br />
-약 7년간의 웨이트 경력을 갖고있는 본 개발자는 여러 헬스 앱을 사용하면서 불편함을 느꼈던 복잡함을 대폭 줄여 간단한 UI를 바탕으로 필수 기능들을 구현했습니다.
-
+약 7년간의 웨이트 경력을 갖고있는 본 개발자가 여러 헬스 앱을 사용하면서 불편함을 느꼈던 복잡함을 대폭 줄여 간단한 UI를 바탕으로 필수 기능들을 구현했습니다.
+<br />
 - 원하는 몸에 맞춘 운동법 추천
 - 운동 및 식단 기록 관리
 - 스톱워치 기능
 - 통계를 통해 성장 그래프 확인
+
+<br />
+<br />
 
 
 ## 워너비핏이 제공하는 서비스 지금 소개합니다!
@@ -48,11 +51,11 @@ Wannabefit은 사용자의 신체 정보를 바탕으로 벌크업, 다이어트
 <p>최고 무게를 기록하셨다면 메모도 남겨 보세요</p>
 
 <p align="center">
-   <img src="https://github.com/user-attachments/assets/465adfe9-64ef-4d0f-bae2-db88246b0a66" width="30%" />
+   <img src="https://github.com/user-attachments/assets/465adfe9-64ef-4d0f-bae2-db88246b0a66" width="20%" />
    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-   <img src="https://github.com/user-attachments/assets/4530a897-3262-46c6-b64c-07c7e44e9b12" width="30%" />
+   <img src="https://github.com/user-attachments/assets/4530a897-3262-46c6-b64c-07c7e44e9b12" width="20%" />
    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-   <img src="https://github.com/user-attachments/assets/a17d360c-aced-413d-a2a7-a3a8ce73d557" width="30%" />
+   <img src="https://github.com/user-attachments/assets/a17d360c-aced-413d-a2a7-a3a8ce73d557" width="20%" />
 </p>
 
 <br />
@@ -70,33 +73,16 @@ Wannabefit은 사용자의 신체 정보를 바탕으로 벌크업, 다이어트
 <br />
 
 ### 📊 얼만큼 성장했는지, 통계를 통해 확인해보세요
+<p>운동 목적에 맞게 얼만큼 노력했는지 점검하고 개선해보세요</p>
+<p align="center">
+   <img src="https://github.com/user-attachments/assets/626d10ba-9114-4449-aaa5-e7a20329f915" width="30%" />
+   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+   <img src="https://github.com/user-attachments/assets/6dd5d1fb-3e92-42a9-9307-a4b4e6eaa584" width="30%" />
+   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  <img src="https://github.com/user-attachments/assets/4c31fbd5-3b23-4950-89aa-5e05440fa9e7" width="30%" />
+</p>
 
-### ⏱️ 스톱워치
-### 🎯 방향성에 맞는 목표 추천
-### 🏋️ 운동 기록 관리
-
-
-
-## 🌼 사용한 기술은 다음과 같아요.
-
-### 💚 Front-end
-
-- React, Typescript, Styled-component
-- React-query, MobX
-- React-hook-form & Yup
-- Storybook, MSW
-- AWS S3, Cloud Front
-
-### 💚 Back-end
-
-- Nest.Js, TypeScript
-- MySQL (RDS), Prisma
-- AWS EC2
-
-<br />
-<br />
-
-## 기술 스택
+## 사용된 기술
 ### **프론트엔드**
 - 프레임워크: React Native
 - 상태 관리: React Hooks (useState, useEffect)
@@ -116,7 +102,6 @@ Wannabefit은 사용자의 신체 정보를 바탕으로 벌크업, 다이어트
 - **Android 버전**: Android 12.0 ("S")
 - **아키텍처**: ARM 64
 
-## 개발 참여 인원(총 2명)
+## 개발 참여 인원(총 1명)
 - 프론트 엔드 : 이시헌
-- 백 엔드 : 송승민
 
