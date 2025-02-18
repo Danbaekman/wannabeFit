@@ -10,8 +10,7 @@
     width="100%"
     />
 </div>
-<br>
-<br>
+<br />
 
 ## 워너비핏은 어떤 앱인가요?
 워너비핏은 사용자의 신체 정보를 바탕으로 벌크업, 다이어트 등 원하는 목적에 맞춰 운동과 식단을 기록하며 관리할 수 있는 모바일 앱입니다.
@@ -30,12 +29,15 @@
 ## 워너비핏이 제공하는 서비스 지금 소개합니다!
 ### 🎯 운동목적 방향성 추천
 <p>입력된 인바디 정보와 원하는 운동목적에 따라 추천 칼로리와 영양성분을 알려줍니다.</p>
+<p align="center">
 <img 
-  src="https://github.com/user-attachments/assets/b781c7ad-68d5-4b48-8c05-6dd4ba77634d" 
-  width="20%"
+  src="https://github.com/user-attachments/assets/cc0e8d15-ae68-4418-b6f4-8c06ff6b1f62" 
+  width="30%"
   align="center"
 />
+</p>
 
+<br />
 ### 한 번 로그인하면 계속 편리하게!
 #### 같은 기기를 사용하는 한, 번거로운 로그인 없이 자동으로 워너비핏을 이용할 수 있습니다.
 <p align="center">
