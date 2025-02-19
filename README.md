@@ -109,9 +109,9 @@
 
 <p align="center">
    <img src="https://github.com/user-attachments/assets/465adfe9-64ef-4d0f-bae2-db88246b0a66" width="30%" />
-   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
    <img src="https://github.com/user-attachments/assets/4530a897-3262-46c6-b64c-07c7e44e9b12" width="30%" />
-   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
    <img src="https://github.com/user-attachments/assets/a17d360c-aced-413d-a2a7-a3a8ce73d557" width="30%" />
 </p>
 
@@ -121,9 +121,9 @@
 <p>매일 식단을 기록하며 추천 칼로리와 영양소 비율에 맞게 식사했는지 점검해보세요!</p>
 <p align="center">
    <img src="https://github.com/user-attachments/assets/8d1df22c-630e-4e23-966e-eeca734fea63" width="30%" />
-   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
    <img src="https://github.com/user-attachments/assets/93a3090b-ea6c-4362-a86a-a2f615fdc18f" width="30%" />
-   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
   <img src="https://github.com/user-attachments/assets/85a7ae80-bb25-4ef6-b0ec-83e5c9a67303" width="30%" />
 </p>
 
