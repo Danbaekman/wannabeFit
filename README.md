@@ -152,6 +152,20 @@
 ### **백엔드** 
 - Node.js, Express
 - 데이터베이스: MongoDB
+<br />
+
+## Getting Started
+```bash
+# 1️⃣ 로컬 환경에 프로젝트 클론하기
+git clone https://github.com/Danbaekman/wannabeFit.git
+
+# 2️⃣ 브랜치 이동 (프론트엔드 or 백엔드 선택)
+git checkout front-dev  # 프론트엔드 작업
+git checkout back-dev   # 백엔드 작업
+
+# 3️⃣ 패키지 설치 (프론트엔드, 백엔드)
+npm install # 패키지 설치
+npm start # 서버 실행
 
 ## 개발 환경
 - **기기**: Pixel 4 XL
