@@ -108,11 +108,11 @@
 <p>메모를 남겨 핵심 포인트들을 저장하세요</p>
 
 <p align="center">
-   <img src="https://github.com/user-attachments/assets/465adfe9-64ef-4d0f-bae2-db88246b0a66" width="30%" />
+   <img src="https://github.com/user-attachments/assets/465adfe9-64ef-4d0f-bae2-db88246b0a66" width="20%" />
    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-   <img src="https://github.com/user-attachments/assets/4530a897-3262-46c6-b64c-07c7e44e9b12" width="30%" />
+   <img src="https://github.com/user-attachments/assets/4530a897-3262-46c6-b64c-07c7e44e9b12" width="20%" />
    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-   <img src="https://github.com/user-attachments/assets/a17d360c-aced-413d-a2a7-a3a8ce73d557" width="30%" />
+   <img src="https://github.com/user-attachments/assets/a17d360c-aced-413d-a2a7-a3a8ce73d557" width="20%" />
 </p>
 
 <br />
