@@ -19,6 +19,13 @@ const muscleSchema = new mongoose.Schema({
   }
 }, { timestamps: true });
 
+// 운동 부위 삭제 시 연결된 세부 항목(ExerciseName)도 삭제
+muscleSchema.pre('findOneAndDelete', async function (next) {
+  const muscleId = this.getQuery()._id; // 삭제될 muscle ID
+  await mongoose.model('ExerciseName').deleteMany({ muscles: muscleId }); // 연결된 세부 항목 삭제
+  next();
+});
+
 const Muscle = mongoose.model('Muscle', muscleSchema);
 
 module.exports = Muscle;

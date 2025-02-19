@@ -6,7 +6,8 @@ const authenticateToken = require('../middleware/authenticateToken'); // 인증 
 // 운동 기록 생성 (Create)
 router.post('/', authenticateToken, async (req, res) => {
   try {
-    const {  muscles, exercises, startTime, endTime } = req.body;
+    const {  muscles, exercises, startTime, endTime, memo } = req.body;
+    console.log('📥 Received workout data:', JSON.stringify(req.body, null, 2)); // 여기서 확인
 
     console.log(`[POST /] 운동 기록 생성 요청: 사용자 ID=${req.user.id}, 요청 데이터=`, req.body);
 
@@ -16,6 +17,7 @@ router.post('/', authenticateToken, async (req, res) => {
       exercises,
       startTime,
       endTime,
+      memo,
     });
 
     const savedWorkoutLog = await workoutLog.save();
@@ -32,31 +34,35 @@ router.post('/', authenticateToken, async (req, res) => {
 // 특정 사용자의 운동 기록 전체 조회 (Read All)
 router.get('/', authenticateToken, async (req, res) => {
   try {
-    console.log(`[GET /] 운동 기록 전체 조회 요청: 사용자 ID=${req.user.id}`);
 
     const workoutLogs = await WorkoutLog.find({ user: req.user.id }) // 사용자 ID 기준으로 조회
       .populate('muscles', 'name') // Muscle 이름만 가져옴
-      .populate('exercises.exerciseName', 'name'); // ExerciseName 이름만 가져옴
+      .populate('exercises.exerciseName', 'name') // ExerciseName 이름만 가져옴
+      .lean(); // JSON 형태로 반환
 
-    const result = workoutLogs.map(log => {
-      // 총 세트 수 계산
+    // 필요 시 totalSets와 totalTime 추가 처리
+    const result = workoutLogs.map((log) => {
       const totalSets = log.exercises.reduce((setSum, exercise) => {
-        return setSum + (exercise.sets ? exercise.sets.length : 0);
+        return setSum + (exercise.sets ? exercise.sets.length : 0); // sets의 길이를 합산
       }, 0);
 
-      // 총 운동 시간 계산 (분 단위)
-      const totalTime = (new Date(log.endTime) - new Date(log.startTime)) / (1000 * 60);
+      const totalTime = (new Date(log.endTime) - new Date(log.startTime)) / (1000 * 60); // 총 운동 시간 계산
 
       return {
-        ...log.toObject(), // 기존 운동 기록 데이터를 유지
-        totalSets,         // 총 세트 수 추가
-        totalTime,         // 총 운동 시간 추가 (분 단위)
+        ...log,
+        memo: log.memo || '',
+        exercises: log.exercises.map((exercise) => ({
+          ...exercise,
+          sets: exercise.sets || [], // sets 배열 포함
+        })),
+        totalSets,
+        totalTime,
       };
     });
 
-    console.log(`[GET /] 운동 기록 전체 조회 성공:`, result);
+console.log(`[GET /] 운동 기록 전체 조회 성공:`, JSON.stringify(result, null, 2));
+res.status(200).json({ workoutLogs: result });
 
-    res.status(200).json({ workoutLogs: result });
   } catch (error) {
     console.error(`[GET /] 운동 기록 조회 실패:`, error.message);
     res.status(500).json({ message: '운동 기록 조회 실패', error: error.message });

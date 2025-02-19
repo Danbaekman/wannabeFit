@@ -13,7 +13,8 @@ const foodSchema = new mongoose.Schema({
   dietary_fiber: { type: Number }, // 식이섬유 함량
   calories: { type: Number }, // 칼로리
   serving_size: { type: String }, // 기준량 (예: 100g)
-  created_at: { type: Date, default: Date.now } // 기록일
+  created_at: { type: Date, default: Date.now }, // 기록일
+  isCustom: { type: Boolean, default: false },
 });
 
 const Food = mongoose.model('Food', foodSchema);

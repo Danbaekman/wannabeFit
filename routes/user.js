@@ -112,6 +112,40 @@ router.put('/update', authenticateToken, validateUserInput, async (req, res) => 
   }
 });
 
+router.put('/update-goals', authenticateToken, async (req, res) => {
+  try {
+    const { target_calories, recommended_protein, recommended_fat, recommended_carbs } = req.body;
+
+    // 필수 값 확인
+    if (target_calories == null || recommended_protein == null || recommended_fat == null || recommended_carbs == null) {
+      return res.status(400).json({ error: 'All fields are required.' });
+    }
+
+    // 사용자 정보 업데이트
+    const updatedUser = await User.findByIdAndUpdate(
+      req.user._id,
+      {
+        target_calories,
+        recommended_protein,
+        recommended_fat,
+        recommended_carbs,
+        updated_at: Date.now(),
+      },
+      { new: true }
+    );
+
+    if (!updatedUser) {
+      return res.status(404).json({ error: 'User not found.' });
+    }
+
+    console.log('User goals updated successfully:', updatedUser);
+    res.status(200).json({ message: 'Goals updated successfully.', user: updatedUser });
+  } catch (error) {
+    console.error('Error updating user goals:', error.message);
+    res.status(500).json({ error: 'An error occurred while updating user goals.' });
+  }
+});
+
 // DELETE /api/user/delete - 사용자 삭제
 router.delete('/delete', authenticateToken, async (req, res) => {
   try {

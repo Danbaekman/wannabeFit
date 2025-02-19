@@ -12,6 +12,7 @@ const handleServerError = (res, error, customMessage) => {
 };
 
 // 운동 부위 목록 가져오기 (그룹화된 형태로)
+//01.25 시헌 변경
 router.get('/muscles/grouped', authenticateToken, async (req, res) => {
     try {
         const userId = req.user.id;
@@ -29,6 +30,7 @@ router.get('/muscles/grouped', authenticateToken, async (req, res) => {
                     _id: null,
                     muscles: {
                         $push: {
+                            _id: '$_id', // _id 필드 추가
                             name: '$name',
                             isCustom: '$isCustom',
                             user: '$user',
@@ -133,24 +135,36 @@ router.put('/customMuscle/:id', authenticateToken, async (req, res) => {
 // 사용자 정의 운동 부위 삭제하기 (Delete)
 router.delete('/customMuscle/:id', authenticateToken, async (req, res) => {
     const muscleId = req.params.id;
+    console.log('서버로 전달된 삭제 요청 ID:', muscleId);
+
+    if (!mongoose.Types.ObjectId.isValid(muscleId)) {
+        console.log('유효하지 않은 ID 형식:', muscleId);
+        return res.status(400).json({ message: '유효하지 않은 ID 형식입니다.' });
+    }
 
     try {
         const muscle = await Muscle.findById(muscleId);
+        console.log('찾은 근육 데이터:', muscle);
 
         if (!muscle) {
-            return res.status(404).json({ message: "해당 근육을 찾을 수 없습니다." });
+            return res.status(404).json({ message: '근육을 찾을 수 없습니다.' });
         }
 
-        if (muscle.user.toString() !== req.user.id) {
-            return res.status(403).json({ message: "해당 근육을 삭제할 권한이 없습니다." });
+        if (!muscle.isCustom) {
+            return res.status(403).json({ message: '기본 제공 근육은 삭제할 수 없습니다.' });
         }
 
-        await muscle.remove();
-        res.status(200).json({ message: "근육이 성공적으로 삭제되었습니다." });
+        // findByIdAndDelete를 사용해 삭제
+        await Muscle.findByIdAndDelete(muscleId);
+        res.status(200).json({ message: '근육이 성공적으로 삭제되었습니다.' });
     } catch (error) {
-        handleServerError(res, error, "근육 삭제 중 오류가 발생했습니다.");
+        console.error('근육 삭제 중 오류 발생:', error);
+        res.status(500).json({ message: '근육 삭제 중 오류가 발생했습니다.', error: error.message });
     }
 });
+
+
+
 
 // 운동 이름 등록하기 (Create)
 router.post('/exercises', authenticateToken, async (req, res) => {
@@ -253,16 +267,27 @@ router.delete('/exercises/:id', authenticateToken, async (req, res) => {
             return res.status(404).json({ message: "해당 운동을 찾을 수 없습니다." });
         }
 
+        // 기본 제공 운동 여부 확인
+        if (!exercise.isCustom) {
+            return res.status(403).json({ message: "기본 제공 운동은 삭제할 수 없습니다." });
+        }
+
+        // 소유권 확인 (커스텀 운동인 경우만)
         if (exercise.user && exercise.user.toString() !== req.user.id) {
             return res.status(403).json({ message: "해당 운동을 삭제할 권한이 없습니다." });
         }
 
-        await exercise.remove();
+        // 삭제 수행
+        await exercise.deleteOne(); 
+
         res.status(200).json({ message: "운동이 성공적으로 삭제되었습니다." });
     } catch (error) {
-        handleServerError(res, error, "운동 삭제 중 오류가 발생했습니다.");
+        console.error('운동 삭제 중 오류 발생:', error);
+        res.status(500).json({ message: "운동 삭제 중 오류가 발생했습니다.", error: error.message });
     }
 });
+
+
 
 router.put('/exercises/:id', authenticateToken, async (req, res) => {
     const { name, muscles } = req.body;
@@ -306,6 +331,51 @@ router.put('/exercises/:id', authenticateToken, async (req, res) => {
         handleServerError(res, error, "운동 수정 중 오류가 발생했습니다.");
     }
 });
+
+// 사용자 정의 운동 종목 추가 
+router.post('/add-exercises', authenticateToken, async (req, res) => {
+    const { name, muscles } = req.body;
+    console.log('POST /add-exercises 호출됨');
+    console.log('요청 데이터:', req.body);
+
+    if (!name) {
+        return res.status(400).json({ message: '운동명을 입력해야 합니다.' });
+    }
+
+    if (!muscles || !Array.isArray(muscles) || muscles.length === 0) {
+        return res.status(400).json({ message: '운동 부위를 최소 하나 이상 입력해야 합니다.' });
+    }
+
+    try {
+        const existingExercise = await ExerciseName.findOne({
+            name,
+            user: req.user.id,
+        });
+
+        if (existingExercise) {
+            return res.status(409).json({
+                message: '이미 등록된 운동입니다.',
+                exercise: existingExercise,
+            });
+        }
+
+        // 사용자 정의 운동으로 isCustom: true 설정
+        const newExercise = new ExerciseName({
+            name,
+            muscles,
+            user: req.user.id,
+            isCustom: true, // 사용자 정의 운동 여부 추가
+        });
+
+        console.log('저장 전 데이터:', newExercise);
+        await newExercise.save();
+        res.status(201).json({ message: '운동이 성공적으로 추가되었습니다.', exercise: newExercise });
+    } catch (error) {
+        res.status(500).json({ message: '운동 추가 중 오류가 발생했습니다.', error: error.message });
+    }
+});
+
+  
 
 
 module.exports = router;

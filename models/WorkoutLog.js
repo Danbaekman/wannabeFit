@@ -48,6 +48,11 @@ const workoutLogSchema = new mongoose.Schema({
     type: Date,
     required: true, // 운동 종료 시간
   },
+  memo: {
+    type: String,
+    trim: true,
+    default: '', // 선택적 메모 필드
+  },
 }, { timestamps: true });
 
 const WorkoutLog = mongoose.model('WorkoutLog', workoutLogSchema);

@@ -24,20 +24,18 @@ router.post('/login/naver', async (req, res) => {
 
     const { email, name } = response.data.response;
 
-    // 2. 사용자 정보 조회 또는 생성
+    // 2. 사용자 정보 조회
     let user = await User.findOne({ email });
 
     if (user) {
-      // 사용자 등록되어 있는 경우, 액세스 토큰 및 정보 업데이트
+      // 사용자 등록되어 있는 경우, 액세스 토큰 업데이트
       let token = await Token.findOne({ userId: user._id });
 
       if (token) {
-        // 토큰이 이미 존재하면 업데이트
         token.accessToken = accessToken;
         token.updated_at = Date.now();
         await token.save();
       } else {
-        // 토큰이 존재하지 않으면 새로 생성
         token = new Token({
           userId: user._id,
           accessToken,
@@ -49,41 +47,74 @@ router.post('/login/naver', async (req, res) => {
 
       // JWT 발급
       const jwtToken = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
-      console.log('Generated JWT:', jwtToken);
-      
-      // 성공 메시지와 데이터 반환
-      console.log('User already registered:', user);
+
       return res.status(200).json({ message: 'User already registered', user, token, jwtToken });
     } else {
       // 사용자 등록되어 있지 않은 경우, 새 사용자 등록
-      user = new User({
+      let user = new User({
         email,
         name,
         created_at: Date.now()
       });
-      await user.save();
+
+      let savedUser;
+      try {
+        savedUser = await user.save(); // 사용자 저장
+      } catch (error) {
+        console.error('Error saving user:', error);
+        return res.status(500).json({ error: 'Failed to save user' });
+      }
 
       // 새 사용자에 대한 토큰 저장
-      const token = new Token({
-        userId: user._id,
-        accessToken,
-        created_at: Date.now(),
-        updated_at: Date.now()
-      });
-      await token.save();
+      let token;
+      try {
+        token = new Token({
+          userId: savedUser._id,
+          accessToken,
+          created_at: Date.now(),
+          updated_at: Date.now()
+        });
+        await token.save();
+      } catch (error) {
+        console.error('Error saving token, deleting user:', error);
+        await User.deleteOne({ _id: savedUser._id }); // 사용자 삭제
+        return res.status(500).json({ error: 'Failed to save token, user rolled back' });
+      }
 
       // JWT 발급
-      const jwtToken = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
-      console.log('Generated JWT:', jwtToken);x
+      const jwtToken = jwt.sign({ userId: savedUser._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
 
-      // 성공 메시지와 데이터 반환
-      console.log('User registered and token saved:', user);
-      return res.status(201).json({ message: 'User registered and token saved', user, token, jwtToken });
+      return res.status(201).json({ message: 'User registered and token saved', user: savedUser, token, jwtToken });
     }
   } catch (error) {
     console.error('Error during login:', error);
+    return res.status(500).json({ error: error.message });
+  }
+});
+
+
+router.post('/logout', async (req, res) => {
+  try {
+    const { userId } = req.body;
+
+    // 1. 사용자 ID로 액세스 토큰 삭제
+    const token = await Token.findOne({ userId });
+
+    if (!token) {
+      return res.status(404).json({ error: 'Token not found for the user' });
+    }
+
+    // 2. 토큰 삭제
+    await Token.deleteOne({ userId });
+    console.log('Token deleted for user:', userId);
+
+    // 성공 메시지 반환
+    return res.status(200).json({ message: 'User successfully logged out' });
+  } catch (error) {
+    console.error('Error during logout:', error);
     res.status(500).json({ error: error.message });
   }
 });
+
 
 module.exports = router;

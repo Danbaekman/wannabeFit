@@ -41,4 +41,7 @@ router.use('/exercise', exerciseRouter);
 const statisticRouter = require('./statistic');
 router.use('/statistic', statisticRouter);
 
+// 체중 라우터
+const weightRouter = require('./weight');
+router.use('/weight', weightRouter);
 module.exports = router;

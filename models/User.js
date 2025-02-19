@@ -34,7 +34,8 @@ const userSchema = new mongoose.Schema({
   weeksToGoal: { type: Number, default: 0 }, // 목표까지 걸리는 주 수
   target_calories: { type: Number, default: 0 }, // 목표 칼로리
   created_at: { type: Date, default: Date.now }, // 가입일
-  updated_at: { type: Date, default: Date.now } // 정보 수정일
+  updated_at: { type: Date, default: Date.now }, // 정보 수정일
+  profileImage: { type: String, default: null }, 
 });
 
 

@@ -17,6 +17,10 @@ const exerciseNameSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
     default: null // 기본 제공 운동일 경우 null
+  },
+  isCustom: { // 사용자 정의 여부
+    type: Boolean,
+    default: false // 기본 제공 운동은 false, 사용자 정의 운동은 true
   }
 }, { timestamps: true });
 
