@@ -1,4 +1,4 @@
-# 헬스 통합 앱 서비스 'Wannabefit'
+# 헬스 통합 앱 서비스 '워너비핏'
 > 2024.11 ~ 2025.02, 2025.02 ~ (리팩토링 진행 중)
 
 <br />
@@ -12,11 +12,31 @@
 </div>
 <br />
 
-## 워너비핏은 어떤 앱인가요?
-워너비핏은 사용자의 신체 정보를 바탕으로 벌크업, 다이어트 등 원하는 목적에 맞춰 운동과 식단을 기록하며 관리할 수 있는 모바일 앱입니다.
+<table>
+  <tr>
+    <td width="30%" align="center" style="vertical-align: middle;">
+      <img 
+        src="https://github.com/user-attachments/assets/27096968-50d2-41b9-82ca-cc8850a0e0ad" 
+        width="50%" 
+        style="display: block; margin: auto;"
+      />
+    </td>
+    <td style="vertical-align: middle;">
+      <h2>워너비핏은 어떤 앱인가요?</h2>
+      <p>
+        워너비핏은 사용자의 신체 정보를 바탕으로 벌크업, 다이어트 등 원하는 목적에 맞춰 
+        운동과 식단을 관리할 수 있는 모바일 앱입니다. 
+      </p>
+      <p>
+        약 7년간의 웨이트 경력을 갖고있는 본 개발자는 여러 헬스 앱을 사용하면서 불편함을 느꼈던 
+        복잡함을 대폭 줄여 간단한 UI를 바탕으로 필수 기능들을 구현했습니다.
+      </p>
+    </td>
+  </tr>
+</table>
+
 <br />
-약 7년간의 웨이트 경력을 갖고있는 본 개발자가 여러 헬스 앱을 사용하면서 불편함을 느꼈던 복잡함을 대폭 줄여 간단한 UI를 바탕으로 필수 기능들을 구현했습니다.
-<br />
+
 - 원하는 몸에 맞춘 운동법 추천
 - 운동 및 식단 기록 관리
 - 스톱워치 기능
@@ -25,39 +45,74 @@
 <br />
 <br />
 
-
-## 워너비핏이 제공하는 서비스 지금 소개합니다!
+## 워너비핏이 제공하는 서비스를 소개합니다!
 ### 🎯 운동목적 방향성 추천
-<p>입력된 인바디 정보와 원하는 운동목적에 따라 추천 칼로리와 영양성분을 알려줍니다.</p>
-<p align="center">
-<img 
-  src="https://github.com/user-attachments/assets/cc0e8d15-ae68-4418-b6f4-8c06ff6b1f62" 
-  width="30%"
-  align="center"
-/>
-</p>
+<table>
+  <tr>
+    <td width="40%" align="center">
+      <img 
+        src="https://github.com/user-attachments/assets/cc0e8d15-ae68-4418-b6f4-8c06ff6b1f62" 
+        width="90%"
+        style="display: block; margin: auto;"
+      />
+    </td>
+    <td width="60%">
+      <h2>워너비핏은 사용자의 TDEE를 기준으로 개인의 목표에 맞춘 최적의 칼로리와 영양소 비율을 추천합니다 😊</h2>
+      <h3>TDEE란?</h3>
+      <p>
+        TDEE(Total Daily Energy Expenditure, 총 일일 에너지 소모량)는 하루 동안 소비하는 총 칼로리를 의미합니다.  
+        기초대사량(BMR)과 활동량을 고려하여 계산되며, 신체 활동 수준에 따라 달라집니다.
+      </p>
+      <h3 align="center">💡 사용된 TDEE 계산법</h3>
+      <table align="center" border="1" cellspacing="0" cellpadding="5">
+        <tr>
+          <th>요소</th>
+          <th>계산식</th>
+        </tr>
+        <tr>
+          <td><b>BMR</b> (기초대사량)</td>
+          <td>10 × 체중(kg) + 6.25 × 키(cm) - 5 × 나이 + 성별 보정</td>
+        </tr>
+        <tr>
+          <td><b>성별 보정</b></td>
+          <td>남성: +5 / 여성: -161</td>
+        </tr>
+        <tr>
+          <td><b>활동량 보정</b></td>
+          <td>BMR × 활동계수</td>
+        </tr>
+        <tr>
+          <td><b>활동계수</b></td>
+          <td>
+            - 1.2: 거의 운동 안함<br>
+            - 1.375: 가벼운 운동 (주 1~3회)<br>
+            - 1.55: 보통 운동 (주 3~5회)<br>
+            - 1.725: 격렬한 운동 (주 6~7회)<br>
+            - 1.9: 운동 선수 수준
+          </td>
+        </tr>
+        <tr>
+          <td><b>최종 TDEE</b></td>
+          <td>BMR × 활동계수</td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
+
 
 <br />
-### 한 번 로그인하면 계속 편리하게!
-#### 같은 기기를 사용하는 한, 번거로운 로그인 없이 자동으로 워너비핏을 이용할 수 있습니다.
-<p align="center">
-  <img 
-    src="https://github.com/user-attachments/assets/573422a6-eab4-458b-a653-8d8a142f7f8d" 
-    width="30%"
-    align="center"
-  />
-</p>
   
 ### 🏋️ 실시간 운동 세트 기록
-<p>실시간으로 운동하면서 무게와 횟수를 기록해보세요</p>
-<p>최고 무게를 기록하셨다면 메모도 남겨 보세요</p>
+<p>스톱워치를 이용해 실시간으로 운동하면서 무게와 횟수를 기록해보세요</p>
+<p>메모를 남겨 핵심 포인트들을 저장하세요</p>
 
 <p align="center">
-   <img src="https://github.com/user-attachments/assets/465adfe9-64ef-4d0f-bae2-db88246b0a66" width="20%" />
-   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-   <img src="https://github.com/user-attachments/assets/4530a897-3262-46c6-b64c-07c7e44e9b12" width="20%" />
-   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-   <img src="https://github.com/user-attachments/assets/a17d360c-aced-413d-a2a7-a3a8ce73d557" width="20%" />
+   <img src="https://github.com/user-attachments/assets/465adfe9-64ef-4d0f-bae2-db88246b0a66" width="30%" />
+   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+   <img src="https://github.com/user-attachments/assets/4530a897-3262-46c6-b64c-07c7e44e9b12" width="30%" />
+   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+   <img src="https://github.com/user-attachments/assets/a17d360c-aced-413d-a2a7-a3a8ce73d557" width="30%" />
 </p>
 
 <br />
@@ -66,9 +121,9 @@
 <p>매일 식단을 기록하며 추천 칼로리와 영양소 비율에 맞게 식사했는지 점검해보세요!</p>
 <p align="center">
    <img src="https://github.com/user-attachments/assets/8d1df22c-630e-4e23-966e-eeca734fea63" width="30%" />
-   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
    <img src="https://github.com/user-attachments/assets/93a3090b-ea6c-4362-a86a-a2f615fdc18f" width="30%" />
-   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
   <img src="https://github.com/user-attachments/assets/85a7ae80-bb25-4ef6-b0ec-83e5c9a67303" width="30%" />
 </p>
 
@@ -93,7 +148,7 @@
 - UI 스타일링: React Native StyleSheet
 - 애니메이션: React Native Animated, PanResponder
 - 로그인: @react-native-seoul/naver-login
-<br />
+
 ### **백엔드** 
 - Node.js, Express
 - 데이터베이스: MongoDB
