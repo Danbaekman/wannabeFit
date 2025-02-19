@@ -49,7 +49,7 @@ const MealDirectInputScreen = ({ navigation, route }) => {
       if (!isDuplicate) {
         favorites.push(foodData);
         await AsyncStorage.setItem('favorites', JSON.stringify(favorites));
-        alert('즐겨찾기에 추가되었습니다.');
+        Alert.alert('Wannabefit', '즐겨찾기에 추가되었습니다.');
       } else {
         alert('이미 즐겨찾기에 추가된 음식입니다.');
       }

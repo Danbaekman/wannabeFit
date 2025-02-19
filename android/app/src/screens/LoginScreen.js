@@ -6,6 +6,7 @@ import KakaoLoginButton from '../components/buttons/kakao/KakaoLoginButton';
 import GoogleLoginButton from '../components/buttons/google/GoogleLoginButton';
 
 const LoginScreen = ({ navigation }) => {
+  
   return (
     <View style={styles.container}>
       {/* 뒤로가기 버튼 */}

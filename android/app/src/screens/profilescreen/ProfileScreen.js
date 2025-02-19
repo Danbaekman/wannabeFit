@@ -184,7 +184,7 @@ const ProfileScreen = ({ navigation }) => {
         setProfileImage(data.profileImage); // ✅ UI 업데이트
         setUserData((prev) => ({ ...prev, profileImage: data.profileImage })); // ✅ 유저 데이터 업데이트
         await AsyncStorage.setItem('profileImage', data.profileImage); // ✅ 로컬 저장
-        Alert.alert('성공', '프로필 이미지가 변경되었습니다.');
+        Alert.alert('Wannabefit', '프로필 이미지가 변경되었습니다.');
       } else {
         Alert.alert('실패', '이미지 업로드에 실패했습니다.');
       }
@@ -193,9 +193,41 @@ const ProfileScreen = ({ navigation }) => {
       Alert.alert('오류', '이미지 업로드 중 문제가 발생했습니다.');
     }
   };
-  
-  
 
+  const handleLogout = async () => {
+    Alert.alert(
+      'Wannabefit',
+      '로그아웃하시겠습니까?',
+      [
+        { text: '취소', style: 'cancel' },
+        {
+          text: '로그아웃',
+          onPress: async () => {
+            await AsyncStorage.removeItem('jwtToken');
+            navigation.replace('Login'); // 로그인 화면으로 이동
+          },
+        },
+      ],
+      { cancelable: true }
+    );
+  };
+
+  if (loading) {
+    return (
+      <View style={styles.container}>
+        <ActivityIndicator size="large" color="#008080" />
+      </View>
+    );
+  }
+
+  if (!userData) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.greetingText}>사용자 정보를 불러올 수 없습니다.</Text>
+      </View>
+    );
+  }
+  
   return (
     <ScrollView contentContainerStyle={styles.scrollContainer}>
       <View style={styles.container}>
@@ -357,6 +389,18 @@ const ProfileScreen = ({ navigation }) => {
   </View>
 </View>
 
+    <View style={styles.container}>
+          <Text style={styles.goalTitle}>계정</Text>
+          <View style={styles.goalBox}>
+            <TouchableOpacity 
+              style={styles.goalItemRow} 
+              onPress={() => navigation.navigate('AccountManagement')}
+            >
+              <Text style={styles.goalLabel}>내 계정 관리</Text>
+              <Ionicons name="chevron-forward-outline" size={18} color="#888" />
+            </TouchableOpacity>
+          </View>
+        </View>
 
   <ProfileModal
     isVisible={isModalVisible}

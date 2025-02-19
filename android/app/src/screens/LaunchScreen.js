@@ -1,9 +1,13 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import { View, Text, TouchableOpacity, Image, Alert } from 'react-native';
 import styles from '../styles/LaunchStyles';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import LoginHistoryModal from '../components/modal/login/LoginHistoryModal';
 
 const LaunchScreen = ({ navigation }) => {
+  const [lastLoginMethod, setLastLoginMethod] = useState(null);
+  const [isModalVisible, setIsModalVisible] = useState(false);
+
   const checkLoginStatus = useCallback(async () => {
     try {
       const token = await AsyncStorage.getItem('jwtToken');
@@ -11,27 +15,21 @@ const LaunchScreen = ({ navigation }) => {
         console.log('로그인 상태 확인: 토큰 있음');
       } else {
         console.log('로그인 상태 확인: 토큰 없음');
-        Alert.alert(
-          '로그인 필요',
-          '이전 로그인 기록이 없습니다. 로그인 창으로 이동하시겠습니까?',
-          [
-            {
-              text: '취소',
-              onPress: () => console.log('로그인 취소'),
-              style: 'cancel',
-            },
-            {
-              text: '확인',
-              onPress: () => navigation.navigate('Login'), // 로그인 창으로 이동
-            },
-          ],
-          { cancelable: false } // 외부 터치로 닫히지 않게 설정
-        );
       }
     } catch (error) {
       console.error('토큰 확인 중 오류:', error);
     }
   }, [navigation]);
+
+  const openLoginHistoryModal = async () => {
+    try {
+      const storedMethod = await AsyncStorage.getItem('lastLoginMethod');
+      setLastLoginMethod(storedMethod); // ✅ 저장된 로그인 방식 불러오기
+      setIsModalVisible(true);
+    } catch (error) {
+      console.error('로그인 기록 불러오기 오류:', error);
+    }
+  };
 
   // 화면이 렌더링될 때 로그인 상태 확인
   React.useEffect(() => {
@@ -105,11 +103,21 @@ const LaunchScreen = ({ navigation }) => {
       {/* 로그인 안내 */}
       <TouchableOpacity
         style={styles.loginButton}
-        onPress={checkLoginStatus} // 로그인 상태 확인을 다시 호출
+        onPress={openLoginHistoryModal}
       >
         <Text style={styles.loginText}>이미 계정이 있습니까?</Text>
         <Text style={styles.loginLink}>로그인</Text>
       </TouchableOpacity>
+
+      <LoginHistoryModal
+        isVisible={isModalVisible}
+        onClose={() => setIsModalVisible(false)}
+        lastLoginMethod={lastLoginMethod}
+        onLogin={() => {
+          navigation.navigate('Login', { method: lastLoginMethod });
+          setIsModalVisible(false);
+        }}
+      />
     </View>
   );
 };

@@ -113,7 +113,7 @@ const FitnessGoalScreen = ({ navigation }) => {
   
       if (response.ok) {
         console.log('Goals updated successfully!');
-        navigation.navigate('Main'); // Main 화면으로 이동
+        navigation.navigate('Welcome'); // Main 화면으로 이동
       } else {
         console.error('Failed to update goals:', response.status);
         Alert.alert('오류', '목표를 업데이트하는 데 실패했습니다.');

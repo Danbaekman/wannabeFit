@@ -5,6 +5,10 @@ export default StyleSheet.create({
       flex: 1,
       backgroundColor: '#008080',
     },
+    scrollViewContent: {
+        flexGrow: 1, // 스크롤뷰가 컨텐츠 크기에 맞춰 확장됨
+        justifyContent: 'space-between', // 컨텐츠가 아래로 확장되도록 설정
+      },
     statsSection: {
       marginBottom: 20,
       backgroundColor: '#FFFFFF',

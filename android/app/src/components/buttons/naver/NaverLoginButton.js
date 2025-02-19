@@ -18,6 +18,7 @@ NaverLogin.initialize({
   consumerSecret,
 });
 
+
 // JWT 토큰을 저장하는 함수
 const storeToken = async (token) => {
   try {
@@ -66,23 +67,23 @@ const sendAccessTokenToBack = async (accessToken) => {
 
 // 로그인 버튼 컴포넌트
 const NaverLoginButton = ({ navigation }) => {
+ 
+    useEffect(() => {
+        const checkLoginStatus = async () => {
+          const token = await AsyncStorage.getItem('jwtToken');
+          setIsLoggedIn(!!token); // 토큰이 있으면 true, 없으면 false
+        };
+      
+        const unsubscribe = navigation.addListener('focus', () => {
+          checkLoginStatus(); // ✅ 네이버 로그인 버튼도 로그인 상태를 다시 확인
+        });
+      
+        checkLoginStatus(); // 초기 상태 체크
+        return unsubscribe;
+      }, [navigation]);
+      
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [failureResponse, setFailureResponse] = useState(null);
-
-  useEffect(() => {
-    const checkLoginStatus = async () => {
-      const token = await AsyncStorage.getItem('jwtToken');
-      if (!token) {
-        console.log('JWT 토큰 없음, 로그인 필요');
-      } else {
-        console.log('JWT 토큰 존재:', token);
-        await AsyncStorage.removeItem('jwtToken'); // 기존 토큰 삭제
-      }
-    };
-  
-    checkLoginStatus();
-  }, []);
-  
 
 
   // JWT 토큰을 가져오는 함수
@@ -100,11 +101,13 @@ const NaverLoginButton = ({ navigation }) => {
   };
 
   // 로그인을 위한 함수
-  const login = async () => {
+  const login = async (method) => {
     try {
       const { failureResponse, successResponse } = await NaverLogin.login();
 
       if (successResponse) {
+        await AsyncStorage.setItem('lastLoginMethod', method);
+        console.log(`로그인 방식 저장: ${method}`);
         setIsLoggedIn(true);
         console.log('로그인 성공:', successResponse);
 
@@ -132,83 +135,21 @@ const NaverLoginButton = ({ navigation }) => {
     }
   };
 
- // 로그아웃을 위한 함수
- const logout = async () => {
-  try {
-    console.log('로그아웃 시작');
-
-    // 1. 네이버 SDK 로그아웃
-    await NaverLogin.logout();
-    console.log('네이버 로그아웃 성공');
-
-    // 2. 네이버 서버에서 토큰 삭제
-    await NaverLogin.deleteToken();
-    console.log('네이버 토큰 삭제 성공');
-
-    // 3. 클라이언트에서 JWT 토큰 확인 및 삭제
-    const jwtToken = await AsyncStorage.getItem('jwtToken');
-    if (!jwtToken) {
-      console.warn('JWT 토큰이 없습니다. 로그아웃 중단.');
-      Alert.alert('로그아웃 오류', '로그인 상태가 아닙니다.');
-      return;
-    }
-    console.log('JWT 토큰 확인:', jwtToken);
-
-    // JWT 디코딩
-    const decodedToken = jwtDecode(jwtToken);
-    const userId = decodedToken.userId;
-    console.log('디코딩된 userId:', userId);
-
-    // 4. 서버에 로그아웃 요청 보내기
-    console.log('서버로 보낼 데이터:', { userId });
-    const response = await fetch(`${CONFIG.API_BASE_URL}/auth/logout`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${jwtToken}`,
-      },
-      body: JSON.stringify({ userId }),
-    });
-
-    console.log('서버 응답 상태:', response.status);
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`서버 로그아웃 오류: ${response.status} - ${errorText}`);
-    }
-    console.log('서버 로그아웃 성공');
-
-    // 5. 클라이언트에서 JWT 토큰 삭제 및 상태 초기화
-    await AsyncStorage.removeItem('jwtToken');
-    setIsLoggedIn(false);
-    console.log('JWT 토큰 및 AsyncStorage 초기화 완료');
-
-    Alert.alert('로그아웃', '성공적으로 로그아웃되었습니다.');
-  } catch (error) {
-    console.error('로그아웃 오류:', error);
-    Alert.alert('로그아웃 오류', '로그아웃 도중 오류가 발생했습니다.');
-  }
-};
-
-  return (
+return (
     <View>
-      {!isLoggedIn ? (
-        <TouchableOpacity onPress={login}>
-          <Image
+      <TouchableOpacity onPress={() => login('naver')}>
+        <Image
           source={require('../../../../assets/images/naver.png')}
-          style={styles.icon}  
+          style={styles.icon}
         />
-        </TouchableOpacity>
-      ) : (
-        <>
-          <Text style={styles.successText}>로그인 성공!</Text>
-        </>
-      )}
-
+      </TouchableOpacity>
+  
       {failureResponse && (
         <Text style={styles.errorText}>로그인 실패: {failureResponse.message}</Text>
       )}
     </View>
-  );
+  );  
+  
 };
 
 export default NaverLoginButton;

@@ -77,6 +77,10 @@ const MealStatsScreen = ({ navigation }) => {
         }
       );
       if (!response.ok) {
+        if (response.status === 404) {
+          setFirstRecordedDate(null); // 기본값 설정 (null 또는 새로운 기본 날짜)
+          return;
+        }
         console.error('HTTP Error:', response.status, response.statusText);
         return;
       }
@@ -305,8 +309,13 @@ const fetchNutritionDistribution = async (selectedPeriod) => {
       return <Text style={{ textAlign: 'center', marginTop: 20 }}>데이터가 없습니다.</Text>;
     }
   
-    const { calorieComparison = 'N/A', proteinComparison = 'N/A', fatComparison = 'N/A', carbsComparison = 'N/A' } = goalComparison;
-  
+    const { 
+      calorieComparison = 0, 
+      proteinComparison = 0, 
+      fatComparison = 0, 
+      carbsComparison = 0 
+    } = goalComparison;
+    
     const getStatus = (value) => {
       const percentage = parseFloat(value);
       if (isNaN(percentage)) return { status: 'N/A', color: '#aaa' };

@@ -25,6 +25,7 @@ import WeightStatsScreen from './android/app/src/screens/chart/weightstatsscreen
 import './reanimatedConfig';
 import MealDirectInputScreen from './android/app/src/screens/mealdirectinputscreen/MealDirectInputScreen';
 import WelcomeScreen from './android/app/src/screens/welcomescreen/WelcomeScreen';
+import AccountManagementScreen from './android/app/src/screens/accountmanagementscreen/AccountManagementScreen';
 
 
 const Stack = createNativeStackNavigator();
@@ -56,6 +57,7 @@ const App = () => {
           <Stack.Screen name="Profile" component={ProfileScreen} />
           <Stack.Screen name="WeightStats" component={WeightStatsScreen} />
           <Stack.Screen name="MealDirectInput" component={MealDirectInputScreen} />
+          <Stack.Screen name="AccountManagement" component={AccountManagementScreen} />
         </Stack.Navigator>
       </NavigationContainer>
     </GestureHandlerRootView>

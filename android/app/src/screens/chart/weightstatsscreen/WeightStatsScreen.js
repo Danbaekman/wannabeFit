@@ -330,7 +330,7 @@ const aggregateDataByPeriod = (data, period) => {
       <Navbar />
       <TabNavigation activeTab="체중" onTabPress={(tab) => navigation.navigate(tab === '운동' ? 'StaticsMain' : 'MealStats')} />
 
-      <ScrollView>
+      <ScrollView contentContainerStyle={styles.scrollViewContent}>
         <ContentWrapper>
           <Text style={styles.sectionTitle}>체중 변화 추이</Text>
           <View style={styles.statsSection}>
